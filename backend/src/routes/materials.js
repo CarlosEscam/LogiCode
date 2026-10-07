@@ -5,6 +5,7 @@ import { HttpError } from '../lib/errors.js';
 import { courseAccess, requireCourse } from '../lib/access.js';
 import { publicMaterial, TOOLS } from '../lib/material.js';
 import { recibirArchivo, rutaArchivo, borrarArchivo, tipoDeArchivo } from '../lib/uploads.js';
+import { firmarArchivo, leerFirmaArchivo } from '../lib/auth.js';
 import * as v from '../lib/validate.js';
 import { requireAuth, optionalAuth } from '../middleware/auth.js';
 
@@ -139,9 +140,8 @@ materialsRouter.delete('/:id', requireAuth, async (req, res) => {
   res.status(204).end();
 });
 
-// GET /api/materials/:id/file: entrega el archivo si el usuario puede verlo.
-// La web lo usa tanto para descargar como para mostrarlo en la página.
-materialsRouter.get('/:id/file', optionalAuth, async (req, res) => {
+// Revisa que el usuario pueda ver el material y que el archivo siga en el servidor.
+async function archivoVisible(req) {
   const material = await buscar(req);
   if (!(await puedeVer(req.user, material))) {
     throw new HttpError(req.user ? 403 : 401, 'Este material es solo para los estudiantes del curso.');
@@ -149,6 +149,39 @@ materialsRouter.get('/:id/file', optionalAuth, async (req, res) => {
   if (material.kind !== 'FILE' || !material.filePath) throw new HttpError(404, 'Este material no tiene archivo.');
   const ruta = rutaArchivo(material.filePath);
   if (!fs.existsSync(ruta)) throw new HttpError(404, 'El archivo ya no está en el servidor.');
+  return { material, ruta };
+}
+
+// GET /api/materials/:id/enlace: enlace firmado al archivo, para reproducir videos y descargar
+// directo con el navegador. Vence a las pocas horas y queda atado al usuario que lo pidió.
+materialsRouter.get('/:id/enlace', optionalAuth, async (req, res) => {
+  const { material } = await archivoVisible(req);
+  const firma = firmarArchivo(material.id, req.user);
+  res.json({ url: `/api/materials/${material.id}/file?firma=${encodeURIComponent(firma)}` });
+});
+
+// Con ?firma= el usuario sale del enlace firmado; sin ella, de la sesión si la hay.
+async function sesionOFirma(req, res, next) {
+  if (req.query.firma === undefined) return optionalAuth(req, res, next);
+  let datos;
+  try {
+    datos = leerFirmaArchivo(String(req.query.firma));
+  } catch {
+    throw new HttpError(401, 'El enlace venció. Recargue la página.');
+  }
+  if (String(datos.mid) !== req.params.id) throw new HttpError(401, 'El enlace no es de este material.');
+  if (datos.sub) {
+    const user = await prisma.user.findUnique({ where: { id: Number(datos.sub) } });
+    if (!user || user.status !== 'ACTIVE') throw new HttpError(401, 'La sesión ya no es válida.');
+    req.user = user;
+  }
+  next();
+}
+
+// GET /api/materials/:id/file: entrega el archivo si el usuario puede verlo.
+// La web lo usa para descargar y para mostrarlo en la página; admite rangos para adelantar videos.
+materialsRouter.get('/:id/file', sesionOFirma, async (req, res) => {
+  const { material, ruta } = await archivoVisible(req);
   res.download(ruta, material.fileName ?? material.filePath, {
     headers: { 'Content-Type': tipoDeArchivo(material.fileName ?? material.filePath), 'X-Content-Type-Options': 'nosniff' },
   });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { descargarMaterial, NOMBRE_HERRAMIENTA, obtenerArchivo } from "@/lib/api";
+import { descargarMaterial, enlaceArchivo, NOMBRE_HERRAMIENTA, obtenerArchivo } from "@/lib/api";
 
 // Id del video si el enlace es de YouTube, para mostrarlo incrustado.
 function idYoutube(url) {
@@ -32,6 +32,8 @@ const VISTAS = {
   md: "texto",
   psc: "texto",
   ino: "texto",
+  mp4: "video",
+  webm: "video",
 };
 
 function tipoVista(nombre) {
@@ -40,7 +42,8 @@ function tipoVista(nombre) {
 }
 
 // Muestra el archivo dentro de la página. Se pide con la sesión y se abre desde
-// una URL local del navegador, que se libera al cerrar la vista.
+// una URL local del navegador, que se libera al cerrar la vista. Los videos no se
+// cargan enteros: el reproductor los va pidiendo por partes con un enlace firmado.
 function VistaPrevia({ material, tipo }) {
   const [url, setUrl] = useState(null);
   const [texto, setTexto] = useState(null);
@@ -49,17 +52,19 @@ function VistaPrevia({ material, tipo }) {
   useEffect(() => {
     let vivo = true;
     let creada = null;
-    obtenerArchivo(material)
-      .then(async (blob) => {
-        if (!vivo) return;
-        if (tipo === "texto") {
-          setTexto(await blob.text());
-        } else {
-          creada = URL.createObjectURL(blob);
-          setUrl(creada);
-        }
-      })
-      .catch((e) => vivo && setError(e.message));
+    const cargar =
+      tipo === "video"
+        ? enlaceArchivo(material).then((enlace) => vivo && setUrl(enlace))
+        : obtenerArchivo(material).then(async (blob) => {
+            if (!vivo) return;
+            if (tipo === "texto") {
+              setTexto(await blob.text());
+            } else {
+              creada = URL.createObjectURL(blob);
+              setUrl(creada);
+            }
+          });
+    cargar.catch((e) => vivo && setError(e.message));
     return () => {
       vivo = false;
       if (creada) URL.revokeObjectURL(creada);
@@ -69,6 +74,16 @@ function VistaPrevia({ material, tipo }) {
   if (error) return <p className="text-sm text-red-600 dark:text-red-400">{error}</p>;
   if (!url && texto === null) return <p className="text-sm opacity-60">Cargando...</p>;
 
+  if (tipo === "video") {
+    return (
+      <video
+        src={url}
+        controls
+        preload="metadata"
+        className="max-h-[75vh] w-full max-w-3xl self-start rounded-md bg-black"
+      />
+    );
+  }
   if (tipo === "texto") {
     return (
       <pre className="max-h-[60vh] overflow-auto whitespace-pre-wrap rounded-md bg-black/5 p-3 font-mono text-sm dark:bg-white/10">

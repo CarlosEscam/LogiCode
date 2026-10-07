@@ -8,12 +8,16 @@ import { HttpError } from './errors.js';
 // Archivos de material de apoyo. Se guardan con un nombre aleatorio fuera de la
 // carpeta pública; solo se descargan por la API, que revisa la visibilidad.
 export const MAX_MB = 20;
+// Las clases grabadas pesan mucho más que un documento. La web usa los mismos límites.
+export const MAX_VIDEO_MB = 1024;
+const VIDEOS = new Set(['.mp4', '.webm']);
 
 // Formatos de las herramientas del curso y documentos comunes.
 const EXTENSIONES = new Set([
   '.pdf', '.doc', '.docx', '.ppt', '.pptx', '.xls', '.xlsx', '.txt', '.md',
   '.png', '.jpg', '.jpeg', '.gif', '.webp',
   '.zip', '.psc', '.dfd', '.sb3', '.ino',
+  ...VIDEOS,
 ]);
 
 fs.mkdirSync(config.uploadDir, { recursive: true });
@@ -32,7 +36,13 @@ const TIPOS = {
   '.md': 'text/plain; charset=utf-8',
   '.psc': 'text/plain; charset=utf-8',
   '.ino': 'text/plain; charset=utf-8',
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
 };
+
+export function esVideo(nombre) {
+  return VIDEOS.has(path.extname(String(nombre ?? '')).toLowerCase());
+}
 
 export function tipoDeArchivo(nombre) {
   return TIPOS[path.extname(String(nombre ?? '')).toLowerCase()] ?? 'application/octet-stream';
@@ -45,7 +55,8 @@ export const uploadMaterial = multer({
       cb(null, crypto.randomBytes(16).toString('hex') + path.extname(file.originalname).toLowerCase());
     },
   }),
-  limits: { fileSize: MAX_MB * 1024 * 1024, files: 1 },
+  // multer solo admite un límite: el de los videos. El de los demás archivos se revisa al terminar.
+  limits: { fileSize: MAX_VIDEO_MB * 1024 * 1024, files: 1 },
   fileFilter: (req, file, cb) => {
     // multer entrega el nombre en latin1; se pasa a UTF-8 para conservar tildes.
     file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf8');
@@ -59,10 +70,14 @@ export const uploadMaterial = multer({
 
 // Convierte los errores de multer (por ejemplo, archivo muy grande) en mensajes claros.
 export function recibirArchivo(req, res, next) {
-  uploadMaterial(req, res, (err) => {
+  uploadMaterial(req, res, async (err) => {
     if (err instanceof multer.MulterError) {
-      const mensaje = err.code === 'LIMIT_FILE_SIZE' ? `El archivo supera ${MAX_MB} MB.` : 'No se pudo recibir el archivo.';
+      const mensaje = err.code === 'LIMIT_FILE_SIZE' ? `El archivo supera ${MAX_VIDEO_MB / 1024} GB.` : 'No se pudo recibir el archivo.';
       return next(new HttpError(400, mensaje));
+    }
+    if (!err && req.file && !esVideo(req.file.originalname) && req.file.size > MAX_MB * 1024 * 1024) {
+      await borrarArchivo(req.file.filename);
+      return next(new HttpError(400, `El archivo supera ${MAX_MB} MB.`));
     }
     next(err);
   });
