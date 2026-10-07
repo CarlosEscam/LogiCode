@@ -65,12 +65,17 @@ enum SubmissionType {
   QUESTIONS
 }
 
+// Tipos que califican los quizzes: MULTIPLE_CHOICE, TRUE_FALSE, SHORT_ANSWER,
+// OUTPUT ("¿qué muestra este algoritmo?") y ORDER_STEPS. CODE_COMPLETION y OPEN
+// quedan para cuando exista el calificador de PSeInt.
 enum QuestionType {
   MULTIPLE_CHOICE
   TRUE_FALSE
   ORDER_STEPS
   CODE_COMPLETION
   OPEN
+  SHORT_ANSWER
+  OUTPUT
 }
 
 // IN_REVIEW: la plataforma no está segura de la nota y avisó al docente.
@@ -106,6 +111,8 @@ model User {
   forumThreads      ForumThread[]
   forumPosts        ForumPost[]
   passwordResets    PasswordResetToken[]
+  quizAttempts      QuizAttempt[]
+  quizAllowances    QuizAllowance[]
 }
 
 // Enlace temporal para recuperar la contraseña (RF-04). Se guarda solo el hash del token.
@@ -139,6 +146,7 @@ model Course {
   materials  Material[]
   activities Activity[]
   questions  Question[]
+  quizzes    Quiz[]
 
   @@index([teacherId])
 }
@@ -178,6 +186,7 @@ model Topic {
   materials  Material[]
   activities Activity[]
   questions  Question[]
+  quizzes    Quiz[]
 
   @@index([courseId, position])
 }
@@ -240,27 +249,38 @@ model Activity {
   @@index([courseId, closesAt])
 }
 
-// Pregunta del banco (RF-25). options y correctAnswer dependen del tipo:
-// selección múltiple -> lista de opciones e índice; ordenar pasos -> lista en orden correcto.
+// Pregunta del banco (RF-25). El banco es del docente: sirve para todos sus cursos y semestres.
+// options y correctAnswer dependen del tipo (ver backend/src/lib/preguntas.js):
+// selección múltiple -> lista de opciones e índice correcto; verdadero o falso -> true/false;
+// respuesta corta y salida -> lista de respuestas aceptadas; ordenar pasos -> pasos en orden correcto.
+// Una pregunta ya respondida en un quiz no se borra: se archiva.
 model Question {
   id            Int          @id @default(autoincrement())
-  courseId      Int
+  courseId      Int? // curso donde se creó; si se borra el curso, la pregunta sigue en el banco
   topicId       Int?
   type          QuestionType
+  tool          Tool         @default(GENERAL)
   statement     String
+  code          String? // algoritmo que acompaña el enunciado (preguntas de salida)
   options       Json?
   correctAnswer Json?
+  explanation   String? // se muestra al estudiante cuando cierra el quiz
+  archived      Boolean      @default(false)
   createdById   Int
   createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @default(now()) @updatedAt
 
-  course     Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  topic      Topic?             @relation(fields: [topicId], references: [id], onDelete: SetNull)
-  createdBy  User               @relation(fields: [createdById], references: [id])
-  activities ActivityQuestion[]
-  testCases  TestCase[]
-  answers    SubmissionAnswer[]
+  course      Course?            @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  topic       Topic?             @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  createdBy   User               @relation(fields: [createdById], references: [id])
+  activities  ActivityQuestion[]
+  testCases   TestCase[]
+  answers     SubmissionAnswer[]
+  quizzes     QuizQuestion[]
+  quizAnswers QuizAnswer[]
 
   @@index([courseId, topicId])
+  @@index([createdById, tool])
 }
 
 // Preguntas que forman un quiz, con su orden y su peso.
@@ -347,6 +367,103 @@ model SubmissionAnswer {
 
   @@unique([submissionId, questionId])
   @@index([questionId])
+}
+
+// ---------------------------------------------------------------------------
+// Quizzes (sección 6 del anteproyecto, RF-18, RF-25, RF-26)
+// ---------------------------------------------------------------------------
+
+// Quiz armado con preguntas del banco. Sin tiempo por pregunta: el docente fija el tiempo
+// total y el intento se envía solo cuando se acaba. La nota (0,0 a 5,0) sale solo de los
+// aciertos; el ranking ordena por nota. isPractice = quiz de repaso, sin nota (RF-18).
+model Quiz {
+  id               Int      @id @default(autoincrement())
+  courseId         Int
+  topicId          Int?
+  title            String   @db.VarChar(200)
+  description      String?
+  timeLimitMinutes Int
+  opensAt          DateTime
+  closesAt         DateTime
+  maxAttempts      Int      @default(1)
+  isPractice       Boolean  @default(false)
+  shuffleQuestions Boolean  @default(true)
+  published        Boolean  @default(false) // borrador hasta que el docente lo publica
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @default(now()) @updatedAt
+
+  course     Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  topic      Topic?          @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  questions  QuizQuestion[]
+  attempts   QuizAttempt[]
+  allowances QuizAllowance[]
+
+  @@index([courseId, opensAt])
+}
+
+model QuizQuestion {
+  quizId     Int
+  questionId Int
+  position   Int
+  points     Decimal @default(1) @db.Decimal(5, 2)
+
+  quiz     Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: NoAction)
+
+  @@id([quizId, questionId])
+}
+
+// Intento de un estudiante. deadline = inicio + tiempo del quiz (sin pasar del cierre):
+// el reloj sigue aunque recargue la página. Las respuestas se guardan mientras responde.
+model QuizAttempt {
+  id            Int       @id @default(autoincrement())
+  quizId        Int
+  studentId     Int
+  attemptNumber Int       @default(1)
+  startedAt     DateTime  @default(now())
+  deadline      DateTime
+  submittedAt   DateTime?
+  autoSubmitted Boolean   @default(false) // se envió porque se acabó el tiempo
+  grade         Decimal?  @db.Decimal(3, 1)
+  correctCount  Int?
+
+  quiz    Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  student User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  answers QuizAnswer[]
+
+  @@unique([quizId, studentId, attemptNumber])
+  @@index([studentId])
+}
+
+// Respuesta a una pregunta. score va de 0 a 1 (ordenar pasos da puntaje parcial).
+// Alimenta el panel de preguntas más falladas (RF-26).
+model QuizAnswer {
+  id         Int      @id @default(autoincrement())
+  attemptId  Int
+  questionId Int
+  answer     Json?
+  isCorrect  Boolean?
+  score      Float?
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  attempt  QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question Question    @relation(fields: [questionId], references: [id], onDelete: NoAction)
+
+  @@unique([attemptId, questionId])
+  @@index([questionId])
+}
+
+// Intentos de más que el docente le habilita a un estudiante.
+model QuizAllowance {
+  id            Int @id @default(autoincrement())
+  quizId        Int
+  studentId     Int
+  extraAttempts Int @default(0)
+
+  quiz    Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  student User @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([quizId, studentId])
 }
 
 // ---------------------------------------------------------------------------
