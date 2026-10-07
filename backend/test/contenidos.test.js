@@ -225,3 +225,30 @@ test('enlace firmado: abre el archivo sin cabecera, solo para quien puede verlo 
   await prisma.rosterEntry.deleteMany({ where: { courseId: curso.id, userId: estudiante.user.id } });
   assert.equal((await request(app).get(enlace.body.url)).status, 403);
 });
+
+test('la biblioteca trae el tema de cada material y se puede buscar', async () => {
+  const { docente, curso } = await escenario();
+  const tema = await request(app).post(`/api/courses/${curso.id}/topics`).set(auth(docente.token)).send({ title: 'Estructura condicional', tool: 'PSEINT' });
+  const palabra = `zz${Date.now()}`;
+  const conTema = await request(app).post('/api/materials').set(auth(docente.token)).send({
+    title: `Guía Si-Entonces ${palabra}`, kind: 'LINK', url: 'https://example.com/si', courseId: curso.id, topicId: tema.body.topic.id, visibility: 'PUBLIC',
+  });
+  const sinTema = await request(app).post('/api/materials').set(auth(docente.token)).send({
+    title: 'Lectura general', description: `Repaso ${palabra}`, kind: 'LINK', url: 'https://example.com/general',
+  });
+
+  const busqueda = await request(app).get(`/api/library?q=${palabra}`);
+  assert.equal(busqueda.status, 200);
+  assert.deepEqual(busqueda.body.materials.map((m) => m.id).sort(), [conTema.body.material.id, sinTema.body.material.id].sort());
+  const guia = busqueda.body.materials.find((m) => m.id === conTema.body.material.id);
+  assert.equal(guia.topic.title, 'Estructura condicional');
+  assert.equal(busqueda.body.materials.find((m) => m.id === sinTema.body.material.id).topic, null);
+
+  // Buscar por el nombre del tema también lo encuentra.
+  const porTema = await request(app).get('/api/library?q=estructura condicional');
+  assert.ok(porTema.body.materials.some((m) => m.id === conTema.body.material.id));
+
+  const pocos = await request(app).get('/api/library?limit=1');
+  assert.equal(pocos.body.materials.length, 1);
+  await prisma.material.delete({ where: { id: sinTema.body.material.id } });
+});

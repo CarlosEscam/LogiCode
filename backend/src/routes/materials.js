@@ -187,15 +187,32 @@ materialsRouter.get('/:id/file', sesionOFirma, async (req, res) => {
   });
 });
 
-// GET /api/library?tool=PSEINT: biblioteca pública para visitantes (RF-20).
+// GET /api/library?tool=PSEINT&q=texto&limit=4: biblioteca pública para visitantes (RF-20).
+// Cada material trae su tema para que la biblioteca se organice por tema y herramienta.
 export const libraryRouter = Router();
 
 libraryRouter.get('/', async (req, res) => {
   const tool = TOOLS.includes(req.query.tool) ? req.query.tool : undefined;
+  const q = String(req.query.q ?? '').trim().slice(0, 100);
+  const limit = Number.parseInt(req.query.limit, 10);
   const materials = await prisma.material.findMany({
-    where: { visibility: 'PUBLIC', tool },
+    where: {
+      visibility: 'PUBLIC',
+      tool,
+      ...(q && {
+        OR: [
+          { title: { contains: q, mode: 'insensitive' } },
+          { description: { contains: q, mode: 'insensitive' } },
+          { topic: { title: { contains: q, mode: 'insensitive' } } },
+        ],
+      }),
+    },
     orderBy: { createdAt: 'desc' },
-    include: { uploadedBy: { select: { fullName: true } } },
+    take: limit > 0 ? Math.min(limit, 50) : undefined,
+    include: {
+      uploadedBy: { select: { fullName: true } },
+      topic: { select: { id: true, title: true, position: true, tool: true } },
+    },
   });
-  res.json({ materials: materials.map(publicMaterial) });
+  res.json({ materials: materials.map((m) => ({ ...publicMaterial(m), topic: m.topic })) });
 });
