@@ -58,6 +58,10 @@ export default function Curso() {
         <Link href="/panel" className="self-start text-sm text-foreground/60 transition hover:text-violet-300">← Mi panel</Link>
         <h1 className="titulo-pagina">{course.name}</h1>
         <p className="text-sm text-foreground/65">Periodo {course.period}</p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <Link href={`/curso/${course.id}/quizzes`} className="btn-secundario">🏆 Quizzes</Link>
+          {canEdit && <Link href={`/curso/${course.id}/preguntas`} className="btn-secundario">Banco de preguntas</Link>}
+        </div>
       </div>
       <Aviso>{error}</Aviso>
 
