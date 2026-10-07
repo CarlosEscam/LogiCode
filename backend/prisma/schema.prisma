@@ -228,6 +228,8 @@ model Activity {
   maxAttempts      Int            @default(1)
   expectedAnswer   String? // respuesta esperada para fotos y texto
   rubric           String?
+  weight           Decimal?       @db.Decimal(5, 2) // porcentaje en la definitiva; vacío = todas pesan igual
+  scratchChecks    String[]       @default([]) // bloques que debe usar una entrega de Scratch (ver calificador)
   createdAt        DateTime       @default(now())
 
   course      Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
@@ -316,10 +318,12 @@ model Submission {
   submittedAt    DateTime?
   textAnswer     String?
   filePath       String?
+  fileName       String?          @db.VarChar(255) // nombre original del archivo o la foto
   autoGrade      Decimal?         @db.Decimal(3, 1)
   confidence     Float?
   finalGrade     Decimal?         @db.Decimal(3, 1)
   gradingNotes   String? // lo que leyó la IA o el resultado de los casos de prueba
+  gradingDetails Json? // detalle para mostrar: casos de prueba o bloques de Scratch revisados
   teacherComment String?
   gradedById     Int?
   gradedAt       DateTime?
