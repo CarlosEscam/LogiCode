@@ -353,19 +353,23 @@ model SubmissionAnswer {
 // Foro (RF-21 a RF-23)
 // ---------------------------------------------------------------------------
 
+// El primer mensaje del tema es su planteamiento. Los temas fijados van primero;
+// después, los que tienen la respuesta más reciente (lastPostAt).
 model ForumThread {
-  id        Int      @id @default(autoincrement())
-  category  Tool
-  title     String   @db.VarChar(200)
-  authorId  Int
-  isPinned  Boolean  @default(false)
-  isClosed  Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  category   Tool
+  title      String   @db.VarChar(200)
+  authorId   Int
+  isPinned   Boolean  @default(false)
+  isClosed   Boolean  @default(false) // cerrado: ya no recibe respuestas
+  createdAt  DateTime @default(now())
+  lastPostAt DateTime @default(now())
 
   author User        @relation(fields: [authorId], references: [id])
   posts  ForumPost[]
 
   @@index([category, isPinned])
+  @@index([isPinned, lastPostAt])
 }
 
 model ForumPost {
@@ -374,6 +378,7 @@ model ForumPost {
   authorId  Int
   body      String
   createdAt DateTime  @default(now())
+  editedAt  DateTime? // el autor corrigió el mensaje
   deletedAt DateTime? // borrado por moderación: se oculta pero queda registro
 
   thread ForumThread @relation(fields: [threadId], references: [id], onDelete: Cascade)

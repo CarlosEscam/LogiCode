@@ -7,6 +7,7 @@ import { adminRouter } from './routes/admin.js';
 import { coursesRouter } from './routes/courses.js';
 import { topicsRouter } from './routes/topics.js';
 import { materialsRouter, libraryRouter } from './routes/materials.js';
+import { forumRouter } from './routes/forum.js';
 
 export const app = express();
 
@@ -25,6 +26,7 @@ app.use('/api/courses', coursesRouter);
 app.use('/api', topicsRouter);
 app.use('/api/materials', materialsRouter);
 app.use('/api/library', libraryRouter);
+app.use('/api/forum', forumRouter);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });

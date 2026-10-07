@@ -43,6 +43,9 @@ export function registrarCurso(id) {
 
 export async function cleanup() {
   await prisma.course.deleteMany({ where: { id: { in: creados.courses } } });
+  // El foro guarda el autor sin borrado en cascada: se limpia antes que los usuarios.
+  await prisma.forumPost.deleteMany({ where: { authorId: { in: creados.users } } });
+  await prisma.forumThread.deleteMany({ where: { authorId: { in: creados.users } } });
   await prisma.user.deleteMany({ where: { id: { in: creados.users } } });
   await prisma.$disconnect();
 }
