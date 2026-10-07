@@ -1,22 +1,25 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { NOMBRE_ROL, useUsuario } from "@/lib/api";
 import PanelAdmin from "./PanelAdmin";
 import PanelDocente from "./PanelDocente";
 import PanelEstudiante from "./PanelEstudiante";
 
-// Panel según el rol del usuario. Sin sesión, lleva a ingresar.
+// Panel según el rol del usuario.
 export default function Panel() {
   const usuario = useUsuario();
-  const router = useRouter();
 
-  useEffect(() => {
-    if (usuario === null) router.replace("/ingresar");
-  }, [usuario, router]);
-
-  if (!usuario) return null;
+  // Sin sesión se muestra un enlace en vez de redirigir: al salir desde el panel,
+  // una redirección aquí competía con la del botón Salir.
+  if (usuario === undefined) return null;
+  if (usuario === null) {
+    return (
+      <p>
+        <Link href="/ingresar" className="underline">Ingrese</Link> para ver su panel.
+      </p>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">

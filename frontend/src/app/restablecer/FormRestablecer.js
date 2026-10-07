@@ -37,7 +37,7 @@ export default function FormRestablecer({ token }) {
   }
 
   return (
-    <form onSubmit={enviar} className="flex flex-col gap-3">
+    <form method="post" onSubmit={enviar} className="flex flex-col gap-3">
       <Campo etiqueta="Contraseña nueva (mínimo 8 caracteres)" name="password" type="password" minLength={8} autoComplete="new-password" required />
       <Campo etiqueta="Repetir contraseña" name="confirmar" type="password" minLength={8} autoComplete="new-password" required />
       <Aviso>{error}</Aviso>
