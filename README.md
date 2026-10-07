@@ -62,6 +62,20 @@ Para comprobar que todo funciona: http://localhost:4000/api/health debe responde
 
 Mientras no haya servidor de correo, el correo de recuperación se escribe en la consola de la API (la ventana donde corre `npm run dev`), con el enlace para abrir.
 
+## Contenidos (fase 3)
+
+| Ruta de la API | Quién | Qué hace |
+| --- | --- | --- |
+| `GET` / `POST /api/courses/:id/topics` | curso / docente | Temas en orden con su material; el docente crea temas. |
+| `PATCH` / `DELETE /api/topics/:id` | docente del curso | Edita, marca "próxima clase" (solo uno por curso) o borra un tema. |
+| `POST /api/topics/:id/move` | docente del curso | Sube o baja el tema (`direction: up | down`). |
+| `POST /api/materials` | docente / administrador | Archivo (multipart, máx. 20 MB), enlace o video. Sin `courseId` va directo a la biblioteca. |
+| `PATCH` / `DELETE /api/materials/:id` | quien lo subió o el docente | Cambia visibilidad, título o tema; borra el material y su archivo. |
+| `GET /api/materials/:id/file` | según visibilidad | Descarga: público para todos, del curso solo para sus estudiantes. |
+| `GET /api/library?tool=PSEINT` | visitantes | Material público, filtrado por herramienta. |
+
+Los archivos se guardan en `backend/uploads` (cambiable con `UPLOAD_DIR`) con nombres aleatorios y solo se sirven por la API.
+
 ## Pruebas
 
 ```bash
@@ -75,4 +89,4 @@ Ramas cortas (`feature/`, `fix/`, `docs/`) e integración a `main` por Pull Requ
 
 ## Plan
 
-El alcance, los roles y el plan por fases están en el anteproyecto del proyecto. Fase actual: **2. Usuarios y acceso** (registro, ingreso, roles, cédulas habilitadas).
+El alcance, los roles y el plan por fases están en el anteproyecto del proyecto. Fase actual: **3. Contenidos** (temas, material de apoyo, próxima clase y biblioteca).

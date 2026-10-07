@@ -192,7 +192,10 @@ model Material {
   description  String?
   kind         MaterialKind
   url          String? // enlace o video de YouTube
-  filePath     String? // ruta del archivo subido
+  filePath     String? // nombre del archivo guardado en la carpeta de subidas
+  fileName     String?      @db.VarChar(255) // nombre original, para la descarga
+  fileType     String?      @db.VarChar(100)
+  fileSize     Int?
   tool         Tool         @default(GENERAL)
   visibility   Visibility   @default(COURSE)
   uploadedById Int

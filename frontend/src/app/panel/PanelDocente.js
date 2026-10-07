@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import { Aviso, Boton, Campo } from "@/components/Formulario";
 
@@ -68,6 +69,12 @@ export default function PanelDocente() {
           </form>
         </details>
       </section>
+
+      {elegido && (
+        <Link href={`/curso/${elegido}`} className="self-start rounded-md bg-foreground px-3 py-2 text-background">
+          Temas y material del curso
+        </Link>
+      )}
 
       {elegido && <ListaCedulas cursoId={elegido} onCambio={() => setVersion((v) => v + 1)} />}
     </div>
