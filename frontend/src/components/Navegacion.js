@@ -8,6 +8,7 @@ const enlaces = [
   { href: "/", texto: "Inicio" },
   { href: "/biblioteca", texto: "Biblioteca" },
   { href: "/pseint", texto: "PSeInt" },
+  { href: "/juegos", texto: "Juegos" },
   { href: "/foro", texto: "Foro" },
 ];
 

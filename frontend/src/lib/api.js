@@ -128,6 +128,19 @@ export function guardarSesion({ token, user }) {
   window.dispatchEvent(new Event(EVENTO));
 }
 
+// Cambia los datos del usuario guardados en la sesión (por ejemplo, su foto nueva).
+// Si no cambió nada no se avisa, para no volver a pintar la página.
+export function actualizarUsuario(user) {
+  const sesion = leerSesion();
+  if (!sesion || JSON.stringify(sesion.user) === JSON.stringify(user)) return;
+  guardarSesion({ token: sesion.token, user });
+}
+
+// Dirección completa de una foto de perfil, o null si la persona no tiene.
+export function urlFoto(persona) {
+  return persona?.avatarUrl ? `${API_URL}${persona.avatarUrl}` : null;
+}
+
 export function cerrarSesion() {
   localStorage.removeItem(CLAVE);
   window.dispatchEvent(new Event(EVENTO));

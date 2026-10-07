@@ -13,7 +13,7 @@ export default function Header() {
             Logi<span className="texto-gradiente">Code</span>
           </span>
         </Link>
-        <div className="flex items-center gap-2 text-sm sm:gap-4">
+        <div className="flex flex-wrap items-center gap-2 text-sm sm:gap-4">
           <Navegacion />
           <MenuSesion />
         </div>

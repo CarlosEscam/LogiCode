@@ -76,6 +76,20 @@ Mientras no haya servidor de correo, el correo de recuperación se escribe en la
 
 Los archivos se guardan en `backend/uploads` (cambiable con `UPLOAD_DIR`) con nombres aleatorios y solo se sirven por la API.
 
+## Apartado del estudiante y perfil
+
+| Ruta de la API | Quién | Qué hace |
+| --- | --- | --- |
+| `GET /api/me/summary` | estudiante | Panel: lo que tiene por entregar (actividades y quizzes, con prórrogas), próximos quizzes, últimas notas, avance por tema y mejores puntajes de los juegos. |
+| `GET /api/me/grades` | estudiante | Notas y comentarios de cada actividad y quiz; la definitiva es la misma de la planilla del docente. |
+| `PATCH /api/me` | con sesión | Cambia el correo. |
+| `POST /api/me/password` | con sesión | Cambia la contraseña (pide la actual). |
+| `PUT` / `DELETE /api/me/avatar` | con sesión | Sube (JPG, PNG o WebP, máx. 1 MB; la web la recorta a 320×320) o quita la foto de perfil. |
+| `GET /api/users/:id/avatar` | cualquiera | La foto de perfil (sale en el foro, que es público). |
+| `GET` / `POST /api/me/games` | con sesión | Mejores puntajes y partidas de los juegos. |
+
+Páginas: `/panel` (estudiante), `/mis-notas`, `/perfil` (todos los roles) y `/juegos` con *Adivina la salida*, *Memorama de símbolos* y *Ordena los pasos*. Los visitantes también pueden jugar, pero el puntaje solo se guarda con sesión. Las respuestas de *Adivina la salida* se comprueban con el intérprete de PSeInt en `backend/test/juegos.test.js`.
+
 ## Pruebas
 
 ```bash

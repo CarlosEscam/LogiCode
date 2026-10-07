@@ -11,6 +11,7 @@ import { activitiesRouter } from './routes/activities.js';
 import { forumRouter } from './routes/forum.js';
 import { questionsRouter } from './routes/questions.js';
 import { quizzesRouter } from './routes/quizzes.js';
+import { meRouter, usersRouter } from './routes/me.js';
 
 export const app = express();
 
@@ -33,6 +34,8 @@ app.use('/api', activitiesRouter);
 app.use('/api/forum', forumRouter);
 app.use('/api', questionsRouter);
 app.use('/api', quizzesRouter);
+app.use('/api/me', meRouter);
+app.use('/api/users', usersRouter);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });

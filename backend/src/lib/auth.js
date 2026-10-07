@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { config } from '../config.js';
+import { urlFoto } from './perfil.js';
 
 const SESSION_HOURS = 8;
 
@@ -36,5 +37,5 @@ export function leerFirmaArchivo(firma) {
 // Datos del usuario que se pueden enviar al navegador (nunca el hash).
 export function publicUser(user) {
   const { id, cedula, fullName, email, role, status } = user;
-  return { id, cedula, fullName, email, role, status };
+  return { id, cedula, fullName, email, role, status, avatarUrl: urlFoto(user) };
 }

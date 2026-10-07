@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { prisma } from '../lib/prisma.js';
 import { HttpError } from '../lib/errors.js';
 import { TOOLS } from '../lib/material.js';
+import { autorPublico } from '../lib/perfil.js';
 import * as v from '../lib/validate.js';
 import { requireAuth, optionalAuth } from '../middleware/auth.js';
 
@@ -10,7 +11,7 @@ import { requireAuth, optionalAuth } from '../middleware/auth.js';
 export const forumRouter = Router();
 
 const POR_PAGINA = 20;
-const autor = { select: { id: true, fullName: true, role: true } };
+const autor = { select: { id: true, fullName: true, role: true, avatarPath: true } };
 
 const esModerador = (user) => Boolean(user) && (user.role === 'TEACHER' || user.role === 'ADMIN');
 
@@ -38,7 +39,7 @@ function publicPost(p, user) {
   return {
     id: p.id,
     body: borrado && !esModerador(user) ? null : p.body,
-    author: p.author,
+    author: autorPublico(p.author),
     createdAt: p.createdAt,
     editedAt: p.editedAt,
     deleted: borrado,
@@ -103,7 +104,7 @@ forumRouter.get('/threads', optionalAuth, async (req, res) => {
     pages,
     total,
     canModerate: esModerador(req.user),
-    threads: threads.map(({ _count, authorId, ...t }) => ({ ...t, replies: Math.max(0, _count.posts - 1) })),
+    threads: threads.map(({ _count, authorId, author, ...t }) => ({ ...t, author: autorPublico(author), replies: Math.max(0, _count.posts - 1) })),
   });
 });
 
@@ -121,7 +122,8 @@ forumRouter.post('/threads', requireAuth, async (req, res) => {
 forumRouter.get('/threads/:id', optionalAuth, async (req, res) => {
   const encontrado = await prisma.forumThread.findUnique({ where: { id: v.id(req.params.id) }, include: { author: autor } });
   if (!encontrado) throw new HttpError(404, 'Tema no encontrado.');
-  const { authorId, ...thread } = encontrado;
+  const { authorId, ...resto } = encontrado;
+  const thread = { ...resto, author: autorPublico(resto.author) };
   const posts = await prisma.forumPost.findMany({
     where: { threadId: thread.id },
     orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
