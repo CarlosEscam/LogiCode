@@ -4,7 +4,7 @@ import { prisma } from '../lib/prisma.js';
 import { HttpError } from '../lib/errors.js';
 import { courseAccess, requireCourse } from '../lib/access.js';
 import { publicMaterial, TOOLS } from '../lib/material.js';
-import { recibirArchivo, rutaArchivo, borrarArchivo } from '../lib/uploads.js';
+import { recibirArchivo, rutaArchivo, borrarArchivo, tipoDeArchivo } from '../lib/uploads.js';
 import * as v from '../lib/validate.js';
 import { requireAuth, optionalAuth } from '../middleware/auth.js';
 
@@ -139,7 +139,8 @@ materialsRouter.delete('/:id', requireAuth, async (req, res) => {
   res.status(204).end();
 });
 
-// GET /api/materials/:id/file: descarga el archivo si el usuario puede verlo.
+// GET /api/materials/:id/file: entrega el archivo si el usuario puede verlo.
+// La web lo usa tanto para descargar como para mostrarlo en la página.
 materialsRouter.get('/:id/file', optionalAuth, async (req, res) => {
   const material = await buscar(req);
   if (!(await puedeVer(req.user, material))) {
@@ -149,7 +150,7 @@ materialsRouter.get('/:id/file', optionalAuth, async (req, res) => {
   const ruta = rutaArchivo(material.filePath);
   if (!fs.existsSync(ruta)) throw new HttpError(404, 'El archivo ya no está en el servidor.');
   res.download(ruta, material.fileName ?? material.filePath, {
-    headers: { 'Content-Type': material.fileType ?? 'application/octet-stream', 'X-Content-Type-Options': 'nosniff' },
+    headers: { 'Content-Type': tipoDeArchivo(material.fileName ?? material.filePath), 'X-Content-Type-Options': 'nosniff' },
   });
 });
 
