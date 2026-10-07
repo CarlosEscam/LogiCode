@@ -14,4 +14,6 @@ export const config = {
   databaseUrl: required('DATABASE_URL'),
   jwtSecret: required('JWT_SECRET'),
   corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:3000',
+  // Dirección de la web, para armar los enlaces de los correos.
+  appUrl: process.env.APP_URL ?? process.env.CORS_ORIGIN ?? 'http://localhost:3000',
 };

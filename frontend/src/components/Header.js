@@ -1,4 +1,5 @@
 import Link from "next/link";
+import MenuSesion from "@/components/MenuSesion";
 
 const enlaces = [
   { href: "/", texto: "Inicio" },
@@ -22,12 +23,7 @@ export default function Header() {
             </li>
           ))}
           <li>
-            <Link
-              href="/ingresar"
-              className="rounded-md bg-foreground px-3 py-1.5 text-background"
-            >
-              Ingresar
-            </Link>
+            <MenuSesion />
           </li>
         </ul>
       </nav>
