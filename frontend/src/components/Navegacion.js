@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 const enlaces = [
   { href: "/", texto: "Inicio" },
   { href: "/biblioteca", texto: "Biblioteca" },
+  { href: "/pseint", texto: "PSeInt" },
   { href: "/foro", texto: "Foro" },
 ];
 
