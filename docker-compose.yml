@@ -1,0 +1,22 @@
+# Base de datos para desarrollo local. La API y la web se corren con npm (ver README).
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: logicode_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-logicode}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD en el archivo .env de la raiz (ver .env.example)}
+      POSTGRES_DB: ${POSTGRES_DB:-logicode}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pgdata:

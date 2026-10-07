@@ -1,0 +1,380 @@
+// Esquema de la base de datos de LogiCode.
+// Cada modelo corresponde a una entidad del anteproyecto (sección 8).
+// Los nombres de tablas y columnas van en inglés; los comentarios, en español.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enumeraciones
+// ---------------------------------------------------------------------------
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+// Un docente queda PENDING hasta que un administrador lo aprueba (RF-02).
+enum AccountStatus {
+  PENDING
+  ACTIVE
+  DISABLED
+}
+
+// Herramienta de cada tema y categoría del foro.
+enum Tool {
+  PSEINT
+  DFD
+  SCRATCH
+  ARDUINO
+  GENERAL
+}
+
+enum MaterialKind {
+  FILE
+  LINK
+  VIDEO
+}
+
+// COURSE: solo estudiantes del curso. PUBLIC: también visitantes (aparece en la biblioteca).
+enum Visibility {
+  COURSE
+  PUBLIC
+}
+
+enum ActivityType {
+  TASK
+  WORKSHOP
+  EVALUATION
+  QUIZ
+  KAHOOT_QUIZ
+}
+
+enum SubmissionType {
+  TEXT
+  FILE
+  PHOTO
+  PSEINT
+  QUESTIONS
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  ORDER_STEPS
+  CODE_COMPLETION
+  OPEN
+}
+
+// IN_REVIEW: la plataforma no está segura de la nota y avisó al docente.
+enum SubmissionStatus {
+  IN_PROGRESS
+  SUBMITTED
+  GRADED
+  IN_REVIEW
+}
+
+// ---------------------------------------------------------------------------
+// Usuarios y acceso (RF-01 a RF-05)
+// ---------------------------------------------------------------------------
+
+model User {
+  id           Int           @id @default(autoincrement())
+  cedula       String        @unique @db.VarChar(20)
+  fullName     String        @db.VarChar(150)
+  email        String        @unique @db.VarChar(150)
+  passwordHash String
+  role         Role          @default(STUDENT)
+  status       AccountStatus @default(ACTIVE)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  coursesTaught     Course[]
+  rosterEntries     RosterEntry[]
+  materialsUploaded Material[]
+  questionsCreated  Question[]
+  submissions       Submission[]         @relation("StudentSubmissions")
+  submissionsGraded Submission[]         @relation("GradedSubmissions")
+  extensions        ActivityExtension[]
+  forumThreads      ForumThread[]
+  forumPosts        ForumPost[]
+  passwordResets    PasswordResetToken[]
+}
+
+// Enlace temporal para recuperar la contraseña (RF-04). Se guarda solo el hash del token.
+model PasswordResetToken {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Curso y lista de cédulas habilitadas
+// ---------------------------------------------------------------------------
+
+model Course {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(150)
+  period    String   @db.VarChar(20) // por ejemplo "2026-2"
+  teacherId Int
+  createdAt DateTime @default(now())
+
+  teacher    User          @relation(fields: [teacherId], references: [id])
+  roster     RosterEntry[]
+  topics     Topic[]
+  materials  Material[]
+  activities Activity[]
+  questions  Question[]
+
+  @@index([teacherId])
+}
+
+// Cédula que el docente habilitó para el curso (RF-05).
+// userId queda vacío hasta que el estudiante se registra con esa cédula.
+model RosterEntry {
+  id        Int      @id @default(autoincrement())
+  courseId  Int
+  cedula    String   @db.VarChar(20)
+  fullName  String?  @db.VarChar(150)
+  userId    Int?
+  createdAt DateTime @default(now())
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([courseId, cedula])
+  @@index([cedula])
+}
+
+// ---------------------------------------------------------------------------
+// Contenidos y biblioteca (RF-06 a RF-09, RF-19, RF-20, RF-24)
+// ---------------------------------------------------------------------------
+
+model Topic {
+  id          Int      @id @default(autoincrement())
+  courseId    Int
+  title       String   @db.VarChar(150)
+  description String?
+  tool        Tool     @default(GENERAL)
+  position    Int      @default(0)
+  isNextClass Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  course     Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  materials  Material[]
+  activities Activity[]
+  questions  Question[]
+
+  @@index([courseId, position])
+}
+
+// Material de apoyo. Si courseId es nulo, se subió directamente a la biblioteca.
+// La biblioteca muestra todo material con visibility = PUBLIC.
+model Material {
+  id           Int          @id @default(autoincrement())
+  courseId     Int?
+  topicId      Int?
+  title        String       @db.VarChar(200)
+  description  String?
+  kind         MaterialKind
+  url          String? // enlace o video de YouTube
+  filePath     String? // ruta del archivo subido
+  tool         Tool         @default(GENERAL)
+  visibility   Visibility   @default(COURSE)
+  uploadedById Int
+  createdAt    DateTime     @default(now())
+
+  course     Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  topic      Topic?  @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  uploadedBy User    @relation(fields: [uploadedById], references: [id])
+
+  @@index([visibility])
+  @@index([courseId])
+}
+
+// ---------------------------------------------------------------------------
+// Actividades, banco de preguntas y calificación (RF-10 a RF-14, RF-25 a RF-27)
+// ---------------------------------------------------------------------------
+
+model Activity {
+  id               Int            @id @default(autoincrement())
+  courseId         Int
+  topicId          Int?
+  type             ActivityType
+  title            String         @db.VarChar(200)
+  instructions     String?
+  submissionType   SubmissionType
+  opensAt          DateTime
+  closesAt         DateTime
+  maxGrade         Decimal        @default(5.0) @db.Decimal(3, 1)
+  timeLimitMinutes Int? // solo quizzes: tiempo total desde que se abre
+  maxAttempts      Int            @default(1)
+  expectedAnswer   String? // respuesta esperada para fotos y texto
+  rubric           String?
+  createdAt        DateTime       @default(now())
+
+  course      Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  topic       Topic?              @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  questions   ActivityQuestion[]
+  testCases   TestCase[]
+  submissions Submission[]
+  extensions  ActivityExtension[]
+
+  @@index([courseId, closesAt])
+}
+
+// Pregunta del banco (RF-25). options y correctAnswer dependen del tipo:
+// selección múltiple -> lista de opciones e índice; ordenar pasos -> lista en orden correcto.
+model Question {
+  id            Int          @id @default(autoincrement())
+  courseId      Int
+  topicId       Int?
+  type          QuestionType
+  statement     String
+  options       Json?
+  correctAnswer Json?
+  createdById   Int
+  createdAt     DateTime     @default(now())
+
+  course     Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  topic      Topic?             @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  createdBy  User               @relation(fields: [createdById], references: [id])
+  activities ActivityQuestion[]
+  testCases  TestCase[]
+  answers    SubmissionAnswer[]
+
+  @@index([courseId, topicId])
+}
+
+// Preguntas que forman un quiz, con su orden y su peso.
+model ActivityQuestion {
+  activityId Int
+  questionId Int
+  position   Int
+  points     Decimal @default(1) @db.Decimal(5, 2)
+
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Restrict)
+
+  @@id([activityId, questionId])
+}
+
+// Caso de prueba para PSeInt: pertenece a una actividad o a una pregunta de completar código.
+model TestCase {
+  id             Int     @id @default(autoincrement())
+  activityId     Int?
+  questionId     Int?
+  input          String  @default("")
+  expectedOutput String
+  weight         Decimal @default(1) @db.Decimal(5, 2)
+
+  activity Activity? @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  question Question? @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+// Prórroga de fecha o intento extra (RF-11, RF-27). studentId nulo = aplica a todo el curso.
+model ActivityExtension {
+  id            Int       @id @default(autoincrement())
+  activityId    Int
+  studentId     Int?
+  newClosesAt   DateTime?
+  extraAttempts Int       @default(0)
+  createdAt     DateTime  @default(now())
+
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  student  User?    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([activityId])
+}
+
+// Entrega de un estudiante. autoGrade y confidence los llena la plataforma;
+// finalGrade es la nota que cuenta (igual a autoGrade, o la que ponga el docente).
+model Submission {
+  id             Int              @id @default(autoincrement())
+  activityId     Int
+  studentId      Int
+  attemptNumber  Int              @default(1)
+  status         SubmissionStatus @default(IN_PROGRESS)
+  startedAt      DateTime         @default(now())
+  submittedAt    DateTime?
+  textAnswer     String?
+  filePath       String?
+  autoGrade      Decimal?         @db.Decimal(3, 1)
+  confidence     Float?
+  finalGrade     Decimal?         @db.Decimal(3, 1)
+  gradingNotes   String? // lo que leyó la IA o el resultado de los casos de prueba
+  teacherComment String?
+  gradedById     Int?
+  gradedAt       DateTime?
+
+  activity Activity           @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  student  User               @relation("StudentSubmissions", fields: [studentId], references: [id], onDelete: Cascade)
+  gradedBy User?              @relation("GradedSubmissions", fields: [gradedById], references: [id])
+  answers  SubmissionAnswer[]
+
+  @@unique([activityId, studentId, attemptNumber])
+  @@index([status])
+}
+
+// Respuesta a una pregunta de quiz. Alimenta el panel de preguntas más falladas (RF-26).
+model SubmissionAnswer {
+  id           Int      @id @default(autoincrement())
+  submissionId Int
+  questionId   Int
+  answer       Json
+  isCorrect    Boolean?
+  score        Decimal? @db.Decimal(5, 2)
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  question   Question   @relation(fields: [questionId], references: [id], onDelete: Restrict)
+
+  @@unique([submissionId, questionId])
+  @@index([questionId])
+}
+
+// ---------------------------------------------------------------------------
+// Foro (RF-21 a RF-23)
+// ---------------------------------------------------------------------------
+
+model ForumThread {
+  id        Int      @id @default(autoincrement())
+  category  Tool
+  title     String   @db.VarChar(200)
+  authorId  Int
+  isPinned  Boolean  @default(false)
+  isClosed  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  author User        @relation(fields: [authorId], references: [id])
+  posts  ForumPost[]
+
+  @@index([category, isPinned])
+}
+
+model ForumPost {
+  id        Int       @id @default(autoincrement())
+  threadId  Int
+  authorId  Int
+  body      String
+  createdAt DateTime  @default(now())
+  deletedAt DateTime? // borrado por moderación: se oculta pero queda registro
+
+  thread ForumThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  author User        @relation(fields: [authorId], references: [id])
+
+  @@index([threadId, createdAt])
+}
