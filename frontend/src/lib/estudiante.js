@@ -19,7 +19,7 @@ export const ESTADO_QUIZ_ESTUDIANTE = {
 
 // Página de una actividad para entregarla y ver su nota.
 export function rutaActividad(courseId, activityId) {
-  return `/curso/${courseId}/actividades/${activityId}`;
+  return `/curso/${courseId}/actividad/${activityId}`;
 }
 
 // Enlace de un pendiente: la actividad, el quiz o el intento que quedó abierto.

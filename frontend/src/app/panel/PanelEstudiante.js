@@ -46,7 +46,7 @@ export default function PanelEstudiante() {
         <Cifra
           titulo="Mis notas"
           valor={nota(promedio)}
-          detalle={promedio !== null ? "Promedio hasta hoy · ver detalle" : "Aún no tiene notas"}
+          detalle={promedio !== null ? "Definitiva hasta hoy · ver detalle" : "Aún no tiene notas"}
           color={colorNota(promedio)}
           href="/mis-notas"
         />
@@ -128,7 +128,7 @@ export default function PanelEstudiante() {
         <p className="text-sm text-foreground/65">Sin nota: para repasar las veces que quiera.</p>
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <li>
-            <Link href="/editor-pseint" className="tono-PSEINT tarjeta-viva flex h-full flex-col gap-2 p-5">
+            <Link href="/pseint" className="tono-PSEINT tarjeta-viva flex h-full flex-col gap-2 p-5">
               <CuadroHerramienta herramienta="PSEINT" />
               <span className="font-semibold">Editor de PSeInt</span>
               <span className="text-sm text-foreground/65">Escriba y pruebe sus algoritmos sin instalar nada.</span>

@@ -92,12 +92,12 @@ function Curso({ curso, filtro }) {
           <p className="text-sm text-foreground/60">{curso.period} · Docente: {curso.teacher.fullName}</p>
         </div>
         <div className="tarjeta flex items-center gap-3 px-4 py-2">
-          <span className="text-sm text-foreground/65">Promedio hasta hoy</span>
+          <span className="text-sm text-foreground/65">Definitiva hasta hoy</span>
           <span className={`text-2xl font-bold ${colorNota(curso.promedio)}`}>{nota(curso.promedio)}</span>
         </div>
       </div>
       <p className="text-xs text-foreground/50">
-        El promedio cuenta las notas puestas y, con 0,0, lo que venció sin entregar. Los quizzes de repaso no cuentan. La nota definitiva es la de la planilla de su docente.
+        Es la misma cuenta de la planilla de su docente: suma las notas puestas y, con 0,0, lo que venció sin entregar, con el porcentaje de cada actividad. Los quizzes de repaso no cuentan.
       </p>
 
       <div className="flex flex-col gap-3">

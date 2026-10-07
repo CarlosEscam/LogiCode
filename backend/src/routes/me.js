@@ -9,6 +9,7 @@ import { checkPassword, hashPassword, publicUser } from '../lib/auth.js';
 import { MAX_FOTO_KB, extensionDeImagen } from '../lib/perfil.js';
 import { borrarArchivo, rutaArchivo, tipoDeArchivo } from '../lib/uploads.js';
 import { cerrarVencidos } from '../lib/quizzes.js';
+import { NO_QUIZ, plazoDe, planillaDelCurso } from '../lib/actividades.js';
 import * as v from '../lib/validate.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 
@@ -21,7 +22,6 @@ export const usersRouter = Router();
 meRouter.use(requireAuth);
 
 const num = (d) => (d === null || d === undefined ? null : Number(d));
-const redondear = (n) => Math.round(n * 10) / 10;
 
 // --- Perfil ---------------------------------------------------------------------
 
@@ -98,22 +98,11 @@ usersRouter.get('/:id/avatar', async (req, res) => {
 
 // --- Actividades y quizzes del estudiante ------------------------------------------
 
-// Tareas, talleres y evaluaciones; los quizzes tienen sus propias tablas.
-const TIPOS_ACTIVIDAD = ['TASK', 'WORKSHOP', 'EVALUATION'];
-
-// Cierre e intentos del estudiante contando las prórrogas suyas y las de todo el curso.
-function plazoDe(activity, studentId) {
-  const propias = activity.extensions.filter((e) => e.studentId === null || e.studentId === studentId);
-  const cierre = propias.reduce((max, e) => (e.newClosesAt && e.newClosesAt > max ? e.newClosesAt : max), activity.closesAt);
-  const intentos = activity.maxAttempts + propias.reduce((a, e) => a + e.extraAttempts, 0);
-  return { cierre, intentos };
-}
-
 // Estado de una actividad para el estudiante:
 // CALIFICADA, EN_REVISION (entregada, la nota aún no está), PENDIENTE o NO_ENTREGO (venció sin entrega).
 function estadoActividad(activity, studentId, ahora) {
   const entregas = activity.submissions;
-  const { cierre, intentos } = plazoDe(activity, studentId);
+  const { cierre, intentos } = plazoDe(activity, activity.extensions, studentId);
   const calificadas = entregas.filter((s) => s.status === 'GRADED' && s.finalGrade !== null);
   const mejor = calificadas.reduce((m, s) => (!m || Number(s.finalGrade) > Number(m.finalGrade) ? s : m), null);
   let estado = 'PENDIENTE';
@@ -150,7 +139,7 @@ async function datosDelEstudiante(user) {
       teacher: { select: { fullName: true } },
       topics: { orderBy: { position: 'asc' }, select: { id: true, title: true, tool: true, isNextClass: true } },
       activities: {
-        where: { type: { in: TIPOS_ACTIVIDAD }, opensAt: { lte: ahora } },
+        where: { ...NO_QUIZ, opensAt: { lte: ahora } },
         orderBy: [{ closesAt: 'asc' }, { id: 'asc' }],
         include: {
           topic: { select: { id: true, title: true, tool: true } },
@@ -170,7 +159,12 @@ async function datosDelEstudiante(user) {
     },
   });
 
-  return cursos.map((c) => {
+  // La definitiva sale de la planilla del docente, con los mismos porcentajes y reglas.
+  const definitivas = await Promise.all(
+    cursos.map(async (c) => (await planillaDelCurso(c.id)).estudiantes.find((e) => e.cedula === user.cedula)?.definitiva ?? null),
+  );
+
+  return cursos.map((c, i) => {
     const actividades = c.activities.map((a) => ({
       id: a.id,
       title: a.title,
@@ -207,14 +201,6 @@ async function datosDelEstudiante(user) {
       };
     });
 
-    // Promedio simple de lo que ya cuenta: notas puestas y lo que venció sin entregar (0,0).
-    // Los quizzes de repaso no cuentan. La definitiva oficial es la de la planilla del docente.
-    const cuentan = [
-      ...actividades.filter((a) => a.nota !== null || a.estado === 'NO_ENTREGO').map((a) => a.nota ?? 0),
-      ...quizzes.filter((q) => !q.isPractice && (q.nota !== null || q.estado === 'NO_PRESENTADO')).map((q) => q.nota ?? 0),
-    ];
-    const promedio = cuentan.length ? redondear(cuentan.reduce((s, n) => s + n, 0) / cuentan.length) : null;
-
     // Avance por tema: cuántas actividades y quizzes del tema ya hizo.
     const temas = c.topics.map((t) => {
       const del = [...actividades.filter((a) => a.topic?.id === t.id), ...quizzes.filter((q) => q.topic?.id === t.id && q.status !== 'UPCOMING')];
@@ -231,7 +217,7 @@ async function datosDelEstudiante(user) {
       temas,
       actividades,
       quizzes,
-      promedio,
+      promedio: definitivas[i],
     };
   });
 }
