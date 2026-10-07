@@ -20,6 +20,8 @@ export const config = {
   corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:3000',
   // Carpeta donde se guardan los archivos subidos (por defecto backend/uploads).
   uploadDir: path.resolve(backendDir, process.env.UPLOAD_DIR ?? 'uploads'),
+  // Carpeta de las copias de seguridad de la base (por defecto backend/copias).
+  backupDir: path.resolve(backendDir, process.env.BACKUP_DIR ?? 'copias'),
   // Dirección de la web, para armar los enlaces de los correos.
   appUrl: process.env.APP_URL ?? process.env.CORS_ORIGIN ?? 'http://localhost:3000',
   // IA para calificar fotos y respuestas abiertas (ver lib/ia.js).
