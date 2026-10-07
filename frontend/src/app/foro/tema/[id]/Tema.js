@@ -180,9 +180,9 @@ function Mensaje({ post, primero, accion }) {
 
   return (
     <li className={`tarjeta flex flex-col gap-3 p-5 ${primero ? "border-marca/40 bg-gradient-to-br from-marca/10 to-superficie/80" : ""}`}>
-      <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
-        <span>
-          <span className="font-medium"><NombreAutor autor={post.author} /></span>
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+        <span className="inline-flex flex-wrap items-center gap-x-1">
+          <span className="font-medium"><NombreAutor autor={post.author} foto /></span>
           <span className="text-foreground/55"> · {fechaForo(post.createdAt)}{post.editedAt && " · editado"}</span>
         </span>
         {!editando && (post.canEdit || post.canDelete) && (

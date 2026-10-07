@@ -98,6 +98,7 @@ model User {
   passwordHash String
   role         Role          @default(STUDENT)
   status       AccountStatus @default(ACTIVE)
+  avatarPath   String? // foto de perfil (nombre del archivo en la carpeta de subidas)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
@@ -113,6 +114,7 @@ model User {
   passwordResets    PasswordResetToken[]
   quizAttempts      QuizAttempt[]
   quizAllowances    QuizAllowance[]
+  gameScores        GameScore[]
 }
 
 // Enlace temporal para recuperar la contraseña (RF-04). Se guarda solo el hash del token.
@@ -502,4 +504,24 @@ model ForumPost {
   author User        @relation(fields: [authorId], references: [id])
 
   @@index([threadId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Juegos didácticos (RF-18)
+// ---------------------------------------------------------------------------
+
+// Una partida terminada. game: ADIVINA_SALIDA, MEMORAMA_DFD u ORDENAR_PASOS.
+// Sirve para mostrar al estudiante su mejor puntaje; no cuenta para la nota.
+model GameScore {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  game      String   @db.VarChar(30)
+  score     Int
+  maxScore  Int
+  seconds   Int?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, game])
 }
