@@ -33,11 +33,10 @@ export const PROBLEMAS = [
     ],
   },
   {
-    titulo: "Sumar los números del 1 al N",
+    titulo: "Sumar los números del 1 al N (suma ya empieza en 0)",
     herramienta: "PSEINT",
     pasos: [
       "Leer N",
-      "suma <- 0",
       "Para i desde 1 hasta N",
       "suma <- suma + i",
       "FinPara",

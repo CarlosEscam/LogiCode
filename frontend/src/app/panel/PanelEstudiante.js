@@ -193,7 +193,7 @@ function Pendiente({ p }) {
     <li>
       <Link href={rutaPendiente(p)} className={`tono-${herramienta} tarjeta-viva flex flex-wrap items-center gap-4 p-4 sm:p-5`}>
         <CuadroHerramienta herramienta={herramienta} />
-        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="flex min-w-0 flex-1 basis-48 flex-col gap-0.5">
           <span className="flex flex-wrap items-center gap-2">
             <span className="chip">{NOMBRE_ACTIVIDAD[p.kind === "QUIZ" ? "QUIZ" : p.type]}</span>
             <span className="font-semibold">{p.title}</span>
@@ -204,11 +204,13 @@ function Pendiente({ p }) {
             {p.kind === "QUIZ" && p.timeLimitMinutes ? ` · ${p.timeLimitMinutes} min` : ""}
           </span>
         </span>
-        <span className="flex flex-col items-end gap-0.5 text-right">
-          <span className={`text-sm font-semibold ${urgente ? "text-rose-300" : "text-amber-300"}`}>{texto}</span>
-          <span className="text-xs text-foreground/50">{fechaCorta(p.closesAt)}</span>
+        <span className="flex w-full items-center justify-between gap-4 sm:w-auto">
+          <span className="flex flex-col gap-0.5 sm:items-end sm:text-right">
+            <span className={`text-sm font-semibold ${urgente ? "text-rose-300" : "text-amber-300"}`}>{texto}</span>
+            <span className="text-xs text-foreground/50">{fechaCorta(p.closesAt)}</span>
+          </span>
+          <span className="btn-primario py-1.5">{p.kind === "QUIZ" ? (p.attemptId ? "Continuar" : "Presentar") : "Entregar"}</span>
         </span>
-        <span className="btn-primario py-1.5">{p.kind === "QUIZ" ? (p.attemptId ? "Continuar" : "Presentar") : "Entregar"}</span>
       </Link>
     </li>
   );
