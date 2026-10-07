@@ -7,24 +7,47 @@ import { CuadroHerramienta, Icono } from "@/components/Herramienta";
 import Material from "@/components/Material";
 import FormMaterial from "@/components/FormMaterial";
 
-// Material público para visitantes, filtrado por herramienta.
+// Agrupa el material por tema, en el orden del curso; lo que no tiene tema va al final.
+function porTema(materiales) {
+  const grupos = new Map();
+  for (const m of materiales) {
+    const clave = m.topic?.id ?? "otros";
+    if (!grupos.has(clave)) grupos.set(clave, { tema: m.topic, materiales: [] });
+    grupos.get(clave).materiales.push(m);
+  }
+  return [...grupos.values()].sort((a, b) => (a.tema?.position ?? Infinity) - (b.tema?.position ?? Infinity));
+}
+
+// Material público para visitantes, organizado por tema y filtrado por herramienta (RF-20).
 // Docentes y administradores pueden subir directo aquí.
 export default function Biblioteca() {
   const usuario = useUsuario();
   const [herramienta, setHerramienta] = useState("");
+  const [busqueda, setBusqueda] = useState("");
   const [materiales, setMateriales] = useState(null);
   const [error, setError] = useState("");
   const [version, setVersion] = useState(0);
 
+  // La búsqueda espera a que se deje de escribir para no pedir una lista por cada tecla.
   useEffect(() => {
     let vivo = true;
-    api(`/library${herramienta ? `?tool=${herramienta}` : ""}`)
-      .then((d) => vivo && setMateriales(d.materials))
-      .catch((e) => vivo && setError(e.message));
+    const params = new URLSearchParams();
+    if (herramienta) params.set("tool", herramienta);
+    if (busqueda.trim()) params.set("q", busqueda.trim());
+    const espera = setTimeout(() => {
+      api(`/library?${params}`)
+        .then((d) => {
+          if (!vivo) return;
+          setMateriales(d.materials);
+          setError("");
+        })
+        .catch((e) => vivo && setError(e.message));
+    }, busqueda ? 300 : 0);
     return () => {
       vivo = false;
+      clearTimeout(espera);
     };
-  }, [herramienta, version]);
+  }, [herramienta, busqueda, version]);
 
   const puedeSubir = usuario && ["TEACHER", "ADMIN"].includes(usuario.role);
 
@@ -43,6 +66,15 @@ export default function Biblioteca() {
       <Encabezado titulo="Biblioteca" icono={<CuadroHerramienta herramienta="GENERAL" grande />}>
         Material público de Pensamiento Computacional, abierto para cualquier visitante.
       </Encabezado>
+
+      <input
+        type="search"
+        value={busqueda}
+        onChange={(e) => setBusqueda(e.target.value)}
+        placeholder="Buscar por título, descripción o tema..."
+        aria-label="Buscar en la biblioteca"
+        className="campo"
+      />
 
       <div className="flex flex-wrap gap-2 text-sm">
         {[{ valor: "", nombre: "Todo" }, ...HERRAMIENTAS].map((h) => (
@@ -67,18 +99,30 @@ export default function Biblioteca() {
       {materiales?.length === 0 && (
         <div className="tarjeta flex flex-col items-center gap-2 border-dashed px-6 py-12 text-center">
           <span className="text-4xl" aria-hidden="true">📭</span>
-          <p className="text-foreground/70">Todavía no hay material en esta sección.</p>
+          <p className="text-foreground/70">
+            {busqueda.trim() ? "No se encontró material con esa búsqueda." : "Todavía no hay material en esta sección."}
+          </p>
         </div>
       )}
-      <ul className="flex flex-col gap-3">
-        {materiales?.map((m) => (
-          <Material
-            key={m.id}
-            material={m}
-            onBorrar={usuario && (usuario.role === "ADMIN" || usuario.id === m.uploadedById) ? () => borrar(m) : undefined}
-          />
+      {materiales &&
+        porTema(materiales).map(({ tema, materiales: lista }) => (
+          <section key={tema?.id ?? "otros"} className="flex flex-col gap-3">
+            <h2 className={`${tema ? `tono-${tema.tool}` : ""} flex items-center gap-2 text-lg font-semibold`}>
+              {tema && <Icono herramienta={tema.tool} className="h-5 w-5 text-tono" />}
+              {tema ? tema.title : "Material general"}
+              <span className="text-sm font-normal text-foreground/55">({lista.length})</span>
+            </h2>
+            <ul className="flex flex-col gap-3">
+              {lista.map((m) => (
+                <Material
+                  key={m.id}
+                  material={m}
+                  onBorrar={usuario && (usuario.role === "ADMIN" || usuario.id === m.uploadedById) ? () => borrar(m) : undefined}
+                />
+              ))}
+            </ul>
+          </section>
         ))}
-      </ul>
 
       {puedeSubir && (
         <details className="desplegable">

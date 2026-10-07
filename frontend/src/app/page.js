@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CuadroHerramienta, DESCRIPCION_HERRAMIENTA } from "@/components/Herramienta";
+import Recientes from "./Recientes";
 
 const herramientas = [
   ["PSEINT", "PSeInt"],
@@ -14,7 +15,36 @@ const secciones = [
   { titulo: "Tu curso", texto: "Temas, material de clase, actividades y juegos.", href: "/panel", emoji: "🎯" },
 ];
 
-// Página de inicio del visitante (RF-19). Misión y visión son texto provisional.
+// Quién usa la plataforma y qué hace cada uno (la parte "cómo funciona" del RF-19).
+const pasos = [
+  {
+    rol: "Visitante",
+    emoji: "👀",
+    texto: "Sin crear cuenta, explora la biblioteca de material público y lee las conversaciones del foro.",
+  },
+  {
+    rol: "Estudiante",
+    emoji: "🎒",
+    texto: "Se registra con su cédula, si el docente la cargó en la lista del curso. Ve los temas y el material de clase, responde tareas, talleres y quizzes, y consulta sus notas.",
+  },
+  {
+    rol: "Docente",
+    emoji: "🧑‍🏫",
+    texto: "Organiza los temas del curso, sube guías y videos, crea actividades y quizzes, y califica con ayuda de la plataforma.",
+  },
+  {
+    rol: "Administrador",
+    emoji: "🛡️",
+    texto: "Aprueba las cuentas de los docentes y cuida que la plataforma funcione.",
+  },
+];
+
+// Página de inicio del visitante (RF-19). Misión y visión son un borrador que el equipo puede ajustar.
+const MISION =
+  "Acompañar a los estudiantes de primer semestre de la Universidad de Pamplona en el aprendizaje del pensamiento computacional, reuniendo en un solo lugar el material de la materia, actividades con calificación inmediata y un espacio para resolver dudas, con PSeInt, DFD, Scratch y Arduino.";
+const VISION =
+  "Ser la plataforma de referencia de la materia Pensamiento Computacional en la Universidad de Pamplona, donde cada estudiante aprenda a resolver problemas con algoritmos de forma práctica, didáctica y a su propio ritmo.";
+
 export default function Inicio() {
   return (
     <div className="flex flex-col gap-16">
@@ -67,6 +97,25 @@ export default function Inicio() {
         </ul>
       </section>
 
+      <Recientes />
+
+      <section className="flex flex-col gap-6">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Cómo funciona</h2>
+          <p className="text-foreground/65">Cada persona entra con un papel distinto.</p>
+        </div>
+        <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {pasos.map((p, i) => (
+            <li key={p.rol} className="tarjeta relative flex flex-col gap-2 p-5">
+              <span className="absolute right-4 top-3 text-sm font-bold text-foreground/25">{i + 1}</span>
+              <span className="text-3xl" aria-hidden="true">{p.emoji}</span>
+              <h3 className="text-lg font-semibold">{p.rol}</h3>
+              <p className="text-sm text-foreground/70">{p.texto}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
       <section className="grid gap-4 sm:grid-cols-3">
         {secciones.map((s) => (
           <Link key={s.href} href={s.href} className="tarjeta-viva group flex flex-col gap-2 p-5">
@@ -82,11 +131,11 @@ export default function Inicio() {
       <section className="grid gap-4 sm:grid-cols-2">
         <div className="tarjeta p-6">
           <h2 className="text-xl font-semibold text-violet-300">Misión</h2>
-          <p className="mt-1 text-foreground/70">Pendiente de redactar.</p>
+          <p className="mt-1 text-foreground/70">{MISION}</p>
         </div>
         <div className="tarjeta p-6">
           <h2 className="text-xl font-semibold text-cyan-300">Visión</h2>
-          <p className="mt-1 text-foreground/70">Pendiente de redactar.</p>
+          <p className="mt-1 text-foreground/70">{VISION}</p>
         </div>
       </section>
     </div>
