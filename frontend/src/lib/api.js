@@ -176,3 +176,24 @@ export const HERRAMIENTAS = [
 export const NOMBRE_HERRAMIENTA = Object.fromEntries(HERRAMIENTAS.map((h) => [h.valor, h.nombre]));
 
 export const NOMBRE_ROL = { STUDENT: "Estudiante", TEACHER: "Docente", ADMIN: "Administrador" };
+
+// Descarga un archivo que pide sesión (por ejemplo, una copia de seguridad del administrador).
+export async function descargarConSesion(ruta, nombre) {
+  const token = leerSesion()?.token;
+  let res;
+  try {
+    res = await fetch(`${API_URL}/api${ruta}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  } catch {
+    throw new Error("No hay conexión con el servidor de LogiCode.");
+  }
+  if (!res.ok) {
+    const datos = await res.json().catch(() => ({}));
+    throw new Error(datos.error ?? "No se pudo descargar el archivo.");
+  }
+  const url = URL.createObjectURL(await res.blob());
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = nombre;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}

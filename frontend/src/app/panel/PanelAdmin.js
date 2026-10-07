@@ -1,58 +1,48 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
-import { Aviso } from "@/components/Formulario";
+import { useState } from "react";
+import Resumen from "./admin/Resumen";
+import Usuarios from "./admin/Usuarios";
+import Cursos from "./admin/Cursos";
+import BibliotecaAdmin from "./admin/BibliotecaAdmin";
+import Copias from "./admin/Copias";
 
-// Aprobación de docentes (RF-02).
+const SECCIONES = [
+  { id: "resumen", nombre: "Resumen" },
+  { id: "usuarios", nombre: "Usuarios" },
+  { id: "cursos", nombre: "Cursos" },
+  { id: "biblioteca", nombre: "Biblioteca" },
+  { id: "copias", nombre: "Copias de seguridad" },
+];
+
+// Panel del administrador: aprobación de docentes (RF-02), cuentas, cursos, biblioteca y copias (RNF-07).
 export default function PanelAdmin() {
-  const [docentes, setDocentes] = useState(null);
-  const [error, setError] = useState("");
-  const [version, setVersion] = useState(0);
-
-  useEffect(() => {
-    let vivo = true;
-    api("/admin/teachers?status=PENDING")
-      .then((d) => vivo && setDocentes(d.teachers))
-      .catch((e) => vivo && setError(e.message));
-    return () => {
-      vivo = false;
-    };
-  }, [version]);
-
-  async function decidir(id, accion) {
-    setError("");
-    try {
-      await api(`/admin/teachers/${id}/${accion}`, { method: "POST" });
-      setVersion((v) => v + 1);
-    } catch (e) {
-      setError(e.message);
-    }
-  }
+  const [seccion, setSeccion] = useState("resumen");
 
   return (
-    <section className="flex flex-col gap-4">
-      <h2 className="text-xl font-bold tracking-tight">Docentes pendientes de aprobación</h2>
-      <Aviso>{error}</Aviso>
-      {docentes?.length === 0 && <p className="tarjeta p-5 text-sm text-foreground/70">✅ No hay solicitudes pendientes.</p>}
-      <ul className="flex flex-col gap-3">
-        {docentes?.map((d) => (
-          <li key={d.id} className="tarjeta-viva flex flex-wrap items-center justify-between gap-3 p-4">
-            <div>
-              <p className="font-medium">{d.fullName}</p>
-              <p className="text-sm text-foreground/65">Cédula {d.cedula} · {d.email}</p>
-            </div>
-            <div className="flex gap-2 text-sm">
-              <button type="button" onClick={() => decidir(d.id, "approve")} className="btn-primario py-1.5">
-                Aprobar
-              </button>
-              <button type="button" onClick={() => decidir(d.id, "disable")} className="btn-secundario py-1.5 hover:border-rose-400/60 hover:text-rose-300">
-                Rechazar
-              </button>
-            </div>
-          </li>
+    <div className="flex flex-col gap-6">
+      <nav aria-label="Secciones del administrador" className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1">
+        {SECCIONES.map((s) => (
+          <button
+            key={s.id}
+            type="button"
+            onClick={() => setSeccion(s.id)}
+            aria-current={seccion === s.id ? "page" : undefined}
+            className={`shrink-0 rounded-xl border px-4 py-2 text-sm font-medium transition ${
+              seccion === s.id
+                ? "border-marca bg-marca/15 text-violet-100 shadow-md shadow-marca/20"
+                : "border-borde bg-white/5 text-foreground/75 hover:border-marca/50 hover:text-foreground"
+            }`}
+          >
+            {s.nombre}
+          </button>
         ))}
-      </ul>
-    </section>
+      </nav>
+      {seccion === "resumen" && <Resumen onIrA={setSeccion} />}
+      {seccion === "usuarios" && <Usuarios />}
+      {seccion === "cursos" && <Cursos />}
+      {seccion === "biblioteca" && <BibliotecaAdmin />}
+      {seccion === "copias" && <Copias />}
+    </div>
   );
 }
