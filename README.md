@@ -45,6 +45,23 @@ npm run dev
 
 Para comprobar que todo funciona: http://localhost:4000/api/health debe responder `{"estado":"ok","baseDeDatos":"conectada"}`.
 
+## Acceso y roles (fase 2)
+
+| Ruta de la API | Quién | Qué hace |
+| --- | --- | --- |
+| `POST /api/auth/register` | cualquiera | Estudiante: solo si su cédula está en la lista de un curso. Docente: queda pendiente. |
+| `POST /api/auth/login` | cualquiera | Ingreso con cédula y contraseña; devuelve la sesión (8 horas). |
+| `GET /api/auth/me` | con sesión | Datos del usuario actual. |
+| `POST /api/auth/forgot-password` | cualquiera | Envía el enlace de recuperación (vence en 1 hora). |
+| `POST /api/auth/reset-password` | con enlace | Cambia la contraseña; el enlace sirve una sola vez. |
+| `GET /api/admin/teachers?status=PENDING` | administrador | Docentes por estado. |
+| `POST /api/admin/teachers/:id/approve` y `/disable` | administrador | Aprueba o rechaza a un docente. |
+| `GET` / `POST /api/courses` | con sesión / docente | Lista los cursos según el rol; el docente crea el suyo. |
+| `GET` / `POST /api/courses/:id/roster` | docente del curso | Lista o carga cédulas (texto pegado desde Excel o CSV). |
+| `DELETE /api/courses/:id/roster/:entryId` | docente del curso | Quita una cédula de la lista. |
+
+Mientras no haya servidor de correo, el correo de recuperación se escribe en la consola de la API (la ventana donde corre `npm run dev`), con el enlace para abrir.
+
 ## Pruebas
 
 ```bash
@@ -58,4 +75,4 @@ Ramas cortas (`feature/`, `fix/`, `docs/`) e integración a `main` por Pull Requ
 
 ## Plan
 
-El alcance, los roles y el plan por fases están en el anteproyecto del proyecto. Fase actual: **1. Análisis y diseño** (esqueleto y base de datos).
+El alcance, los roles y el plan por fases están en el anteproyecto del proyecto. Fase actual: **2. Usuarios y acceso** (registro, ingreso, roles, cédulas habilitadas).
