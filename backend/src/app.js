@@ -5,6 +5,8 @@ import { healthRouter } from './routes/health.js';
 import { authRouter } from './routes/auth.js';
 import { adminRouter } from './routes/admin.js';
 import { coursesRouter } from './routes/courses.js';
+import { topicsRouter } from './routes/topics.js';
+import { materialsRouter, libraryRouter } from './routes/materials.js';
 
 export const app = express();
 
@@ -20,6 +22,9 @@ app.use('/api/health', healthRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/courses', coursesRouter);
+app.use('/api', topicsRouter);
+app.use('/api/materials', materialsRouter);
+app.use('/api/library', libraryRouter);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });

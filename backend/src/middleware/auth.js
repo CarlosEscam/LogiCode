@@ -22,6 +22,18 @@ export async function requireAuth(req, res, next) {
   next();
 }
 
+// Para rutas que también ven los visitantes: si hay una sesión válida deja req.user,
+// y si no, sigue sin usuario.
+export async function optionalAuth(req, res, next) {
+  if (!req.get('authorization')) return next();
+  try {
+    await requireAuth(req, res, () => {});
+  } catch {
+    req.user = undefined;
+  }
+  next();
+}
+
 // Uso: router.get('/', requireAuth, requireRole('ADMIN'), ...)
 export function requireRole(...roles) {
   return (req, res, next) => {

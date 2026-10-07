@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import { Aviso } from "@/components/Formulario";
 
-// Por ahora, los cursos del estudiante. Actividades y notas llegan en las siguientes fases.
+// Cursos del estudiante; cada uno lleva a sus temas y material. Actividades y notas llegan después.
 export default function PanelEstudiante() {
   const [cursos, setCursos] = useState(null);
   const [error, setError] = useState("");
@@ -25,9 +26,11 @@ export default function PanelEstudiante() {
       <Aviso>{error}</Aviso>
       <ul className="flex flex-col gap-2">
         {cursos?.map((c) => (
-          <li key={c.id} className="rounded-md border border-black/15 px-3 py-2 dark:border-white/20">
-            <p className="font-medium">{c.name}</p>
-            <p className="text-sm opacity-70">{c.period} · Docente: {c.teacher.fullName}</p>
+          <li key={c.id}>
+            <Link href={`/curso/${c.id}`} className="block rounded-md border border-black/15 px-3 py-2 hover:border-foreground dark:border-white/20">
+              <p className="font-medium">{c.name}</p>
+              <p className="text-sm opacity-70">{c.period} · Docente: {c.teacher.fullName}</p>
+            </Link>
           </li>
         ))}
       </ul>
