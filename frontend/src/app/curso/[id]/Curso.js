@@ -8,6 +8,7 @@ import { Aviso, Boton, Campo } from "@/components/Formulario";
 import Material from "@/components/Material";
 import FormMaterial from "@/components/FormMaterial";
 import { CuadroHerramienta, EtiquetaHerramienta } from "@/components/Herramienta";
+import Actividades from "./Actividades";
 
 // Temas y material de apoyo del curso (RF-06 a RF-09).
 // El estudiante los ve; el docente además los organiza.
@@ -69,6 +70,8 @@ export default function Curso() {
           </span>
         </a>
       )}
+
+      <Actividades courseId={course.id} />
 
       {topics.length === 0 && <p className="tarjeta p-6 text-foreground/70">Todavía no hay temas en este curso.</p>}
 

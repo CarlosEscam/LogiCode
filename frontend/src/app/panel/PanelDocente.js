@@ -5,7 +5,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import { Aviso, Boton, Campo } from "@/components/Formulario";
 
-// El docente crea su curso y carga la lista de cédulas habilitadas (RF-05).
+// El docente crea su curso, carga la lista de cédulas habilitadas (RF-05) y entra a calificar.
 export default function PanelDocente() {
   const [cursos, setCursos] = useState(null);
   const [elegido, setElegido] = useState(null);
@@ -70,13 +70,40 @@ export default function PanelDocente() {
         </details>
       </section>
 
-      {elegido && (
-        <Link href={`/curso/${elegido}`} className="btn-primario self-start px-5 py-2.5">
-          Temas y material del curso →
-        </Link>
-      )}
+      {elegido && <AccesosCurso cursoId={elegido} />}
 
       {elegido && <ListaCedulas cursoId={elegido} onCambio={() => setVersion((v) => v + 1)} />}
+    </div>
+  );
+}
+
+// Entrada al curso y aviso de lo que la plataforma dejó para revisión (RF-13).
+function AccesosCurso({ cursoId }) {
+  const [porRevisar, setPorRevisar] = useState(0);
+
+  useEffect(() => {
+    let vivo = true;
+    api(`/courses/${cursoId}/review`)
+      .then((d) => vivo && setPorRevisar(d.submissions.length))
+      .catch(() => vivo && setPorRevisar(0));
+    return () => {
+      vivo = false;
+    };
+  }, [cursoId]);
+
+  return (
+    <div className="flex flex-wrap gap-3">
+      <Link href={`/curso/${cursoId}`} className="btn-primario px-5 py-2.5">
+        Temas, material y actividades →
+      </Link>
+      {porRevisar > 0 && (
+        <Link href={`/curso/${cursoId}/revision`} className="flex items-center gap-2 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2.5 text-sm font-semibold text-amber-200 transition hover:border-amber-300/70">
+          {porRevisar} {porRevisar === 1 ? "entrega" : "entregas"} por revisar →
+        </Link>
+      )}
+      <Link href={`/curso/${cursoId}/notas`} className="btn-secundario px-5 py-2.5">
+        Notas
+      </Link>
     </div>
   );
 }

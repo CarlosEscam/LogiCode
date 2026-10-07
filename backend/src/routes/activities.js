@@ -370,6 +370,7 @@ activitiesRouter.get('/courses/:id/review', requireAuth, async (req, res) => {
     include: { activity: { select: { id: true, title: true, type: true, submissionType: true, maxGrade: true } }, student: { select: { id: true, fullName: true, cedula: true } } },
   });
   res.json({
+    course: { id: course.id, name: course.name, period: course.period },
     submissions: entregas.map((s) => ({
       ...publicEntrega(s, { paraDocente: true }),
       activity: { ...s.activity, maxGrade: Number(s.activity.maxGrade) },
@@ -380,7 +381,7 @@ activitiesRouter.get('/courses/:id/review', requireAuth, async (req, res) => {
 // GET /api/courses/:id/gradebook
 activitiesRouter.get('/courses/:id/gradebook', requireAuth, async (req, res) => {
   const { course } = await requireCourse(req.user, v.id(req.params.id), 'owner');
-  res.json(await planillaDelCurso(course.id));
+  res.json({ course: { id: course.id, name: course.name, period: course.period }, ...(await planillaDelCurso(course.id)) });
 });
 
 // GET /api/courses/:id/gradebook.xlsx: la planilla en Excel.
