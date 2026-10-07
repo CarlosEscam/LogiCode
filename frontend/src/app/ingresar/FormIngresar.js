@@ -35,8 +35,8 @@ export default function FormIngresar() {
       <Aviso>{error}</Aviso>
       <Boton type="submit" cargando={cargando}>Ingresar</Boton>
       <div className="flex justify-between text-sm">
-        <Link href="/registro" className="hover:underline">Crear cuenta</Link>
-        <Link href="/recuperar" className="hover:underline">Olvidé mi contraseña</Link>
+        <Link href="/registro" className="text-violet-300 hover:text-violet-200 hover:underline">Crear cuenta</Link>
+        <Link href="/recuperar" className="text-violet-300 hover:text-violet-200 hover:underline">Olvidé mi contraseña</Link>
       </div>
     </form>
   );

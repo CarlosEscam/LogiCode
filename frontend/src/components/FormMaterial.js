@@ -53,14 +53,14 @@ export default function FormMaterial({ courseId, topicId, herramienta = "GENERAL
   }
 
   return (
-    <form onSubmit={enviar} className="flex flex-col gap-3 rounded-md border border-dashed border-black/20 p-3 dark:border-white/25">
+    <form onSubmit={enviar} className="tarjeta flex flex-col gap-4 p-5">
       <div className="flex flex-wrap gap-4 text-sm">
         {[
           ["FILE", "Archivo"],
           ["LINK", "Enlace"],
           ["VIDEO", "Video de YouTube"],
         ].map(([valor, nombre]) => (
-          <label key={valor} className="flex items-center gap-2">
+          <label key={valor} className="flex cursor-pointer items-center gap-2 accent-violet-500">
             <input type="radio" name="kind" value={valor} checked={tipo === valor} onChange={() => setTipo(valor)} />
             {nombre}
           </label>
@@ -69,23 +69,23 @@ export default function FormMaterial({ courseId, topicId, herramienta = "GENERAL
       <Campo etiqueta="Título" name="title" required />
       <Campo etiqueta="Descripción (opcional)" name="description" />
       {tipo === "FILE" ? (
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-foreground/90">
           Archivo: PDF, Office, imagen, video (.mp4 o .webm), .psc, .dfd, .sb3, .ino o .zip. Máximo 20 MB; los videos, hasta 1 GB.
-          <input type="file" name="file" required className="text-sm" />
+          <input type="file" name="file" required className="campo text-sm font-normal file:mr-3 file:rounded-lg file:border-0 file:bg-marca/20 file:px-3 file:py-1 file:font-semibold file:text-violet-200" />
         </label>
       ) : (
         <Campo etiqueta="Enlace" name="url" type="url" placeholder="https://" required />
       )}
-      <label className="flex flex-col gap-1 text-sm">
+      <label className="flex flex-col gap-1.5 text-sm font-medium text-foreground/90">
         Herramienta
-        <select name="tool" defaultValue={herramienta} className="rounded-md border border-black/20 bg-transparent px-3 py-2 dark:border-white/25">
+        <select name="tool" defaultValue={herramienta} className="campo font-normal">
           {HERRAMIENTAS.map((h) => (
             <option key={h.valor} value={h.valor}>{h.nombre}</option>
           ))}
         </select>
       </label>
       {courseId && (
-        <label className="flex items-center gap-2 text-sm">
+        <label className="flex cursor-pointer items-center gap-2 text-sm accent-violet-500">
           <input type="checkbox" name="publico" /> Público: también aparece en la biblioteca para visitantes
         </label>
       )}
@@ -93,7 +93,7 @@ export default function FormMaterial({ courseId, topicId, herramienta = "GENERAL
       <div className="flex items-center gap-3">
         <Boton type="submit" cargando={cargando}>Agregar material</Boton>
         {avance !== null && (
-          <span className="text-sm opacity-70" role="status">
+          <span className="animate-pulse text-sm font-medium text-cyan-300" role="status">
             {avance < 100 ? `Subiendo... ${avance}%` : "Guardando..."}
           </span>
         )}

@@ -14,7 +14,7 @@ export function NombreAutor({ autor }) {
     <span>
       {autor.fullName}
       {autor.role !== "STUDENT" && (
-        <span className="ml-1 rounded bg-foreground/10 px-1 text-[0.7rem] font-medium">{NOMBRE_ROL[autor.role]}</span>
+        <span className="ml-1 rounded-full bg-marca/20 px-1.5 py-px text-[0.7rem] font-semibold text-violet-200">{NOMBRE_ROL[autor.role]}</span>
       )}
     </span>
   );

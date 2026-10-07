@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { descargarMaterial, enlaceArchivo, NOMBRE_HERRAMIENTA, obtenerArchivo } from "@/lib/api";
+import { descargarMaterial, enlaceArchivo, obtenerArchivo } from "@/lib/api";
+import { CuadroHerramienta, EtiquetaHerramienta } from "@/components/Herramienta";
 
 // Id del video si el enlace es de YouTube, para mostrarlo incrustado.
 function idYoutube(url) {
@@ -71,8 +72,8 @@ function VistaPrevia({ material, tipo }) {
     };
   }, [material, tipo]);
 
-  if (error) return <p className="text-sm text-red-600 dark:text-red-400">{error}</p>;
-  if (!url && texto === null) return <p className="text-sm opacity-60">Cargando...</p>;
+  if (error) return <p className="text-sm text-rose-400">{error}</p>;
+  if (!url && texto === null) return <p className="animate-pulse text-sm text-foreground/60">Cargando...</p>;
 
   if (tipo === "video") {
     return (
@@ -80,13 +81,13 @@ function VistaPrevia({ material, tipo }) {
         src={url}
         controls
         preload="metadata"
-        className="max-h-[75vh] w-full max-w-3xl self-start rounded-md bg-black"
+        className="max-h-[75vh] w-full max-w-3xl self-start rounded-xl border border-borde bg-black"
       />
     );
   }
   if (tipo === "texto") {
     return (
-      <pre className="max-h-[60vh] overflow-auto whitespace-pre-wrap rounded-md bg-black/5 p-3 font-mono text-sm dark:bg-white/10">
+      <pre className="max-h-[60vh] overflow-auto whitespace-pre-wrap rounded-xl border border-borde bg-black/40 p-4 font-mono text-sm">
         {texto}
       </pre>
     );
@@ -94,13 +95,13 @@ function VistaPrevia({ material, tipo }) {
   return (
     <div className="flex flex-col gap-1">
       {tipo === "pdf" ? (
-        <iframe src={url} title={material.title} className="h-[75vh] w-full rounded-md border border-black/10 dark:border-white/15" />
+        <iframe src={url} title={material.title} className="h-[75vh] w-full rounded-xl border border-borde" />
       ) : (
         // next/image no sirve para URLs locales del navegador (blob:).
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={url} alt={material.title} className="max-h-[75vh] max-w-full self-start rounded-md object-contain" />
+        <img src={url} alt={material.title} className="max-h-[75vh] max-w-full self-start rounded-xl object-contain" />
       )}
-      <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm hover:underline">
+      <a href={url} target="_blank" rel="noopener noreferrer" className="accion self-start text-cyan-300">
         Abrir en una pestaña nueva
       </a>
     </div>
@@ -120,45 +121,48 @@ export default function Material({ material, onBorrar, onCambiarVisibilidad }) {
   const vista = material.kind === "FILE" ? tipoVista(material.fileName) : null;
 
   return (
-    <li className="flex flex-col gap-2 rounded-md border border-black/10 px-3 py-2 dark:border-white/15">
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div>
-          <p className="font-medium">{material.title}</p>
-          {material.description && <p className="text-sm opacity-80">{material.description}</p>}
-          <p className="text-xs opacity-60">
-            {material.kind === "FILE" && `${material.fileName} · `}
-            {NOMBRE_HERRAMIENTA[material.tool]}
-            {material.uploadedBy && ` · ${material.uploadedBy}`}
-            {material.visibility === "PUBLIC" && " · Público"}
-          </p>
+    <li className={`tono-${material.tool} tarjeta-viva flex flex-col gap-3 p-4`}>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex min-w-[15rem] flex-1 items-start gap-3">
+          <CuadroHerramienta herramienta={material.tool} />
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="font-semibold leading-snug">{material.title}</p>
+            {material.description && <p className="text-sm text-foreground/75">{material.description}</p>}
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-foreground/55">
+              <EtiquetaHerramienta herramienta={material.tool} />
+              {material.kind === "FILE" && <span className="[overflow-wrap:anywhere]">{material.fileName}</span>}
+              {material.uploadedBy && <span>· {material.uploadedBy}</span>}
+              {material.visibility === "PUBLIC" && <span>· Público</span>}
+            </p>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-3 text-sm">
+        <div className="flex flex-wrap gap-1">
           {vista && (
-            <button type="button" className="font-medium hover:underline" onClick={() => setViendo((v) => !v)}>
+            <button type="button" className="accion text-cyan-300" onClick={() => setViendo((v) => !v)}>
               {viendo ? "Ocultar" : "Ver"}
             </button>
           )}
           {material.kind === "FILE" && (
             <button
               type="button"
-              className="hover:underline"
+              className="accion"
               onClick={() => descargarMaterial(material).catch((e) => setError(e.message))}
             >
               Descargar ({tamano(material.fileSize)})
             </button>
           )}
           {material.kind !== "FILE" && !video && (
-            <a href={material.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+            <a href={material.url} target="_blank" rel="noopener noreferrer" className="accion text-cyan-300">
               Abrir enlace
             </a>
           )}
           {onCambiarVisibilidad && (
-            <button type="button" className="hover:underline" onClick={onCambiarVisibilidad}>
+            <button type="button" className="accion" onClick={onCambiarVisibilidad}>
               {material.visibility === "PUBLIC" ? "Solo para el curso" : "Hacer público"}
             </button>
           )}
           {onBorrar && (
-            <button type="button" className="text-red-600 hover:underline dark:text-red-400" onClick={onBorrar}>
+            <button type="button" className="accion-peligro" onClick={onBorrar}>
               Borrar
             </button>
           )}
@@ -168,7 +172,7 @@ export default function Material({ material, onBorrar, onCambiarVisibilidad }) {
       {video && (
         <div className="aspect-video w-full max-w-xl">
           <iframe
-            className="h-full w-full rounded-md"
+            className="h-full w-full rounded-xl border border-borde"
             src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(video)}`}
             title={material.title}
             allow="accelerometer; encrypted-media; picture-in-picture"
@@ -177,11 +181,11 @@ export default function Material({ material, onBorrar, onCambiarVisibilidad }) {
         </div>
       )}
       {material.kind === "VIDEO" && !video && (
-        <a href={material.url} target="_blank" rel="noopener noreferrer" className="text-sm hover:underline">
+        <a href={material.url} target="_blank" rel="noopener noreferrer" className="accion self-start text-cyan-300">
           Ver video
         </a>
       )}
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p className="text-sm text-rose-400">{error}</p>}
     </li>
   );
 }
