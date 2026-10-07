@@ -32,12 +32,12 @@ export async function api(ruta, { method = "GET", body } = {}) {
   return datos;
 }
 
-// Pide el archivo de un material con la sesión (el material del curso no es público).
-export async function obtenerArchivo(material) {
+// Pide un archivo a la API con la sesión y lo devuelve como Blob.
+export async function pedirArchivo(ruta) {
   const token = leerSesion()?.token;
   let res;
   try {
-    res = await fetch(`${API_URL}/api/materials/${material.id}/file`, {
+    res = await fetch(`${API_URL}/api${ruta}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
   } catch {
@@ -48,6 +48,21 @@ export async function obtenerArchivo(material) {
     throw new Error(datos.error ?? "No se pudo abrir el archivo.");
   }
   return res.blob();
+}
+
+// Pide el archivo de un material con la sesión (el material del curso no es público).
+export function obtenerArchivo(material) {
+  return pedirArchivo(`/materials/${material.id}/file`);
+}
+
+// Guarda un Blob como archivo en el equipo.
+export function guardarBlob(blob, nombre) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = nombre;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
 
 // Enlace firmado al archivo de un material. Sirve donde el navegador no puede mandar
