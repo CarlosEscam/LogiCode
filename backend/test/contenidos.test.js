@@ -140,3 +140,25 @@ test('biblioteca: docentes y administradores suben directo; estudiantes no', asy
   assert.equal(prohibido.status, 403);
   await prisma.material.delete({ where: { id: subida.body.material.id } });
 });
+
+test('el tipo del archivo sale de su extensión, no del que declaró el navegador', async () => {
+  const { docente, curso } = await escenario();
+  const subir = (nombre, tipo, contenido) =>
+    request(app)
+      .post('/api/materials')
+      .set(auth(docente.token))
+      .field('title', nombre)
+      .field('kind', 'FILE')
+      .field('courseId', String(curso.id))
+      .field('visibility', 'PUBLIC')
+      .attach('file', Buffer.from(contenido), { filename: nombre, contentType: tipo });
+
+  const pdf = await subir('guia.pdf', 'text/html', '%PDF-1.4 <script>alert(1)</script>');
+  const psc = await subir('ciclo.psc', 'application/octet-stream', 'Algoritmo ciclo\nFinAlgoritmo\n');
+  const zip = await subir('proyecto.zip', 'text/html', 'PK');
+
+  const tipo = async (id) => (await request(app).get(`/api/materials/${id}/file`)).headers['content-type'];
+  assert.equal(await tipo(pdf.body.material.id), 'application/pdf');
+  assert.equal(await tipo(psc.body.material.id), 'text/plain; charset=utf-8');
+  assert.equal(await tipo(zip.body.material.id), 'application/octet-stream');
+});

@@ -32,9 +32,8 @@ export async function api(ruta, { method = "GET", body } = {}) {
   return datos;
 }
 
-// Descarga el archivo de un material. Se pide con la sesión porque el material
-// del curso no es público.
-export async function descargarMaterial(material) {
+// Pide el archivo de un material con la sesión (el material del curso no es público).
+export async function obtenerArchivo(material) {
   const token = leerSesion()?.token;
   let res;
   try {
@@ -46,9 +45,13 @@ export async function descargarMaterial(material) {
   }
   if (!res.ok) {
     const datos = await res.json().catch(() => ({}));
-    throw new Error(datos.error ?? "No se pudo descargar el archivo.");
+    throw new Error(datos.error ?? "No se pudo abrir el archivo.");
   }
-  const url = URL.createObjectURL(await res.blob());
+  return res.blob();
+}
+
+export async function descargarMaterial(material) {
+  const url = URL.createObjectURL(await obtenerArchivo(material));
   const a = document.createElement("a");
   a.href = url;
   a.download = material.fileName ?? "archivo";

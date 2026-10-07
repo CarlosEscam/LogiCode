@@ -18,6 +18,26 @@ const EXTENSIONES = new Set([
 
 fs.mkdirSync(config.uploadDir, { recursive: true });
 
+// Tipo con el que se sirve cada archivo. Sale de la extensión y no del tipo que
+// declaró el navegador al subirlo, para que nadie pueda hacer pasar un archivo
+// por una página web. Lo que no está aquí se entrega como binario genérico.
+const TIPOS = {
+  '.pdf': 'application/pdf',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.webp': 'image/webp',
+  '.txt': 'text/plain; charset=utf-8',
+  '.md': 'text/plain; charset=utf-8',
+  '.psc': 'text/plain; charset=utf-8',
+  '.ino': 'text/plain; charset=utf-8',
+};
+
+export function tipoDeArchivo(nombre) {
+  return TIPOS[path.extname(String(nombre ?? '')).toLowerCase()] ?? 'application/octet-stream';
+}
+
 export const uploadMaterial = multer({
   storage: multer.diskStorage({
     destination: config.uploadDir,
