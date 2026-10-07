@@ -28,10 +28,10 @@ export default function FormRegistro() {
         router.push("/panel");
       } else {
         setListo(res.mensaje);
-        setCargando(false);
       }
     } catch (err) {
       setError(err.message);
+    } finally {
       setCargando(false);
     }
   }
@@ -46,7 +46,7 @@ export default function FormRegistro() {
   }
 
   return (
-    <form onSubmit={enviar} className="flex flex-col gap-3">
+    <form method="post" onSubmit={enviar} className="flex flex-col gap-3">
       <fieldset className="flex gap-4 text-sm">
         <legend className="mb-1">Soy</legend>
         <label className="flex items-center gap-2">

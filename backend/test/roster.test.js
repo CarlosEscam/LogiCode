@@ -19,3 +19,13 @@ test('devuelve las líneas que no tienen una cédula válida', () => {
   assert.equal(entries.length, 1);
   assert.deepEqual(invalid, ['abc,Juan', '123']);
 });
+
+test('acepta el nombre separado solo por espacios', () => {
+  const { entries, invalid } = parseRoster('1091354398 Ramon Valencia\n1.094.555.666   Luisa  María Gómez\n1094777888,Pérez, Ana');
+  assert.deepEqual(entries, [
+    { cedula: '1091354398', fullName: 'Ramon Valencia' },
+    { cedula: '1094555666', fullName: 'Luisa María Gómez' },
+    { cedula: '1094777888', fullName: 'Pérez Ana' },
+  ]);
+  assert.deepEqual(invalid, []);
+});

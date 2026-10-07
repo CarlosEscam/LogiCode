@@ -21,12 +21,15 @@ export default function FormIngresar() {
       router.push("/panel");
     } catch (err) {
       setError(err.message);
+    } finally {
+      // Next.js conserva esta página al navegar; si no se apaga aquí, al volver
+      // (por ejemplo después de salir) el botón seguiría en "Un momento...".
       setCargando(false);
     }
   }
 
   return (
-    <form onSubmit={enviar} className="flex flex-col gap-3">
+    <form method="post" onSubmit={enviar} className="flex flex-col gap-3">
       <Campo etiqueta="Cédula" name="cedula" inputMode="numeric" autoComplete="username" required />
       <Campo etiqueta="Contraseña" name="password" type="password" autoComplete="current-password" required />
       <Aviso>{error}</Aviso>

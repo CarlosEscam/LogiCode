@@ -25,7 +25,7 @@ export default function FormRecuperar() {
   if (listo) return <Aviso tipo="ok">{listo}</Aviso>;
 
   return (
-    <form onSubmit={enviar} className="flex flex-col gap-3">
+    <form method="post" onSubmit={enviar} className="flex flex-col gap-3">
       <Campo etiqueta="Cédula o correo" name="cedulaOrEmail" autoComplete="username" required />
       <Aviso>{error}</Aviso>
       <Boton type="submit" cargando={cargando}>Enviar enlace</Boton>
