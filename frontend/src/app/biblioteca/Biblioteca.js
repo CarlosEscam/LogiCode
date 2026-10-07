@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { api, HERRAMIENTAS, useUsuario } from "@/lib/api";
-import { Aviso } from "@/components/Formulario";
+import { Aviso, Encabezado } from "@/components/Formulario";
+import { CuadroHerramienta, Icono } from "@/components/Herramienta";
 import Material from "@/components/Material";
 import FormMaterial from "@/components/FormMaterial";
 
@@ -38,11 +39,10 @@ export default function Biblioteca() {
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <div>
-        <h1 className="text-2xl font-semibold">Biblioteca</h1>
-        <p className="opacity-80">Material público de Pensamiento Computacional, abierto para cualquier visitante.</p>
-      </div>
+    <div className="flex flex-col gap-6">
+      <Encabezado titulo="Biblioteca" icono={<CuadroHerramienta herramienta="GENERAL" grande />}>
+        Material público de Pensamiento Computacional, abierto para cualquier visitante.
+      </Encabezado>
 
       <div className="flex flex-wrap gap-2 text-sm">
         {[{ valor: "", nombre: "Todo" }, ...HERRAMIENTAS].map((h) => (
@@ -50,16 +50,27 @@ export default function Biblioteca() {
             key={h.valor}
             type="button"
             onClick={() => setHerramienta(h.valor)}
-            className={`rounded-full border px-3 py-1 ${herramienta === h.valor ? "border-foreground bg-foreground text-background" : "border-black/15 dark:border-white/20"}`}
+            aria-pressed={herramienta === h.valor}
+            className={`${h.valor ? `tono-${h.valor}` : ""} inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 font-medium transition ${
+              herramienta === h.valor
+                ? "border-tono bg-tono/20 text-tono shadow-md shadow-tono/20"
+                : "border-borde bg-white/5 text-foreground/75 hover:border-tono/60 hover:text-tono"
+            }`}
           >
+            {h.valor && <Icono herramienta={h.valor} className="h-4 w-4" />}
             {h.nombre}
           </button>
         ))}
       </div>
 
       <Aviso>{error}</Aviso>
-      {materiales?.length === 0 && <p className="opacity-70">Todavía no hay material en esta sección.</p>}
-      <ul className="flex flex-col gap-2">
+      {materiales?.length === 0 && (
+        <div className="tarjeta flex flex-col items-center gap-2 border-dashed px-6 py-12 text-center">
+          <span className="text-4xl" aria-hidden="true">📭</span>
+          <p className="text-foreground/70">Todavía no hay material en esta sección.</p>
+        </div>
+      )}
+      <ul className="flex flex-col gap-3">
         {materiales?.map((m) => (
           <Material
             key={m.id}
@@ -70,9 +81,9 @@ export default function Biblioteca() {
       </ul>
 
       {puedeSubir && (
-        <details className="text-sm">
-          <summary className="cursor-pointer">Subir material a la biblioteca</summary>
-          <div className="mt-2">
+        <details className="desplegable">
+          <summary>Subir material a la biblioteca</summary>
+          <div className="mt-3">
             <FormMaterial herramienta={herramienta || "GENERAL"} onCreado={() => setVersion((v) => v + 1)} />
           </div>
         </details>

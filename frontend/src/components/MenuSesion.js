@@ -12,19 +12,19 @@ export default function MenuSesion() {
   if (usuario === undefined) return null;
   if (!usuario) {
     return (
-      <Link href="/ingresar" className="rounded-md bg-foreground px-3 py-1.5 text-background">
+      <Link href="/ingresar" className="btn-primario py-1.5">
         Ingresar
       </Link>
     );
   }
   return (
-    <div className="flex items-center gap-3">
-      <Link href="/panel" className="rounded-md bg-foreground px-3 py-1.5 text-background">
+    <div className="flex items-center gap-1">
+      <Link href="/panel" className="btn-primario py-1.5">
         Mi panel
       </Link>
       <button
         type="button"
-        className="hover:underline"
+        className="accion"
         onClick={() => {
           cerrarSesion();
           router.push("/");

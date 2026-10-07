@@ -1,26 +1,136 @@
 @import "tailwindcss";
 
+/* LogiCode usa siempre el tema oscuro: las clases dark: aplican con la clase .dark del <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0b0f1e;
+  --foreground: #e8ebf7;
+  --superficie: #121831;
+  --superficie-2: #182042;
+  --borde: rgb(148 163 255 / 0.14);
+  --marca: #8b5cf6;
+  --marca-2: #22d3ee;
+  --tono: var(--marca);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-superficie: var(--superficie);
+  --color-superficie-2: var(--superficie-2);
+  --color-borde: var(--borde);
+  --color-marca: var(--marca);
+  --color-marca-2: var(--marca-2);
+  --color-tono: var(--tono);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Color de cada herramienta: se usa en filtros, etiquetas, íconos y tarjetas. */
+.tono-PSEINT { --tono: #38bdf8; }
+.tono-DFD { --tono: #f472b6; }
+.tono-SCRATCH { --tono: #fbbf24; }
+.tono-ARDUINO { --tono: #2dd4bf; }
+.tono-GENERAL { --tono: #a78bfa; }
+
+html {
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
+  background-image:
+    radial-gradient(60rem 30rem at 15% -10%, rgb(139 92 246 / 0.18), transparent 70%),
+    radial-gradient(50rem 28rem at 100% 0%, rgb(34 211 238 / 0.1), transparent 70%);
+  background-repeat: no-repeat;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+::selection {
+  background: rgb(139 92 246 / 0.45);
+}
+
+@utility tarjeta {
+  @apply rounded-2xl border border-borde bg-superficie/80 shadow-lg shadow-black/20 backdrop-blur-sm;
+}
+
+@utility tarjeta-viva {
+  @apply tarjeta transition duration-200 hover:-translate-y-0.5 hover:border-tono/50 hover:shadow-xl;
+}
+
+@utility titulo-pagina {
+  @apply text-3xl font-bold tracking-tight;
+}
+
+@utility texto-gradiente {
+  @apply bg-gradient-to-r from-marca via-fuchsia-400 to-marca-2 bg-clip-text text-transparent;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-sm font-semibold transition duration-150 disabled:cursor-not-allowed disabled:opacity-60;
+}
+
+@utility btn-primario {
+  @apply btn bg-gradient-to-r from-marca to-indigo-500 text-white shadow-lg shadow-marca/25 hover:brightness-110 active:scale-[0.98];
+}
+
+@utility btn-secundario {
+  @apply btn border border-borde bg-white/5 text-foreground hover:border-marca/60 hover:bg-white/10;
+}
+
+/* Botón pequeño para acciones dentro de una tarjeta (Ver, Descargar, Borrar...). */
+@utility accion {
+  @apply inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-sm font-medium text-foreground/85 transition hover:bg-white/10 hover:text-foreground disabled:pointer-events-none disabled:opacity-30;
+}
+
+@utility accion-peligro {
+  @apply accion text-rose-400 hover:bg-rose-500/15 hover:text-rose-300;
+}
+
+@utility campo {
+  @apply rounded-xl border border-borde bg-black/25 px-3 py-2 text-foreground transition placeholder:text-foreground/35 focus:border-marca focus:outline-none focus:ring-2 focus:ring-marca/30;
+}
+
+@utility chip {
+  @apply inline-flex items-center gap-1.5 rounded-full border border-tono/35 bg-tono/10 px-2.5 py-0.5 text-xs font-medium text-tono;
+}
+
+.desplegable > summary {
+  @apply inline-flex cursor-pointer list-none items-center gap-2 rounded-xl border border-dashed border-marca/50 px-4 py-2 text-sm font-semibold text-violet-300 transition hover:border-marca hover:bg-marca/10;
+}
+
+.desplegable > summary::-webkit-details-marker {
+  display: none;
+}
+
+.desplegable > summary::before {
+  content: "+";
+  @apply text-base leading-none transition;
+}
+
+.desplegable[open] > summary::before {
+  content: "−";
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.aparecer {
+  animation: aparecer 0.45s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aparecer {
+    animation: none;
+  }
 }

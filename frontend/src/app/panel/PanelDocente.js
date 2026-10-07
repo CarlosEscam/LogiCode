@@ -42,8 +42,8 @@ export default function PanelDocente() {
 
   return (
     <div className="flex flex-col gap-8">
-      <section className="flex flex-col gap-3">
-        <h2 className="text-xl font-semibold">Mis cursos</h2>
+      <section className="flex flex-col gap-4">
+        <h2 className="text-xl font-bold tracking-tight">Mis cursos</h2>
         <Aviso>{error}</Aviso>
         {cursos?.length > 0 && (
           <div className="flex flex-wrap gap-2">
@@ -52,17 +52,17 @@ export default function PanelDocente() {
                 key={c.id}
                 type="button"
                 onClick={() => setElegido(c.id)}
-                className={`rounded-md border px-3 py-1.5 text-sm ${c.id === elegido ? "border-foreground font-semibold" : "border-black/20 dark:border-white/25"}`}
+                className={`rounded-xl border px-4 py-2 text-sm transition ${c.id === elegido ? "border-marca bg-marca/15 font-semibold text-violet-100 shadow-md shadow-marca/20" : "border-borde bg-white/5 text-foreground/75 hover:border-marca/50"}`}
               >
                 {c.name} ({c.period}) · {c._count.roster} cédulas
               </button>
             ))}
           </div>
         )}
-        {cursos?.length === 0 && <p className="text-sm opacity-70">Cree su curso para empezar a cargar las cédulas.</p>}
-        <details open={cursos?.length === 0} className="text-sm">
-          <summary className="cursor-pointer">{cursos?.length ? "Crear otro curso" : "Crear curso"}</summary>
-          <form onSubmit={crearCurso} className="mt-3 flex flex-wrap items-end gap-3">
+        {cursos?.length === 0 && <p className="text-sm text-foreground/65">Cree su curso para empezar a cargar las cédulas.</p>}
+        <details open={cursos?.length === 0} className="desplegable">
+          <summary>{cursos?.length ? "Crear otro curso" : "Crear curso"}</summary>
+          <form onSubmit={crearCurso} className="tarjeta mt-3 flex flex-wrap items-end gap-3 p-5">
             <Campo etiqueta="Nombre del curso" name="name" defaultValue="Pensamiento Computacional" required />
             <Campo etiqueta="Periodo" name="period" placeholder="2026-2" pattern="\d{4}-[12]" required />
             <Boton type="submit">Crear curso</Boton>
@@ -71,8 +71,8 @@ export default function PanelDocente() {
       </section>
 
       {elegido && (
-        <Link href={`/curso/${elegido}`} className="self-start rounded-md bg-foreground px-3 py-2 text-background">
-          Temas y material del curso
+        <Link href={`/curso/${elegido}`} className="btn-primario self-start px-5 py-2.5">
+          Temas y material del curso →
         </Link>
       )}
 
@@ -136,17 +136,17 @@ function ListaCedulas({ cursoId, onCambio }) {
   const registrados = lista?.filter((r) => r.registered).length ?? 0;
 
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-xl font-semibold">Cédulas habilitadas</h2>
-      <form onSubmit={cargar} className="flex flex-col gap-2">
-        <label className="flex flex-col gap-1 text-sm">
+    <section className="flex flex-col gap-4">
+      <h2 className="text-xl font-bold tracking-tight">Cédulas habilitadas</h2>
+      <form onSubmit={cargar} className="tarjeta flex flex-col gap-3 p-5">
+        <label className="flex flex-col gap-1.5 text-sm text-foreground/80">
           Pegue una cédula por línea. Puede copiar las columnas Cédula y Nombre directamente desde Excel.
           <textarea
             name="text"
             rows={6}
             required
             placeholder={"1094123456\tAna Pérez\n1094555666\tLuis Gómez"}
-            className="rounded-md border border-black/20 bg-transparent px-3 py-2 font-mono text-sm dark:border-white/25"
+            className="campo font-mono text-sm"
           />
         </label>
         <div>
@@ -158,27 +158,31 @@ function ListaCedulas({ cursoId, onCambio }) {
 
       {lista && (
         <>
-          <p className="text-sm opacity-70">
+          <p className="text-sm text-foreground/65">
             {lista.length} cédulas en la lista, {registrados} ya crearon su cuenta.
           </p>
-          <div className="overflow-x-auto">
+          <div className="tarjeta overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-black/15 dark:border-white/20">
+              <thead className="border-b border-borde bg-white/5 text-xs uppercase tracking-wide text-foreground/60">
                 <tr>
-                  <th className="py-2 pr-3">Cédula</th>
-                  <th className="py-2 pr-3">Nombre</th>
-                  <th className="py-2 pr-3">Cuenta</th>
-                  <th className="py-2" />
+                  <th className="px-4 py-3">Cédula</th>
+                  <th className="px-4 py-3">Nombre</th>
+                  <th className="px-4 py-3">Cuenta</th>
+                  <th className="px-4 py-3" />
                 </tr>
               </thead>
               <tbody>
                 {lista.map((r) => (
-                  <tr key={r.id} className="border-b border-black/5 dark:border-white/10">
-                    <td className="py-2 pr-3 font-mono">{r.cedula}</td>
-                    <td className="py-2 pr-3">{r.fullName ?? "—"}</td>
-                    <td className="py-2 pr-3">{r.registered ? "Registrada" : "Sin registrar"}</td>
-                    <td className="py-2 text-right">
-                      <button type="button" onClick={() => quitar(r)} className="text-red-600 hover:underline dark:text-red-400">
+                  <tr key={r.id} className="border-b border-borde/60 transition last:border-0 hover:bg-white/5">
+                    <td className="px-4 py-2.5 font-mono">{r.cedula}</td>
+                    <td className="px-4 py-2.5">{r.fullName ?? "—"}</td>
+                    <td className="px-4 py-2.5">
+                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${r.registered ? "bg-emerald-500/15 text-emerald-300" : "bg-white/10 text-foreground/60"}`}>
+                        {r.registered ? "Registrada" : "Sin registrar"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5 text-right">
+                      <button type="button" onClick={() => quitar(r)} className="accion-peligro">
                         Quitar
                       </button>
                     </td>

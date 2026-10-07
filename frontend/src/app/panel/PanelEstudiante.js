@@ -22,14 +22,16 @@ export default function PanelEstudiante() {
 
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="text-xl font-semibold">Mis cursos</h2>
+      <h2 className="text-xl font-bold tracking-tight">Mis cursos</h2>
       <Aviso>{error}</Aviso>
-      <ul className="flex flex-col gap-2">
+      <ul className="grid gap-4 sm:grid-cols-2">
         {cursos?.map((c) => (
           <li key={c.id}>
-            <Link href={`/curso/${c.id}`} className="block rounded-md border border-black/15 px-3 py-2 hover:border-foreground dark:border-white/20">
-              <p className="font-medium">{c.name}</p>
-              <p className="text-sm opacity-70">{c.period} · Docente: {c.teacher.fullName}</p>
+            <Link href={`/curso/${c.id}`} className="tarjeta-viva group flex flex-col gap-1 p-5">
+              <p className="text-lg font-semibold">
+                {c.name} <span className="inline-block text-marca-2 transition group-hover:translate-x-1">→</span>
+              </p>
+              <p className="text-sm text-foreground/65">{c.period} · Docente: {c.teacher.fullName}</p>
             </Link>
           </li>
         ))}

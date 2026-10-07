@@ -5,9 +5,10 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { api, HERRAMIENTAS, NOMBRE_HERRAMIENTA, useUsuario } from "@/lib/api";
 import { Aviso, Boton } from "@/components/Formulario";
+import { EtiquetaHerramienta } from "@/components/Herramienta";
 import { fechaForo, NombreAutor } from "../../comun";
 
-const areaTexto = "rounded-md border border-black/20 bg-transparent px-3 py-2 dark:border-white/25";
+const areaTexto = "campo";
 
 // Un tema del foro con sus mensajes. El autor corrige lo suyo;
 // docentes y administradores fijan, cierran, cambian de categoría y borran.
@@ -58,7 +59,7 @@ export default function Tema() {
   }
 
   const volver = (
-    <Link href={datos ? `/foro?categoria=${datos.thread.category}` : "/foro"} className="text-sm opacity-70 hover:underline">
+    <Link href={datos ? `/foro?categoria=${datos.thread.category}` : "/foro"} className="self-start text-sm text-foreground/60 transition hover:text-violet-300">
       ← Foro{datos && ` · ${NOMBRE_HERRAMIENTA[datos.thread.category]}`}
     </Link>
   );
@@ -76,26 +77,27 @@ export default function Tema() {
   const cambiarTema = (cambios) => accion(api(`/forum/threads/${id}`, { method: "PATCH", body: cambios }));
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-6">
+      <div className="aparecer flex flex-col gap-2">
         {volver}
         <Titulo thread={thread} puedeEditar={canEditTitle} onGuardar={(title) => cambiarTema({ title })} />
-        <p className="text-sm opacity-70">
-          {thread.isPinned && <span className="mr-2 text-amber-700 dark:text-amber-300">Fijado</span>}
-          {thread.isClosed && <span className="mr-2">Cerrado</span>}
+        <p className="flex flex-wrap items-center gap-x-1 gap-y-1 text-sm text-foreground/65">
+          <EtiquetaHerramienta herramienta={thread.category} />
+          {thread.isPinned && <span className="rounded-full bg-amber-400/15 px-2 py-0.5 text-xs font-semibold text-amber-300">📌 Fijado</span>}
+          {thread.isClosed && <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs">Cerrado</span>}
           Abierto por <NombreAutor autor={thread.author} /> · {fechaForo(thread.createdAt)}
         </p>
       </div>
 
       {(canModerate || canDelete) && (
-        <div className="flex flex-wrap items-center gap-3 rounded-md border border-black/10 px-3 py-2 text-sm dark:border-white/15">
+        <div className="tarjeta flex flex-wrap items-center gap-2 px-4 py-2.5 text-sm">
           {canModerate && (
             <>
-              <span className="font-medium">Moderación:</span>
-              <button type="button" className="hover:underline" onClick={() => cambiarTema({ isPinned: !thread.isPinned })}>
+              <span className="font-semibold text-violet-300">Moderación:</span>
+              <button type="button" className="accion" onClick={() => cambiarTema({ isPinned: !thread.isPinned })}>
                 {thread.isPinned ? "Desfijar" : "Fijar arriba"}
               </button>
-              <button type="button" className="hover:underline" onClick={() => cambiarTema({ isClosed: !thread.isClosed })}>
+              <button type="button" className="accion" onClick={() => cambiarTema({ isClosed: !thread.isClosed })}>
                 {thread.isClosed ? "Reabrir" : "Cerrar tema"}
               </button>
               <label className="flex items-center gap-1">
@@ -103,7 +105,7 @@ export default function Tema() {
                 <select
                   value={thread.category}
                   onChange={(e) => cambiarTema({ category: e.target.value })}
-                  className="rounded-md border border-black/20 bg-transparent px-2 py-1 dark:border-white/25"
+                  className="campo px-2 py-1"
                 >
                   {HERRAMIENTAS.map((h) => (
                     <option key={h.valor} value={h.valor}>{h.nombre}</option>
@@ -113,7 +115,7 @@ export default function Tema() {
             </>
           )}
           {canDelete && (
-            <button type="button" className="text-red-600 hover:underline dark:text-red-400" onClick={borrarTema}>
+            <button type="button" className="accion-peligro" onClick={borrarTema}>
               Borrar tema
             </button>
           )}
@@ -131,11 +133,11 @@ export default function Tema() {
       {canReply ? (
         <Responder threadId={thread.id} cerrado={thread.isClosed} accion={accion} />
       ) : thread.isClosed ? (
-        <p className="text-sm opacity-70">Este tema está cerrado y ya no recibe respuestas.</p>
+        <p className="tarjeta p-4 text-sm text-foreground/70">Este tema está cerrado y ya no recibe respuestas.</p>
       ) : (
         usuario === null && (
-          <p className="text-sm">
-            <Link href="/ingresar" className="underline">Ingrese</Link> para responder.
+          <p className="tarjeta p-4 text-sm">
+            <Link href="/ingresar" className="font-semibold text-violet-300 underline">Ingrese</Link> para responder.
           </p>
         )
       )}
@@ -148,10 +150,10 @@ function Titulo({ thread, puedeEditar, onGuardar }) {
 
   if (!editando) {
     return (
-      <h1 className="text-2xl font-semibold">
+      <h1 className="titulo-pagina">
         {thread.title}
         {puedeEditar && (
-          <button type="button" className="ml-3 align-middle text-sm font-normal opacity-70 hover:underline" onClick={() => setEditando(true)}>
+          <button type="button" className="accion ml-3 align-middle text-sm font-normal tracking-normal" onClick={() => setEditando(true)}>
             Editar título
           </button>
         )}
@@ -168,7 +170,7 @@ function Titulo({ thread, puedeEditar, onGuardar }) {
     >
       <input name="title" defaultValue={thread.title} required minLength={5} maxLength={200} aria-label="Título del tema" className={`flex-1 ${areaTexto}`} />
       <Boton type="submit">Guardar</Boton>
-      <button type="button" className="text-sm hover:underline" onClick={() => setEditando(false)}>Cancelar</button>
+      <button type="button" className="accion" onClick={() => setEditando(false)}>Cancelar</button>
     </form>
   );
 }
@@ -177,21 +179,21 @@ function Mensaje({ post, primero, accion }) {
   const [editando, setEditando] = useState(false);
 
   return (
-    <li className={`flex flex-col gap-2 rounded-lg border p-4 ${primero ? "border-black/20 dark:border-white/25" : "border-black/10 dark:border-white/15"}`}>
+    <li className={`tarjeta flex flex-col gap-3 p-5 ${primero ? "border-marca/40 bg-gradient-to-br from-marca/10 to-superficie/80" : ""}`}>
       <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
         <span>
           <span className="font-medium"><NombreAutor autor={post.author} /></span>
-          <span className="opacity-60"> · {fechaForo(post.createdAt)}{post.editedAt && " · editado"}</span>
+          <span className="text-foreground/55"> · {fechaForo(post.createdAt)}{post.editedAt && " · editado"}</span>
         </span>
         {!editando && (post.canEdit || post.canDelete) && (
-          <span className="flex gap-3">
+          <span className="flex gap-1">
             {post.canEdit && (
-              <button type="button" className="hover:underline" onClick={() => setEditando(true)}>Editar</button>
+              <button type="button" className="accion" onClick={() => setEditando(true)}>Editar</button>
             )}
             {post.canDelete && (
               <button
                 type="button"
-                className="text-red-600 hover:underline dark:text-red-400"
+                className="accion-peligro"
                 onClick={() => window.confirm("¿Borrar este mensaje?") && accion(api(`/forum/posts/${post.id}`, { method: "DELETE" }))}
               >
                 Borrar
@@ -218,11 +220,11 @@ function Mensaje({ post, primero, accion }) {
           <textarea name="body" defaultValue={post.body} required rows={4} maxLength={10000} aria-label="Mensaje" className={areaTexto} />
           <div className="flex gap-3">
             <Boton type="submit">Guardar</Boton>
-            <button type="button" className="text-sm hover:underline" onClick={() => setEditando(false)}>Cancelar</button>
+            <button type="button" className="accion" onClick={() => setEditando(false)}>Cancelar</button>
           </div>
         </form>
       ) : (
-        <p className="whitespace-pre-wrap break-words">{post.body}</p>
+        <p className="whitespace-pre-wrap break-words leading-relaxed text-foreground/90">{post.body}</p>
       )}
     </li>
   );
@@ -241,8 +243,8 @@ function Responder({ threadId, cerrado, accion }) {
   }
 
   return (
-    <form onSubmit={enviar} className="flex flex-col gap-2 border-t border-black/10 pt-4 dark:border-white/15">
-      <label className="flex flex-col gap-1 text-sm">
+    <form onSubmit={enviar} className="tarjeta flex flex-col gap-3 p-5">
+      <label className="flex flex-col gap-1.5 text-sm font-medium text-foreground/90">
         {cerrado ? "Responder (el tema está cerrado; solo moderadores pueden escribir)" : "Su respuesta"}
         <textarea name="body" required rows={4} maxLength={10000} className={areaTexto} />
       </label>

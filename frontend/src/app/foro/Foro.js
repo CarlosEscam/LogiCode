@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api, HERRAMIENTAS, NOMBRE_HERRAMIENTA, useUsuario } from "@/lib/api";
-import { Aviso, Boton, Campo } from "@/components/Formulario";
+import { Aviso, Boton, Campo, Encabezado } from "@/components/Formulario";
+import { EtiquetaHerramienta, Icono } from "@/components/Herramienta";
 import { fechaForo, NombreAutor } from "./comun";
 
 // Lista de temas del foro, filtrada por categoría (herramienta) y búsqueda.
@@ -54,18 +55,22 @@ export default function Foro() {
   const contar = (c) => resumen?.find((r) => r.category === c);
 
   return (
-    <div className="flex flex-col gap-5">
-      <div>
-        <h1 className="text-2xl font-semibold">Foro</h1>
-        <p className="opacity-80">
-          Preguntas y respuestas sobre PSeInt, DFD, Scratch y Arduino.
-          {usuario === null && (
-            <>
-              {" "}Cualquiera puede leer; para escribir, <Link href="/ingresar" className="underline">ingrese</Link>.
-            </>
-          )}
-        </p>
-      </div>
+    <div className="flex flex-col gap-6">
+      <Encabezado
+        titulo="Foro"
+        icono={
+          <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-marca/30 bg-marca/15 text-2xl" aria-hidden="true">
+            💬
+          </span>
+        }
+      >
+        Preguntas y respuestas sobre PSeInt, DFD, Scratch y Arduino.
+        {usuario === null && (
+          <>
+            {" "}Cualquiera puede leer; para escribir, <Link href="/ingresar" className="font-semibold text-violet-300 underline">ingrese</Link>.
+          </>
+        )}
+      </Encabezado>
 
       <ul className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {HERRAMIENTAS.map((h) => {
@@ -76,11 +81,17 @@ export default function Foro() {
               <button
                 type="button"
                 onClick={() => ir({ categoria: activa ? "" : h.valor })}
-                className={`flex w-full flex-col rounded-lg border p-3 text-left ${activa ? "border-foreground" : "border-black/10 dark:border-white/15"}`}
+                aria-pressed={activa}
+                className={`tono-${h.valor} tarjeta-viva flex w-full items-center gap-3 p-3 text-left ${activa ? "border-tono bg-tono/15 shadow-tono/20" : ""}`}
               >
-                <span className="font-semibold">{h.nombre}</span>
-                <span className="text-xs opacity-70">
+                <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-tono/30 bg-tono/15 text-tono">
+                  <Icono herramienta={h.valor} />
+                </span>
+                <span className="flex min-w-0 flex-col">
+                <span className={`font-semibold ${activa ? "text-tono" : ""}`}>{h.nombre}</span>
+                <span className="text-xs text-foreground/60">
                   {datos ? `${datos.threads} ${datos.threads === 1 ? "tema" : "temas"} · ${datos.posts} ${datos.posts === 1 ? "mensaje" : "mensajes"}` : " "}
+                </span>
                 </span>
               </button>
             </li>
@@ -101,40 +112,40 @@ export default function Foro() {
           defaultValue={q}
           placeholder="Buscar en el foro"
           aria-label="Buscar en el foro"
-          className="flex-1 rounded-md border border-black/20 bg-transparent px-3 py-2 text-sm dark:border-white/25"
+          className="campo flex-1 text-sm"
         />
         <Boton type="submit">Buscar</Boton>
       </form>
 
       {(categoria || q) && (
-        <p className="text-sm opacity-80">
+        <p className="text-sm text-foreground/75">
           {categoria && <>Categoría: {NOMBRE_HERRAMIENTA[categoria]}. </>}
           {q && <>Búsqueda: “{q}”. </>}
-          <button type="button" className="underline" onClick={() => router.push("/foro")}>Ver todo</button>
+          <button type="button" className="font-semibold text-violet-300 underline" onClick={() => router.push("/foro")}>Ver todo</button>
         </p>
       )}
 
       <Aviso>{error}</Aviso>
       {lista?.threads.length === 0 && (
-        <p className="opacity-70">{q ? "No se encontraron temas con esa búsqueda." : "Todavía no hay temas aquí. ¡Abra el primero!"}</p>
+        <p className="tarjeta border-dashed px-6 py-10 text-center text-foreground/70">{q ? "No se encontraron temas con esa búsqueda." : "Todavía no hay temas aquí. ¡Abra el primero!"}</p>
       )}
 
       {lista?.threads.length > 0 && (
-      <ul className="flex flex-col divide-y divide-black/10 rounded-lg border border-black/10 dark:divide-white/15 dark:border-white/15">
+      <ul className="tarjeta flex flex-col divide-y divide-borde overflow-hidden">
         {lista?.threads.map((t) => (
           <li key={t.id}>
-            <Link href={`/foro/tema/${t.id}`} className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5">
-              <span className="flex flex-col">
-                <span className="font-medium">
-                  {t.isPinned && <span className="mr-2 text-xs text-amber-700 dark:text-amber-300">Fijado</span>}
-                  {t.isClosed && <span className="mr-2 text-xs opacity-60">Cerrado</span>}
+            <Link href={`/foro/tema/${t.id}`} className="group flex flex-wrap items-center justify-between gap-2 px-5 py-4 transition hover:bg-white/5">
+              <span className="flex flex-col gap-1">
+                <span className="font-semibold transition group-hover:text-violet-200">
+                  {t.isPinned && <span className="mr-2 rounded-full bg-amber-400/15 px-2 py-0.5 text-xs font-semibold text-amber-300">📌 Fijado</span>}
+                  {t.isClosed && <span className="mr-2 rounded-full bg-white/10 px-2 py-0.5 text-xs text-foreground/60">Cerrado</span>}
                   {t.title}
                 </span>
-                <span className="text-xs opacity-70">
-                  {NOMBRE_HERRAMIENTA[t.category]} · <NombreAutor autor={t.author} /> · {fechaForo(t.createdAt)}
+                <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-foreground/60">
+                  <EtiquetaHerramienta herramienta={t.category} /> <NombreAutor autor={t.author} /> · {fechaForo(t.createdAt)}
                 </span>
               </span>
-              <span className="text-xs opacity-70">
+              <span className="text-xs text-foreground/60">
                 {t.replies} {t.replies === 1 ? "respuesta" : "respuestas"} · última actividad {fechaForo(t.lastPostAt)}
               </span>
             </Link>
@@ -145,11 +156,11 @@ export default function Foro() {
 
       {lista && lista.pages > 1 && (
         <div className="flex items-center justify-center gap-4 text-sm">
-          <button type="button" disabled={lista.page <= 1} className="hover:underline disabled:opacity-30" onClick={() => ir({ pagina: String(lista.page - 1) })}>
+          <button type="button" disabled={lista.page <= 1} className="accion" onClick={() => ir({ pagina: String(lista.page - 1) })}>
             ← Anteriores
           </button>
           <span>Página {lista.page} de {lista.pages}</span>
-          <button type="button" disabled={lista.page >= lista.pages} className="hover:underline disabled:opacity-30" onClick={() => ir({ pagina: String(lista.page + 1) })}>
+          <button type="button" disabled={lista.page >= lista.pages} className="accion" onClick={() => ir({ pagina: String(lista.page + 1) })}>
             Siguientes →
           </button>
         </div>
@@ -178,23 +189,23 @@ function NuevoTema({ categoria, onCreado }) {
   }
 
   return (
-    <section className="flex flex-col gap-3 border-t border-black/10 pt-4 dark:border-white/15">
-      <h2 className="text-xl font-semibold">Abrir un tema</h2>
-      <form onSubmit={enviar} className="flex flex-col gap-3">
+    <section className="flex flex-col gap-4">
+      <h2 className="text-xl font-bold tracking-tight">Abrir un tema</h2>
+      <form onSubmit={enviar} className="tarjeta flex flex-col gap-4 p-5">
         <div className="grid gap-3 sm:grid-cols-[1fr_12rem]">
           <Campo etiqueta="Título" name="title" required minLength={5} maxLength={200} placeholder="Por ejemplo: ¿Cómo uso el ciclo Para en PSeInt?" />
-          <label className="flex flex-col gap-1 text-sm">
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-foreground/90">
             Categoría
-            <select key={categoria} name="category" defaultValue={categoria} className="rounded-md border border-black/20 bg-transparent px-3 py-2 dark:border-white/25">
+            <select key={categoria} name="category" defaultValue={categoria} className="campo font-normal">
               {HERRAMIENTAS.map((h) => (
                 <option key={h.valor} value={h.valor}>{h.nombre}</option>
               ))}
             </select>
           </label>
         </div>
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-foreground/90">
           Mensaje
-          <textarea name="body" required rows={5} maxLength={10000} className="rounded-md border border-black/20 bg-transparent px-3 py-2 dark:border-white/25" />
+          <textarea name="body" required rows={5} maxLength={10000} className="campo font-normal" />
         </label>
         <Aviso>{error}</Aviso>
         <div>

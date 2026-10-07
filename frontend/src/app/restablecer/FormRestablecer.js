@@ -31,7 +31,7 @@ export default function FormRestablecer({ token }) {
     return (
       <div className="flex flex-col gap-3">
         <Aviso tipo="ok">{listo}</Aviso>
-        <Link href="/ingresar" className="text-sm hover:underline">Ir a ingresar</Link>
+        <Link href="/ingresar" className="text-sm text-violet-300 hover:text-violet-200 hover:underline">Ir a ingresar</Link>
       </div>
     );
   }
@@ -42,7 +42,7 @@ export default function FormRestablecer({ token }) {
       <Campo etiqueta="Repetir contraseña" name="confirmar" type="password" minLength={8} autoComplete="new-password" required />
       <Aviso>{error}</Aviso>
       <Boton type="submit" cargando={cargando} disabled={!token}>Guardar contraseña</Boton>
-      <Link href="/recuperar" className="text-sm hover:underline">Pedir otro enlace</Link>
+      <Link href="/recuperar" className="text-sm text-violet-300 hover:text-violet-200 hover:underline">Pedir otro enlace</Link>
     </form>
   );
 }
