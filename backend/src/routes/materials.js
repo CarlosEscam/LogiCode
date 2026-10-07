@@ -100,7 +100,7 @@ async function buscar(req) {
   return material;
 }
 
-// PATCH /api/materials/:id { title?, description?, visibility?, topicId? }
+// PATCH /api/materials/:id { title?, description?, tool?, visibility?, topicId? }
 materialsRouter.patch('/:id', requireAuth, async (req, res) => {
   const material = await buscar(req);
   if (!(await puedeEditar(req.user, material))) throw new HttpError(403, 'No puede editar este material.');
@@ -111,6 +111,10 @@ materialsRouter.patch('/:id', requireAuth, async (req, res) => {
     data.title = title;
   }
   if (req.body.description !== undefined) data.description = String(req.body.description).trim() || null;
+  if (req.body.tool !== undefined) {
+    if (!TOOLS.includes(req.body.tool)) throw new HttpError(400, 'Herramienta no válida.');
+    data.tool = req.body.tool;
+  }
   if (req.body.visibility !== undefined && material.courseId !== null) {
     data.visibility = req.body.visibility === 'PUBLIC' ? 'PUBLIC' : 'COURSE';
   }
