@@ -259,7 +259,7 @@ test('planilla de notas: mejor nota, no entregó cuenta 0 y la definitiva ponder
   assert.equal(planilla.status, 200);
   const fila = (est) => planilla.body.estudiantes.find((e) => e.cedula === est.user.cedula);
   assert.equal(fila(ana).definitiva, 5);
-  assert.equal(fila(beto).notas[t2.id].estado, 'no_entrego');
+  assert.equal(fila(beto).notas[`a${t2.id}`].estado, 'no_entrego');
   assert.equal(fila(beto).definitiva, 2); // 5 × 40 % + 0 × 60 %
   assert.equal((await request(app).get(`/api/courses/${curso.id}/gradebook`).set(auth(ana.token))).status, 403);
 
@@ -272,6 +272,36 @@ test('planilla de notas: mejor nota, no entregó cuenta 0 y la definitiva ponder
   const hoja = await (await JSZip.loadAsync(excel.body)).file('xl/worksheets/sheet1.xml').async('string');
   assert.match(hoja, /Taller: Taller 1 \(40 %\)/);
   assert.match(hoja, new RegExp(ana.user.fullName));
+});
+
+test('planilla de notas: los quizzes con nota se reparten el porcentaje que falta; los de repaso y borradores no cuentan', async () => {
+  const { docente, curso, ana } = await escenario();
+  const taller = (await crear(docente, curso, { title: 'Taller 1', type: 'WORKSHOP', expectedAnswer: 'si', weight: 40 })).body.activity;
+  await request(app).post(`/api/activities/${taller.id}/submissions`).set(auth(ana.token)).send({ textAnswer: 'si' });
+  const ayer = new Date(Date.now() - 86400000);
+  const quiz = (datos) => prisma.quiz.create({
+    data: { courseId: curso.id, timeLimitMinutes: 10, opensAt: new Date(Date.now() - 3 * 86400000), closesAt: ayer, published: true, ...datos },
+  });
+  const q1 = await quiz({ title: 'Quiz 1' });
+  const q2 = await quiz({ title: 'Quiz 2' });
+  const repaso = await quiz({ title: 'Repaso', isPractice: true });
+  await quiz({ title: 'Borrador', published: false });
+  const intento = (quizId, grade, attemptNumber = 1) => prisma.quizAttempt.create({
+    data: { quizId, studentId: ana.user.id, attemptNumber, startedAt: ayer, deadline: ayer, submittedAt: ayer, grade },
+  });
+  await intento(q1.id, 3.5);
+  await intento(q1.id, 4, 2);
+  await intento(repaso.id, 1);
+
+  const planilla = await request(app).get(`/api/courses/${curso.id}/gradebook`).set(auth(docente.token));
+  assert.equal(planilla.status, 200);
+  const columnas = planilla.body.actividades;
+  assert.deepEqual(columnas.map((c) => c.title).sort(), ['Quiz 1', 'Quiz 2', 'Taller 1']);
+  assert.deepEqual(Object.fromEntries(columnas.map((c) => [c.title, c.peso])), { 'Taller 1': 40, 'Quiz 1': 30, 'Quiz 2': 30 });
+  const fila = planilla.body.estudiantes.find((e) => e.cedula === ana.user.cedula);
+  assert.equal(fila.notas[`q${q1.id}`].nota, 4); // el mejor intento
+  assert.equal(fila.notas[`q${q2.id}`].estado, 'no_entrego');
+  assert.equal(fila.definitiva, 3.2); // 5 × 40 % + 4 × 30 % + 0 × 30 %
 });
 
 test('editor de PSeInt: ejecuta con la entrada que escriba el estudiante', async () => {

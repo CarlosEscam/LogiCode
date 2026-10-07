@@ -142,15 +142,27 @@ function suscribir(aviso) {
   };
 }
 
+// El usuario se lee una vez por cada sesión guardada: devolver siempre el mismo objeto
+// evita que los efectos que dependen de él se repitan sin fin.
+let ultimo = { crudo: undefined, user: undefined };
+
+function usuarioDe(crudo) {
+  if (crudo !== ultimo.crudo) {
+    let user = null;
+    try {
+      user = crudo ? JSON.parse(crudo).user : null;
+    } catch {
+      user = null;
+    }
+    ultimo = { crudo, user };
+  }
+  return ultimo.user;
+}
+
 // Usuario de la sesión actual: undefined mientras carga, null si no hay sesión.
 export function useUsuario() {
   const crudo = useSyncExternalStore(suscribir, leerCrudo, () => undefined);
-  if (crudo === undefined) return undefined;
-  try {
-    return crudo ? JSON.parse(crudo).user : null;
-  } catch {
-    return null;
-  }
+  return crudo === undefined ? undefined : usuarioDe(crudo);
 }
 
 export const HERRAMIENTAS = [

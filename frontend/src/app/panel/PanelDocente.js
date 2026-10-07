@@ -101,6 +101,9 @@ function AccesosCurso({ cursoId }) {
           {porRevisar} {porRevisar === 1 ? "entrega" : "entregas"} por revisar →
         </Link>
       )}
+      <Link href={`/curso/${cursoId}/quizzes`} className="btn-secundario px-5 py-2.5">
+        Quizzes y banco de preguntas →
+      </Link>
       <Link href={`/curso/${cursoId}/notas`} className="btn-secundario px-5 py-2.5">
         Notas
       </Link>

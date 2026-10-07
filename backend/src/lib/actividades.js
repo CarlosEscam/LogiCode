@@ -1,6 +1,7 @@
 import { prisma } from './prisma.js';
 import { HttpError } from './errors.js';
 import { clavesScratchValidas } from './scratch.js';
+import { cerrarVencidos } from './quizzes.js';
 
 // Reglas de las actividades (RF-10, RF-11, RF-27): tipos, plazos con prórroga e intentos.
 
@@ -144,49 +145,89 @@ export function mejorNota(entregas) {
   return Math.max(...calificadas.map((s) => Number(s.finalGrade)));
 }
 
-// Planilla de notas del curso (RF-13, RF-14). Una actividad cuenta para la definitiva cuando
-// el estudiante ya tiene nota o cuando su plazo venció (sin entrega cuenta 0,0).
-// Si todas las actividades que cuentan tienen porcentaje, la definitiva es ponderada; si no, el promedio.
+// Porcentaje con el que cuenta cada columna de la planilla. Las que tienen porcentaje pesan
+// eso; las que no (por ejemplo los quizzes) se reparten por igual lo que falte para 100 %.
+// Si ninguna tiene porcentaje, todas valen igual (null: promedio simple).
+export function pesosEfectivos(columnas) {
+  const conPeso = columnas.filter((c) => c.weight !== null);
+  if (!conPeso.length) return columnas.map(() => null);
+  const asignado = conPeso.reduce((s, c) => s + c.weight, 0);
+  const sinPeso = columnas.length - conPeso.length;
+  const resto = sinPeso ? Math.max(0, 100 - asignado) / sinPeso : 0;
+  return columnas.map((c) => Math.round((c.weight ?? resto) * 100) / 100);
+}
+
+// Definitiva sobre lo que ya cuenta: ponderada con los pesos efectivos o, si no hay pesos, promedio.
+function definitivaDe(cuentan) {
+  if (!cuentan.length) return null;
+  const pesos = cuentan.reduce((s, c) => s + (c.peso ?? 0), 0);
+  const valor = cuentan.every((c) => c.peso !== null) && pesos > 0
+    ? cuentan.reduce((s, c) => s + c.nota * c.peso, 0) / pesos
+    : cuentan.reduce((s, c) => s + c.nota, 0) / cuentan.length;
+  return Math.round(valor * 10) / 10;
+}
+
+// Planilla de notas del curso (RF-13, RF-14): tareas, talleres, evaluaciones y quizzes con nota
+// (los de repaso no cuentan). Una columna cuenta para la definitiva cuando el estudiante ya tiene
+// nota o cuando su plazo venció (sin entrega cuenta 0,0). De cada una vale el mejor intento.
 export async function planillaDelCurso(courseId) {
-  const [actividades, lista] = await Promise.all([
+  // Los intentos de quiz que se quedaron abiertos con el tiempo vencido se cierran antes de sumar.
+  await cerrarVencidos({ quiz: { courseId } });
+  const [actividades, quizzes, lista] = await Promise.all([
     prisma.activity.findMany({
       where: { courseId, ...NO_QUIZ },
       orderBy: [{ closesAt: 'asc' }, { id: 'asc' }],
       include: { extensions: true, submissions: { select: { studentId: true, status: true, finalGrade: true } } },
     }),
+    prisma.quiz.findMany({
+      where: { courseId, published: true, isPractice: false },
+      orderBy: [{ closesAt: 'asc' }, { id: 'asc' }],
+      include: { attempts: { where: { submittedAt: { not: null } }, select: { studentId: true, grade: true } } },
+    }),
     prisma.rosterEntry.findMany({ where: { courseId }, orderBy: { cedula: 'asc' }, include: { user: { select: { id: true, fullName: true } } } }),
   ]);
   const ahora = new Date();
+
+  // Cada columna sabe calcular la nota y el estado de un estudiante.
+  const columnas = [
+    ...actividades.map((a) => ({
+      clave: `a${a.id}`, kind: 'activity', id: a.id, title: a.title, type: a.type, weight: num(a.weight), closesAt: a.closesAt,
+      celda(userId) {
+        const propias = userId ? a.submissions.filter((s) => s.studentId === userId) : [];
+        const nota = mejorNota(propias);
+        const pendiente = propias.some((s) => s.status === 'IN_REVIEW' || s.status === 'SUBMITTED');
+        const vencida = plazoDe(a, a.extensions, userId).cierre < ahora;
+        return { nota, pendiente, vencida };
+      },
+    })),
+    ...quizzes.map((q) => ({
+      clave: `q${q.id}`, kind: 'quiz', id: q.id, title: q.title, type: 'QUIZ', weight: null, closesAt: q.closesAt,
+      celda(userId) {
+        const notas = userId ? q.attempts.filter((t) => t.studentId === userId && t.grade !== null).map((t) => Number(t.grade)) : [];
+        return { nota: notas.length ? Math.max(...notas) : null, pendiente: false, vencida: q.closesAt < ahora };
+      },
+    })),
+  ].sort((x, y) => x.closesAt - y.closesAt);
+  const pesos = pesosEfectivos(columnas);
+
   const estudiantes = lista.map((r) => {
     const notas = {};
     const cuentan = [];
-    for (const a of actividades) {
-      const propias = r.userId ? a.submissions.filter((s) => s.studentId === r.userId) : [];
-      const nota = mejorNota(propias);
-      const pendiente = propias.some((s) => s.status === 'IN_REVIEW' || s.status === 'SUBMITTED');
-      const vencida = plazoDe(a, a.extensions, r.userId).cierre < ahora;
+    columnas.forEach((c, i) => {
+      const { nota, pendiente, vencida } = c.celda(r.userId);
       let estado = 'pendiente';
       if (nota !== null) estado = 'calificada';
       else if (pendiente) estado = 'en_revision';
       else if (vencida) estado = 'no_entrego';
-      notas[a.id] = { nota: nota ?? (estado === 'no_entrego' ? 0 : null), estado, revisionPendiente: pendiente };
-      if (nota !== null || estado === 'no_entrego') cuentan.push({ nota: nota ?? 0, peso: a.weight === null ? null : Number(a.weight) });
-    }
-    let definitiva = null;
-    if (cuentan.length) {
-      const ponderada = cuentan.every((c) => c.peso !== null) && cuentan.some((c) => c.peso > 0);
-      if (ponderada) {
-        const pesos = cuentan.reduce((s, c) => s + c.peso, 0);
-        definitiva = cuentan.reduce((s, c) => s + c.nota * c.peso, 0) / pesos;
-      } else {
-        definitiva = cuentan.reduce((s, c) => s + c.nota, 0) / cuentan.length;
-      }
-      definitiva = Math.round(definitiva * 10) / 10;
-    }
-    return { cedula: r.cedula, fullName: r.user?.fullName ?? r.fullName ?? null, registrado: r.userId !== null, notas, definitiva };
+      notas[c.clave] = { nota: nota ?? (estado === 'no_entrego' ? 0 : null), estado, revisionPendiente: pendiente };
+      if (nota !== null || estado === 'no_entrego') cuentan.push({ nota: nota ?? 0, peso: pesos[i] });
+    });
+    return { cedula: r.cedula, fullName: r.user?.fullName ?? r.fullName ?? null, registrado: r.userId !== null, notas, definitiva: definitivaDe(cuentan) };
   });
   return {
-    actividades: actividades.map((a) => ({ id: a.id, title: a.title, type: a.type, weight: num(a.weight), closesAt: a.closesAt })),
+    actividades: columnas.map((c, i) => ({
+      clave: c.clave, kind: c.kind, id: c.id, title: c.title, type: c.type, weight: c.weight, peso: pesos[i], closesAt: c.closesAt,
+    })),
     estudiantes,
   };
 }

@@ -57,8 +57,9 @@ export default function Notas() {
   if (!datos) return <Aviso>{error}</Aviso>;
 
   const { course, actividades, estudiantes } = datos;
-  const ponderada = actividades.length > 0 && actividades.every((a) => a.weight !== null);
-  const sumaPesos = actividades.reduce((s, a) => s + (a.weight ?? 0), 0);
+  const ponderada = actividades.some((a) => a.peso !== null);
+  const repartida = ponderada && actividades.some((a) => a.weight === null);
+  const enlace = (a) => (a.kind === "quiz" ? `/curso/${id}/quizzes/${a.id}` : `/curso/${id}/actividad/${a.id}`);
 
   return (
     <div className="flex flex-col gap-6">
@@ -72,9 +73,10 @@ export default function Notas() {
         </div>
         <p className="text-sm text-foreground/65">
           {ponderada
-            ? `La definitiva pondera cada actividad por su porcentaje (suman ${sumaPesos} %) sobre lo ya calificado.`
-            : "La definitiva es el promedio de las actividades ya calificadas. Si pone porcentaje a todas, se pondera."}{" "}
-          De cada actividad cuenta el mejor intento. Si cerró sin entrega, cuenta 0,0.
+            ? "La definitiva pondera cada columna por su porcentaje sobre lo ya calificado."
+            : "La definitiva es el promedio de lo ya calificado. Si pone porcentaje a las actividades, se pondera."}{" "}
+          {repartida && "Los quizzes y las actividades sin porcentaje se reparten por igual lo que falte para 100 %. "}
+          De cada una cuenta el mejor intento; si cerró sin entrega, cuenta 0,0. Los quizzes de repaso no cuentan.
         </p>
       </div>
       <Aviso>{error}</Aviso>
@@ -88,9 +90,12 @@ export default function Notas() {
               <tr>
                 <th className="sticky left-0 bg-superficie px-4 py-3 uppercase tracking-wide">Estudiante</th>
                 {actividades.map((a) => (
-                  <th key={a.id} className="min-w-[8rem] px-3 py-3 font-medium">
-                    <Link href={`/curso/${id}/actividad/${a.id}`} className="hover:text-violet-300 hover:underline">
-                      <span className="block uppercase tracking-wide">{NOMBRE_TIPO[a.type]}{a.weight !== null && ` · ${a.weight} %`}</span>
+                  <th key={a.clave} className="min-w-[8rem] px-3 py-3 font-medium">
+                    <Link href={enlace(a)} className="hover:text-violet-300 hover:underline">
+                      <span className="block uppercase tracking-wide">
+                        {a.kind === "quiz" ? "Quiz" : NOMBRE_TIPO[a.type]}
+                        {a.peso !== null && ` · ${String(a.peso).replace(".", ",")} %`}
+                      </span>
                       <span className="block normal-case text-foreground/85">{a.title}</span>
                     </Link>
                   </th>
@@ -106,9 +111,9 @@ export default function Notas() {
                     <span className="block font-mono text-xs text-foreground/50">{e.cedula}{!e.registrado && " · sin registrarse"}</span>
                   </td>
                   {actividades.map((a) => {
-                    const n = e.notas[a.id];
+                    const n = e.notas[a.clave];
                     return (
-                      <td key={a.id} className={`px-3 py-2.5 ${COLOR_ESTADO[n.estado]}`}>
+                      <td key={a.clave} className={`px-3 py-2.5 ${COLOR_ESTADO[n.estado]}`}>
                         {n.estado === "en_revision" ? "En revisión" : n.estado === "pendiente" ? "—" : nota(n.nota)}
                         {n.estado === "calificada" && n.revisionPendiente && <span title="Tiene otro intento por revisar" className="ml-1 text-amber-300">•</span>}
                       </td>

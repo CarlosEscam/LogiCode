@@ -9,6 +9,8 @@ import { topicsRouter } from './routes/topics.js';
 import { materialsRouter, libraryRouter } from './routes/materials.js';
 import { activitiesRouter } from './routes/activities.js';
 import { forumRouter } from './routes/forum.js';
+import { questionsRouter } from './routes/questions.js';
+import { quizzesRouter } from './routes/quizzes.js';
 
 export const app = express();
 
@@ -29,6 +31,8 @@ app.use('/api/materials', materialsRouter);
 app.use('/api/library', libraryRouter);
 app.use('/api', activitiesRouter);
 app.use('/api/forum', forumRouter);
+app.use('/api', questionsRouter);
+app.use('/api', quizzesRouter);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });

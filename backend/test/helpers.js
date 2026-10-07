@@ -46,6 +46,8 @@ export async function cleanup() {
   // El foro guarda el autor sin borrado en cascada: se limpia antes que los usuarios.
   await prisma.forumPost.deleteMany({ where: { authorId: { in: creados.users } } });
   await prisma.forumThread.deleteMany({ where: { authorId: { in: creados.users } } });
+  // El banco de preguntas es del docente y no se borra con el curso.
+  await prisma.question.deleteMany({ where: { createdById: { in: creados.users } } });
   await prisma.user.deleteMany({ where: { id: { in: creados.users } } });
   await prisma.$disconnect();
 }

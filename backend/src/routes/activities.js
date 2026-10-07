@@ -388,14 +388,15 @@ activitiesRouter.get('/courses/:id/gradebook', requireAuth, async (req, res) => 
 activitiesRouter.get('/courses/:id/gradebook.xlsx', requireAuth, async (req, res) => {
   const { course } = await requireCourse(req.user, v.id(req.params.id), 'owner');
   const { actividades, estudiantes } = await planillaDelCurso(course.id);
-  const titulo = (a) => `${NOMBRE_TIPO[a.type] ?? ''}: ${a.title}${a.weight !== null ? ` (${a.weight} %)` : ''}`;
+  const nombreTipo = (a) => (a.kind === 'quiz' ? 'Quiz' : NOMBRE_TIPO[a.type] ?? '');
+  const titulo = (a) => `${nombreTipo(a)}: ${a.title}${a.peso !== null ? ` (${a.peso} %)` : ''}`;
   const filas = [
     ['Cédula', 'Nombre', ...actividades.map(titulo), 'Definitiva'],
     ...estudiantes.map((e) => [
       e.cedula,
       e.fullName ?? (e.registrado ? '' : '(sin registrarse)'),
       ...actividades.map((a) => {
-        const n = e.notas[a.id];
+        const n = e.notas[a.clave];
         if (n.nota !== null) return n.nota;
         return n.estado === 'en_revision' ? 'En revisión' : null;
       }),
