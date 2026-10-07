@@ -11,6 +11,21 @@ after(cleanup);
 
 const auth = (token) => ({ Authorization: `Bearer ${token}` });
 
+// Otros archivos de prueba corren en paralelo y también suben archivos, así que no se compara
+// la carpeta completa: se revisa que ninguno de los archivos nuevos sea el que se rechazó.
+function quedoEnDisco(antes, contenido) {
+  return fs
+    .readdirSync(rutaArchivo('.'))
+    .filter((f) => !antes.has(f))
+    .some((f) => {
+      try {
+        return fs.statSync(rutaArchivo(f)).size === contenido.length && fs.readFileSync(rutaArchivo(f)).equals(contenido);
+      } catch {
+        return false; // otra prueba lo borró mientras tanto
+      }
+    });
+}
+
 // Docente con su curso, un estudiante de la lista y otro que no está en la lista.
 async function escenario() {
   const docente = await crearUsuario({ role: 'TEACHER' });
@@ -106,6 +121,7 @@ test('archivos no permitidos se rechazan y no quedan en el disco', async () => {
     .field('kind', 'FILE')
     .field('courseId', String(curso.id))
     .attach('file', Buffer.from('MZ'), 'virus.exe');
+  assert.equal(quedoEnDisco(antes, Buffer.from('MZ')), false);
   assert.equal(res.status, 400);
   assert.match(res.body.error, /\.exe/);
 
@@ -119,7 +135,7 @@ test('archivos no permitidos se rechazan y no quedan en el disco', async () => {
     .field('courseId', String(curso.id))
     .attach('file', Buffer.from('%PDF-1.4'), 'guia.pdf');
   assert.equal(ajeno.status, 403);
-  assert.deepEqual(new Set(fs.readdirSync(rutaArchivo('.'))), antes);
+  assert.equal(quedoEnDisco(antes, Buffer.from('%PDF-1.4')), false);
 });
 
 test('biblioteca: docentes y administradores suben directo; estudiantes no', async () => {
@@ -186,10 +202,11 @@ test('videos de clase: se suben, se adelantan por rangos y los demás archivos s
 
   // Un documento de más de 20 MB se rechaza aunque los videos puedan pesar más, y no queda en el disco.
   const antes = new Set(fs.readdirSync(rutaArchivo('.')));
-  const grande = await subir('apuntes.pdf', Buffer.alloc(21 * 1024 * 1024, 1));
+  const contenido = Buffer.alloc(21 * 1024 * 1024, 1);
+  const grande = await subir('apuntes.pdf', contenido);
   assert.equal(grande.status, 400);
   assert.match(grande.body.error, /20 MB/);
-  assert.deepEqual(new Set(fs.readdirSync(rutaArchivo('.'))), antes);
+  assert.equal(quedoEnDisco(antes, contenido), false);
 });
 
 test('enlace firmado: abre el archivo sin cabecera, solo para quien puede verlo y solo ese material', async () => {

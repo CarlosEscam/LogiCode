@@ -7,6 +7,7 @@ import { adminRouter } from './routes/admin.js';
 import { coursesRouter } from './routes/courses.js';
 import { topicsRouter } from './routes/topics.js';
 import { materialsRouter, libraryRouter } from './routes/materials.js';
+import { activitiesRouter } from './routes/activities.js';
 import { forumRouter } from './routes/forum.js';
 
 export const app = express();
@@ -26,6 +27,7 @@ app.use('/api/courses', coursesRouter);
 app.use('/api', topicsRouter);
 app.use('/api/materials', materialsRouter);
 app.use('/api/library', libraryRouter);
+app.use('/api', activitiesRouter);
 app.use('/api/forum', forumRouter);
 
 app.use((req, res) => {

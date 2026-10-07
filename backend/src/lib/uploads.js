@@ -83,6 +83,36 @@ export function recibirArchivo(req, res, next) {
   });
 }
 
+// Archivos y fotos de las entregas de los estudiantes: los mismos formatos del material,
+// sin videos, hasta 20 MB.
+const ENTREGAS = new Set([...EXTENSIONES].filter((e) => !VIDEOS.has(e)));
+export const IMAGENES = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp']);
+
+const uploadEntrega = multer({
+  storage: multer.diskStorage({
+    destination: config.uploadDir,
+    filename: (req, file, cb) => {
+      cb(null, crypto.randomBytes(16).toString('hex') + path.extname(file.originalname).toLowerCase());
+    },
+  }),
+  limits: { fileSize: MAX_MB * 1024 * 1024, files: 1 },
+  fileFilter: (req, file, cb) => {
+    file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf8');
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (!ENTREGAS.has(ext)) return cb(new HttpError(400, `No se permiten archivos ${ext || 'sin extensión'}.`));
+    cb(null, true);
+  },
+}).single('file');
+
+export function recibirEntrega(req, res, next) {
+  uploadEntrega(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      return next(new HttpError(400, err.code === 'LIMIT_FILE_SIZE' ? `El archivo supera ${MAX_MB} MB.` : 'No se pudo recibir el archivo.'));
+    }
+    next(err);
+  });
+}
+
 export function rutaArchivo(nombreGuardado) {
   return path.join(config.uploadDir, path.basename(nombreGuardado));
 }
