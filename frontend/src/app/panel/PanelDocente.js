@@ -71,9 +71,14 @@ export default function PanelDocente() {
       </section>
 
       {elegido && (
-        <Link href={`/curso/${elegido}`} className="btn-primario self-start px-5 py-2.5">
-          Temas y material del curso →
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link href={`/curso/${elegido}`} className="btn-primario px-5 py-2.5">
+            Temas y material del curso →
+          </Link>
+          <Link href={`/curso/${elegido}/quizzes`} className="btn-secundario px-5 py-2.5">
+            Quizzes y banco de preguntas →
+          </Link>
+        </div>
       )}
 
       {elegido && <ListaCedulas cursoId={elegido} onCambio={() => setVersion((v) => v + 1)} />}
