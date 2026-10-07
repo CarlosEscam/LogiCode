@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { api, HERRAMIENTAS, useUsuario } from "@/lib/api";
@@ -18,6 +18,9 @@ export default function Banco() {
   const [curso, setCurso] = useState(null);
   const [filtro, setFiltro] = useState({ tool: "", type: "", topicId: "", q: "", archived: "" });
   const [editando, setEditando] = useState(null);
+  // El formulario de nueva pregunta empieza abierto si el banco está vacío y sigue abierto al guardar.
+  const [abierto, setAbierto] = useState(false);
+  const primeraCarga = useRef(true);
   const [error, setError] = useState("");
   const [aviso, setAviso] = useState("");
   const [version, setVersion] = useState(0);
@@ -40,7 +43,12 @@ export default function Banco() {
     const params = new URLSearchParams(Object.entries(filtro).filter(([, v]) => v));
     const t = setTimeout(() => {
       api(`/courses/${id}/questions?${params}`)
-        .then((d) => vivo && setPreguntas(d.questions))
+        .then((d) => {
+          if (!vivo) return;
+          setPreguntas(d.questions);
+          if (primeraCarga.current && d.questions.length === 0) setAbierto(true);
+          primeraCarga.current = false;
+        })
         .catch((e) => vivo && setError(e.message));
     }, 200);
     return () => {
@@ -78,7 +86,7 @@ export default function Banco() {
       <Aviso>{error}</Aviso>
       <Aviso tipo="ok">{aviso}</Aviso>
 
-      <details className="desplegable" open={preguntas?.length === 0 && !Object.values(filtro).some(Boolean)}>
+      <details className="desplegable" open={abierto} onToggle={(e) => setAbierto(e.currentTarget.open)}>
         <summary>Nueva pregunta</summary>
         <div className="mt-3">
           <FormPregunta courseId={id} temas={temas} onGuardada={() => accion(Promise.resolve(), "Pregunta guardada en el banco.")} />

@@ -138,7 +138,7 @@ function Presentar({ datos, onEnviado }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="sticky top-16 z-10 -mx-1 flex flex-col gap-3 rounded-2xl border border-borde bg-background/90 px-4 py-3 shadow-lg shadow-black/30 backdrop-blur">
+      <div className="sticky top-[6.75rem] z-10 sm:top-16 -mx-1 flex flex-col gap-3 rounded-2xl border border-borde bg-background/90 px-4 py-3 shadow-lg shadow-black/30 backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="truncate font-semibold">{quiz.title}</p>
@@ -227,7 +227,7 @@ function Resultado({ datos, volver }) {
         </section>
       ) : (
         <p className="tarjeta p-5 text-foreground/70">
-          Las respuestas correctas y el ranking se publican cuando cierre el quiz, el {fechaHora(quiz.closesAt)}.
+          Las respuestas correctas y el ranking se publican cuando cierre el quiz ({fechaHora(quiz.closesAt)}).
         </p>
       )}
     </div>

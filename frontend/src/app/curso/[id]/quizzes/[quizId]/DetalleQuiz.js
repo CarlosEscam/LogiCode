@@ -148,7 +148,7 @@ function Ranking({ quizId, filas: filasDadas }) {
     <section className="flex flex-col gap-3">
       <h2 className="text-xl font-bold tracking-tight">🏆 Ranking</h2>
       {!datos.available ? (
-        <p className="tarjeta p-5 text-sm text-foreground/65">El ranking se publica cuando cierra el quiz, el {fechaHora(datos.closesAt)}.</p>
+        <p className="tarjeta p-5 text-sm text-foreground/65">El ranking se publica cuando cierre el quiz ({fechaHora(datos.closesAt)}).</p>
       ) : filas.length === 0 ? (
         <p className="tarjeta p-5 text-sm text-foreground/65">Nadie ha presentado el quiz todavía.</p>
       ) : (
@@ -160,7 +160,7 @@ function Ranking({ quizId, filas: filasDadas }) {
             >
               <span className="w-8 text-center text-xl font-bold">{["🥇", "🥈", "🥉"][f.position - 1] ?? f.position}</span>
               <span className="flex-1 font-medium">{f.fullName}{f.isMe && <span className="ml-2 text-xs text-violet-300">(usted)</span>}</span>
-              <span className="hidden text-sm text-foreground/55 sm:inline">{f.correctCount} correctas · {duracion(f.seconds)}</span>
+              <span className="hidden text-sm text-foreground/55 sm:inline">{f.correctCount} {f.correctCount === 1 ? "correcta" : "correctas"} · {duracion(f.seconds)}</span>
               <span className={`text-lg font-bold ${colorNota(f.grade)}`}>{nota(f.grade)}</span>
             </li>
           ))}

@@ -99,7 +99,7 @@ export function mejoresIntentos(intentos) {
   return mejor;
 }
 
-const duracion = (a) => a.submittedAt.getTime() - a.startedAt.getTime();
+const duracion = (a) => Math.max(0, a.submittedAt.getTime() - a.startedAt.getTime());
 
 function compararIntentos(a, b) {
   return num(b.grade) - num(a.grade) || duracion(a) - duracion(b);
