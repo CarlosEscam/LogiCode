@@ -50,13 +50,45 @@ export async function obtenerArchivo(material) {
   return res.blob();
 }
 
+// Enlace firmado al archivo de un material. Sirve donde el navegador no puede mandar
+// la sesión: el reproductor de video y las descargas directas.
+export async function enlaceArchivo(material) {
+  const { url } = await api(`/materials/${material.id}/enlace`);
+  return `${API_URL}${url}`;
+}
+
+// La descarga la hace el navegador con su propio avance, sin cargar el archivo en memoria.
 export async function descargarMaterial(material) {
-  const url = URL.createObjectURL(await obtenerArchivo(material));
   const a = document.createElement("a");
-  a.href = url;
+  a.href = await enlaceArchivo(material);
   a.download = material.fileName ?? "archivo";
   a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}
+
+// Igual que api() con un formulario, pero informa el avance de la subida (fetch no lo hace).
+export function subirConAvance(ruta, formulario, onAvance) {
+  const token = leerSesion()?.token;
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${API_URL}/api${ruta}`);
+    if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onAvance(Math.floor((e.loaded / e.total) * 100));
+    };
+    xhr.onerror = () => reject(new Error("No hay conexión con el servidor de LogiCode."));
+    xhr.onload = () => {
+      let datos = {};
+      try {
+        datos = JSON.parse(xhr.responseText);
+      } catch {
+        // respuesta sin JSON
+      }
+      if (xhr.status === 401 && token) cerrarSesion();
+      if (xhr.status >= 400) reject(new Error(datos.error ?? "Ocurrió un error. Intente de nuevo."));
+      else resolve(datos);
+    };
+    xhr.send(formulario);
+  });
 }
 
 function leerCrudo() {

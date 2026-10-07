@@ -162,3 +162,66 @@ test('el tipo del archivo sale de su extensión, no del que declaró el navegado
   assert.equal(await tipo(psc.body.material.id), 'text/plain; charset=utf-8');
   assert.equal(await tipo(zip.body.material.id), 'application/octet-stream');
 });
+
+test('videos de clase: se suben, se adelantan por rangos y los demás archivos siguen con 20 MB', async () => {
+  const { docente, curso, estudiante } = await escenario();
+  const subir = (nombre, contenido) =>
+    request(app)
+      .post('/api/materials')
+      .set(auth(docente.token))
+      .field('title', nombre)
+      .field('kind', 'FILE')
+      .field('courseId', String(curso.id))
+      .attach('file', contenido, nombre);
+
+  const video = await subir('clase 1.mp4', Buffer.alloc(64 * 1024, 7));
+  assert.equal(video.status, 201);
+  const url = `/api/materials/${video.body.material.id}/file`;
+  const completo = await request(app).get(url).set(auth(estudiante.token));
+  assert.equal(completo.headers['content-type'], 'video/mp4');
+  assert.equal(completo.headers['accept-ranges'], 'bytes');
+  const tramo = await request(app).get(url).set(auth(estudiante.token)).set('Range', 'bytes=1000-1999');
+  assert.equal(tramo.status, 206);
+  assert.equal(tramo.headers['content-range'], `bytes 1000-1999/${64 * 1024}`);
+
+  // Un documento de más de 20 MB se rechaza aunque los videos puedan pesar más, y no queda en el disco.
+  const antes = new Set(fs.readdirSync(rutaArchivo('.')));
+  const grande = await subir('apuntes.pdf', Buffer.alloc(21 * 1024 * 1024, 1));
+  assert.equal(grande.status, 400);
+  assert.match(grande.body.error, /20 MB/);
+  assert.deepEqual(new Set(fs.readdirSync(rutaArchivo('.'))), antes);
+});
+
+test('enlace firmado: abre el archivo sin cabecera, solo para quien puede verlo y solo ese material', async () => {
+  const { docente, curso, estudiante, ajeno } = await escenario();
+  const subir = (nombre) =>
+    request(app)
+      .post('/api/materials')
+      .set(auth(docente.token))
+      .field('title', nombre)
+      .field('kind', 'FILE')
+      .field('courseId', String(curso.id))
+      .attach('file', Buffer.from('contenido de ' + nombre), nombre);
+  const clase = (await subir('clase 2.webm')).body.material;
+  const otro = (await subir('notas.txt')).body.material;
+
+  const enlace = await request(app).get(`/api/materials/${clase.id}/enlace`).set(auth(estudiante.token));
+  assert.equal(enlace.status, 200);
+  const abierto = await request(app).get(enlace.body.url);
+  assert.equal(abierto.status, 200);
+  assert.equal(abierto.headers['content-type'], 'video/webm');
+
+  assert.equal((await request(app).get(`/api/materials/${clase.id}/enlace`)).status, 401);
+  assert.equal((await request(app).get(`/api/materials/${clase.id}/enlace`).set(auth(ajeno.token))).status, 403);
+
+  // La firma de un material no abre otro, una firma inventada no sirve y tampoco sirve como sesión.
+  const firma = new URL(enlace.body.url, 'http://x').searchParams.get('firma');
+  assert.equal((await request(app).get(`/api/materials/${otro.id}/file?firma=${encodeURIComponent(firma)}`)).status, 401);
+  assert.equal((await request(app).get(`/api/materials/${clase.id}/file?firma=inventada`)).status, 401);
+  assert.equal((await request(app).get(`/api/materials/${clase.id}/file?firma=${estudiante.token}`)).status, 401);
+  assert.equal((await request(app).get('/api/auth/me').set(auth(firma))).status, 401);
+
+  // Si el estudiante sale de la lista del curso, su enlace deja de servir.
+  await prisma.rosterEntry.deleteMany({ where: { courseId: curso.id, userId: estudiante.user.id } });
+  assert.equal((await request(app).get(enlace.body.url)).status, 403);
+});
