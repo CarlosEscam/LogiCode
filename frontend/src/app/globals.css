@@ -3,16 +3,14 @@
 /* LogiCode usa siempre el tema oscuro: las clases dark: aplican con la clase .dark del <html>. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-:root {
-  --background: #0b0f1e;
-  --foreground: #e8ebf7;
-  --superficie: #121831;
-  --superficie-2: #182042;
-  --borde: rgb(148 163 255 / 0.14);
-  --marca: #8b5cf6;
-  --marca-2: #22d3ee;
-  --tono: var(--marca);
-}
+/* Paleta de LogiCode:
+   Azul Profundo #0F172A  fondo de la página y texto principal
+   Cian Algorítmico #0284C7  marca, títulos y bordes
+   Menta Eléctrico #10B981  botones principales y éxito
+   Gris Estructura #F8FAFC  fondo de tarjetas y áreas de contenido
+   Naranja Diagrama #F97316  acentos, alertas y destacados
+   Los tokens de texto cambian según el fondo: sobre el azul (la página, .oscuro) son claros
+   y dentro de las tarjetas grises (.tarjeta, .claro) son oscuros, para que siempre se lean. */
 
 @theme inline {
   --color-background: var(--background);
@@ -20,19 +18,100 @@
   --color-superficie: var(--superficie);
   --color-superficie-2: var(--superficie-2);
   --color-borde: var(--borde);
-  --color-marca: var(--marca);
-  --color-marca-2: var(--marca-2);
+  --color-campo: var(--campo);
+  --color-hundido: var(--hundido);
+  --color-marca: #0284c7;
+  --color-marca-2: #10b981;
   --color-tono: var(--tono);
+  --color-tono-vivo: var(--tono-o);
+  --color-titulo: var(--titulo);
+  --color-enlace: var(--enlace);
+  --color-exito: var(--exito);
+  --color-acento: var(--acento);
+  --color-peligro: var(--peligro);
+  --color-azul: #0f172a;
+  --color-cian: #0284c7;
+  --color-menta: #10b981;
+  --color-gris: #f8fafc;
+  --color-naranja: #f97316;
+  /* Cian más oscuro para fondos con letra blanca pequeña (el cian de la marca no alcanza el contraste). */
+  --color-cian-oscuro: #0369a1;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-/* Color de cada herramienta: se usa en filtros, etiquetas, íconos y tarjetas. */
-.tono-PSEINT { --tono: #38bdf8; }
-.tono-DFD { --tono: #f472b6; }
-.tono-SCRATCH { --tono: #fbbf24; }
-.tono-ARDUINO { --tono: #2dd4bf; }
-.tono-GENERAL { --tono: #a78bfa; }
+@layer base {
+  /* Sobre el azul profundo. */
+  :root,
+  .oscuro {
+    --es-claro: 0;
+    --background: #0f172a;
+    --foreground: #f1f5f9;
+    --superficie: #1e293b;
+    --superficie-2: #334155;
+    --borde: rgb(56 189 248 / 0.2);
+    --campo: rgb(2 6 23 / 0.45);
+    --hundido: rgb(2 6 23 / 0.35);
+    --titulo: #0284c7;
+    --enlace: #38bdf8;
+    --exito: #10b981;
+    --acento: #f97316;
+    --peligro: #fb7185;
+  }
+
+  /* Dentro de las tarjetas (gris estructura): texto azul profundo y colores más oscuros. */
+  .tarjeta,
+  .tarjeta-viva,
+  .claro {
+    --es-claro: 1;
+    --foreground: #0f172a;
+    --superficie: #f8fafc;
+    --superficie-2: #e2e8f0;
+    --borde: rgb(2 132 199 / 0.25);
+    --campo: #ffffff;
+    --hundido: #eef2f7;
+    --titulo: #0284c7;
+    --enlace: #0369a1;
+    --exito: #065f46;
+    --acento: #9a3412;
+    --peligro: #be123c;
+    color: var(--foreground);
+  }
+
+  .oscuro {
+    color: var(--foreground);
+  }
+
+  /* Una tarjeta dentro de otra queda blanca para que se distinga. */
+  :where(.tarjeta, .tarjeta-viva, .claro) :where(.tarjeta, .tarjeta-viva) {
+    --superficie: #ffffff;
+  }
+
+  /* Color de cada herramienta: uno para fondo azul (-o) y otro, más oscuro, para tarjeta clara (-c).
+     --tono se recalcula en cada elemento que cambia de herramienta o de fondo.
+     tono-vivo es siempre el claro: para barras y franjas de adorno, que no llevan texto. */
+  :root {
+    --tono-o: #38bdf8;
+    --tono-c: #0369a1;
+  }
+  .tono-PSEINT { --tono-o: #38bdf8; --tono-c: #0369a1; }
+  .tono-DFD { --tono-o: #f472b6; --tono-c: #be185d; }
+  .tono-SCRATCH { --tono-o: #fbbf24; --tono-c: #8a5a00; }
+  .tono-ARDUINO { --tono-o: #2dd4bf; --tono-c: #0f766e; }
+  .tono-GENERAL { --tono-o: #cbd5e1; --tono-c: #475569; }
+  :root,
+  .oscuro,
+  .tarjeta,
+  .tarjeta-viva,
+  .claro,
+  .tono-PSEINT,
+  .tono-DFD,
+  .tono-SCRATCH,
+  .tono-ARDUINO,
+  .tono-GENERAL {
+    --tono: color-mix(in srgb, var(--tono-c) calc(var(--es-claro) * 100%), var(--tono-o));
+  }
+}
 
 html {
   color-scheme: dark;
@@ -41,19 +120,19 @@ html {
 body {
   background-color: var(--background);
   background-image:
-    radial-gradient(60rem 30rem at 15% -10%, rgb(139 92 246 / 0.18), transparent 70%),
-    radial-gradient(50rem 28rem at 100% 0%, rgb(34 211 238 / 0.1), transparent 70%);
+    radial-gradient(60rem 30rem at 15% -10%, rgb(2 132 199 / 0.22), transparent 70%),
+    radial-gradient(50rem 28rem at 100% 0%, rgb(16 185 129 / 0.08), transparent 70%);
   background-repeat: no-repeat;
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
 ::selection {
-  background: rgb(139 92 246 / 0.45);
+  background: rgb(2 132 199 / 0.35);
 }
 
 @utility tarjeta {
-  @apply rounded-2xl border border-borde bg-superficie/80 shadow-lg shadow-black/20 backdrop-blur-sm;
+  @apply rounded-2xl border border-borde bg-superficie shadow-lg shadow-black/25;
 }
 
 @utility tarjeta-viva {
@@ -61,11 +140,11 @@ body {
 }
 
 @utility titulo-pagina {
-  @apply text-3xl font-bold tracking-tight;
+  @apply text-3xl font-bold tracking-tight text-titulo;
 }
 
 @utility texto-gradiente {
-  @apply bg-gradient-to-r from-marca via-fuchsia-400 to-marca-2 bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-sky-400 via-sky-500 to-menta bg-clip-text text-transparent;
 }
 
 @utility btn {
@@ -73,24 +152,24 @@ body {
 }
 
 @utility btn-primario {
-  @apply btn bg-gradient-to-r from-marca to-indigo-500 text-white shadow-lg shadow-marca/25 hover:brightness-110 active:scale-[0.98];
+  @apply btn bg-menta text-azul shadow-lg shadow-menta/20 hover:bg-emerald-400 active:scale-[0.98];
 }
 
 @utility btn-secundario {
-  @apply btn border border-borde bg-white/5 text-foreground hover:border-marca/60 hover:bg-white/10;
+  @apply btn border border-borde bg-foreground/5 text-foreground hover:border-marca/60 hover:bg-foreground/10;
 }
 
 /* Botón pequeño para acciones dentro de una tarjeta (Ver, Descargar, Borrar...). */
 @utility accion {
-  @apply inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-sm font-medium text-foreground/85 transition hover:bg-white/10 hover:text-foreground disabled:pointer-events-none disabled:opacity-30;
+  @apply inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-sm font-medium text-foreground/85 transition hover:bg-foreground/10 hover:text-foreground disabled:pointer-events-none disabled:opacity-30;
 }
 
 @utility accion-peligro {
-  @apply accion text-rose-400 hover:bg-rose-500/15 hover:text-rose-300;
+  @apply accion text-peligro hover:bg-peligro/10 hover:text-peligro;
 }
 
 @utility campo {
-  @apply rounded-xl border border-borde bg-black/25 px-3 py-2 text-foreground transition placeholder:text-foreground/35 focus:border-marca focus:outline-none focus:ring-2 focus:ring-marca/30;
+  @apply rounded-xl border border-foreground/20 bg-campo px-3 py-2 text-foreground transition placeholder:text-foreground/45 focus:border-marca focus:outline-none focus:ring-2 focus:ring-marca/30;
 }
 
 @utility chip {
@@ -98,7 +177,7 @@ body {
 }
 
 .desplegable > summary {
-  @apply inline-flex cursor-pointer list-none items-center gap-2 rounded-xl border border-dashed border-marca/50 px-4 py-2 text-sm font-semibold text-violet-300 transition hover:border-marca hover:bg-marca/10;
+  @apply inline-flex cursor-pointer list-none items-center gap-2 rounded-xl border border-dashed border-marca/50 px-4 py-2 text-sm font-semibold text-enlace transition hover:border-marca hover:bg-marca/10;
 }
 
 .desplegable > summary::-webkit-details-marker {

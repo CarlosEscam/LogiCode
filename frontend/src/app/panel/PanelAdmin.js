@@ -30,8 +30,8 @@ export default function PanelAdmin() {
             aria-current={seccion === s.id ? "page" : undefined}
             className={`shrink-0 rounded-xl border px-4 py-2 text-sm font-medium transition ${
               seccion === s.id
-                ? "border-marca bg-marca/15 text-violet-100 shadow-md shadow-marca/20"
-                : "border-borde bg-white/5 text-foreground/75 hover:border-marca/50 hover:text-foreground"
+                ? "border-marca bg-marca/15 text-enlace shadow-md shadow-marca/20"
+                : "border-borde bg-foreground/5 text-foreground/75 hover:border-marca/50 hover:text-foreground"
             }`}
           >
             {s.nombre}

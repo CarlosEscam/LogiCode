@@ -27,7 +27,7 @@ export default function Panel() {
   if (usuario === null) {
     return (
       <p className="tarjeta p-6">
-        <Link href="/ingresar" className="font-semibold text-violet-300 underline">Ingrese</Link> para ver su panel.
+        <Link href="/ingresar" className="font-semibold text-enlace underline">Ingrese</Link> para ver su panel.
       </p>
     );
   }
@@ -42,11 +42,11 @@ export default function Panel() {
         <div className="relative flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Hola, {usuario.fullName}</h1>
           <p className="flex flex-wrap items-center gap-2 text-sm text-foreground/70">
-            <span className="rounded-full border border-marca/40 bg-marca/15 px-2.5 py-0.5 text-xs font-semibold text-violet-200">
+            <span className="rounded-full border border-marca/40 bg-marca/15 px-2.5 py-0.5 text-xs font-semibold text-enlace">
               {NOMBRE_ROL[usuario.role]}
             </span>
             cédula {usuario.cedula}
-            <Link href="/perfil" className="text-violet-300 hover:text-violet-200 hover:underline">· Mi perfil</Link>
+            <Link href="/perfil" className="text-enlace hover:text-enlace hover:underline">· Mi perfil</Link>
           </p>
         </div>
       </div>

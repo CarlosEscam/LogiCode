@@ -52,7 +52,7 @@ export default function PanelDocente() {
                 key={c.id}
                 type="button"
                 onClick={() => setElegido(c.id)}
-                className={`rounded-xl border px-4 py-2 text-sm transition ${c.id === elegido ? "border-marca bg-marca/15 font-semibold text-violet-100 shadow-md shadow-marca/20" : "border-borde bg-white/5 text-foreground/75 hover:border-marca/50"}`}
+                className={`rounded-xl border px-4 py-2 text-sm transition ${c.id === elegido ? "border-marca bg-marca/15 font-semibold text-enlace shadow-md shadow-marca/20" : "border-borde bg-foreground/5 text-foreground/75 hover:border-marca/50"}`}
               >
                 {c.name} ({c.period}) · {c._count.roster} cédulas
               </button>
@@ -97,7 +97,7 @@ function AccesosCurso({ cursoId }) {
         Temas, material y actividades →
       </Link>
       {porRevisar > 0 && (
-        <Link href={`/curso/${cursoId}/revision`} className="flex items-center gap-2 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2.5 text-sm font-semibold text-amber-200 transition hover:border-amber-300/70">
+        <Link href={`/curso/${cursoId}/revision`} className="flex items-center gap-2 rounded-xl border border-acento/40 bg-acento/10 px-4 py-2.5 text-sm font-semibold text-acento transition hover:border-acento/70">
           {porRevisar} {porRevisar === 1 ? "entrega" : "entregas"} por revisar →
         </Link>
       )}
@@ -193,7 +193,7 @@ function ListaCedulas({ cursoId, onCambio }) {
           </p>
           <div className="tarjeta overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-borde bg-white/5 text-xs uppercase tracking-wide text-foreground/60">
+              <thead className="border-b border-borde bg-foreground/5 text-xs uppercase tracking-wide text-foreground/70">
                 <tr>
                   <th className="px-4 py-3">Cédula</th>
                   <th className="px-4 py-3">Nombre</th>
@@ -203,11 +203,11 @@ function ListaCedulas({ cursoId, onCambio }) {
               </thead>
               <tbody>
                 {lista.map((r) => (
-                  <tr key={r.id} className="border-b border-borde/60 transition last:border-0 hover:bg-white/5">
+                  <tr key={r.id} className="border-b border-borde/60 transition last:border-0 hover:bg-foreground/5">
                     <td className="px-4 py-2.5 font-mono">{r.cedula}</td>
                     <td className="px-4 py-2.5">{r.fullName ?? "—"}</td>
                     <td className="px-4 py-2.5">
-                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${r.registered ? "bg-emerald-500/15 text-emerald-300" : "bg-white/10 text-foreground/60"}`}>
+                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${r.registered ? "bg-exito/15 text-exito" : "bg-foreground/10 text-foreground/70"}`}>
                         {r.registered ? "Registrada" : "Sin registrar"}
                       </span>
                     </td>

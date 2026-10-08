@@ -67,7 +67,7 @@ export default function Usuarios() {
               type="button"
               onClick={() => setAbierto(abierto === u.id ? null : u.id)}
               aria-expanded={abierto === u.id}
-              className="flex w-full flex-wrap items-center justify-between gap-2 px-4 py-3 text-left transition hover:bg-white/5"
+              className="flex w-full flex-wrap items-center justify-between gap-2 px-4 py-3 text-left transition hover:bg-foreground/5"
             >
               <span className="flex min-w-0 flex-col">
                 <span className="font-medium">{u.fullName}</span>
@@ -143,7 +143,7 @@ function Detalle({ id, onCambio }) {
   const soyYo = yo?.id === user.id;
 
   return (
-    <div className="flex flex-col gap-5 border-t border-borde bg-black/10 p-4">
+    <div className="flex flex-col gap-5 border-t border-borde bg-hundido p-4">
       <form
         className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
         onSubmit={(e) => {
@@ -189,7 +189,7 @@ function Detalle({ id, onCambio }) {
           <button
             type="button"
             disabled={ocupado}
-            className="btn-secundario hover:border-rose-400/60 hover:text-rose-300"
+            className="btn-secundario hover:border-peligro/60 hover:text-peligro"
             onClick={() => window.confirm(`¿Deshabilitar la cuenta de ${user.fullName}? No podrá ingresar hasta que la active de nuevo.`) && guardar({ status: "DISABLED" }, "Cuenta deshabilitada.")}
           >
             Deshabilitar cuenta
@@ -209,9 +209,9 @@ function Detalle({ id, onCambio }) {
           </button>
         </div>
         {temporal && (
-          <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-200">
-            Contraseña temporal: <code className="select-all rounded bg-black/30 px-2 py-0.5 font-mono text-base text-amber-100">{temporal}</code>
-            <p className="mt-1 text-amber-200/80">Entréguela a la persona; no se volverá a mostrar. Con ella ingresa y luego puede cambiarla con “¿Olvidó su contraseña?”.</p>
+          <div className="rounded-xl border border-acento/40 bg-acento/10 p-3 text-sm text-acento">
+            Contraseña temporal: <code className="select-all rounded bg-foreground/10 px-2 py-0.5 font-mono text-base font-semibold text-foreground">{temporal}</code>
+            <p className="mt-1 text-acento/80">Entréguela a la persona; no se volverá a mostrar. Con ella ingresa y luego puede cambiarla con “¿Olvidó su contraseña?”.</p>
           </div>
         )}
       </div>
@@ -223,7 +223,7 @@ function Detalle({ id, onCambio }) {
         <div>
           <p className="font-medium">Cursos que dicta</p>
           {coursesTaught.length === 0 ? <p className="text-foreground/60">Ninguno</p> : coursesTaught.map((c) => (
-            <Link key={c.id} href={`/curso/${c.id}`} className="block text-violet-300 hover:underline">{c.name} ({c.period})</Link>
+            <Link key={c.id} href={`/curso/${c.id}`} className="block text-enlace hover:underline">{c.name} ({c.period})</Link>
           ))}
         </div>
         <div>

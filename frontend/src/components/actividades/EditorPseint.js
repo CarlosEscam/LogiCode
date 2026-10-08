@@ -44,8 +44,8 @@ export default function EditorPseint({ codigo, onCambio, name }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex overflow-hidden rounded-xl border border-borde bg-black/40 focus-within:border-marca focus-within:ring-2 focus-within:ring-marca/30">
-        <pre aria-hidden="true" className="select-none border-r border-borde px-2 py-3 text-right font-mono text-sm leading-6 text-foreground/35">
+      <div className="flex overflow-hidden oscuro rounded-xl border border-borde bg-azul focus-within:border-marca focus-within:ring-2 focus-within:ring-marca/30">
+        <pre aria-hidden="true" className="select-none border-r border-borde px-2 py-3 text-right font-mono text-sm leading-6 text-foreground/50">
           {Array.from({ length: lineas }, (_, i) => i + 1).join("\n")}
         </pre>
         <textarea
@@ -69,9 +69,9 @@ export default function EditorPseint({ codigo, onCambio, name }) {
         </label>
         <div className="flex flex-col gap-1.5 text-sm font-medium text-foreground/90">
           Salida
-          <pre className={`min-h-[6.5rem] overflow-auto whitespace-pre-wrap rounded-xl border p-3 font-mono font-normal ${resultado?.error ? "border-rose-500/40 bg-rose-500/5" : "border-borde bg-black/25"}`}>
+          <pre className={`min-h-[6.5rem] overflow-auto whitespace-pre-wrap rounded-xl border p-3 font-mono font-normal ${resultado?.error ? "border-peligro/40 bg-peligro/5" : "oscuro border-borde bg-azul"}`}>
             {resultado ? resultado.salida || (resultado.error ? "" : "(el algoritmo no escribió nada)") : "Pulse Ejecutar para probar el algoritmo."}
-            {resultado?.error && <span className="block text-rose-300">{resultado.error.mensaje}</span>}
+            {resultado?.error && <span className="block text-peligro">{resultado.error.mensaje}</span>}
           </pre>
         </div>
       </div>

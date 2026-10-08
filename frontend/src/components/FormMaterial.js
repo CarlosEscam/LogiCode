@@ -60,7 +60,7 @@ export default function FormMaterial({ courseId, topicId, herramienta = "GENERAL
           ["LINK", "Enlace"],
           ["VIDEO", "Video de YouTube"],
         ].map(([valor, nombre]) => (
-          <label key={valor} className="flex cursor-pointer items-center gap-2 accent-violet-500">
+          <label key={valor} className="flex cursor-pointer items-center gap-2 accent-marca">
             <input type="radio" name="kind" value={valor} checked={tipo === valor} onChange={() => setTipo(valor)} />
             {nombre}
           </label>
@@ -71,7 +71,7 @@ export default function FormMaterial({ courseId, topicId, herramienta = "GENERAL
       {tipo === "FILE" ? (
         <label className="flex flex-col gap-1.5 text-sm font-medium text-foreground/90">
           Archivo: PDF, Office, imagen, video (.mp4 o .webm), .psc, .dfd, .sb3, .ino o .zip. Máximo 20 MB; los videos, hasta 1 GB.
-          <input type="file" name="file" required className="campo text-sm font-normal file:mr-3 file:rounded-lg file:border-0 file:bg-marca/20 file:px-3 file:py-1 file:font-semibold file:text-violet-200" />
+          <input type="file" name="file" required className="campo text-sm font-normal file:mr-3 file:rounded-lg file:border-0 file:bg-marca/15 file:px-3 file:py-1 file:font-semibold file:text-enlace" />
         </label>
       ) : (
         <Campo etiqueta="Enlace" name="url" type="url" placeholder="https://" required />
@@ -85,7 +85,7 @@ export default function FormMaterial({ courseId, topicId, herramienta = "GENERAL
         </select>
       </label>
       {courseId && (
-        <label className="flex cursor-pointer items-center gap-2 text-sm accent-violet-500">
+        <label className="flex cursor-pointer items-center gap-2 text-sm accent-marca">
           <input type="checkbox" name="publico" /> Público: también aparece en la biblioteca para visitantes
         </label>
       )}
@@ -93,7 +93,7 @@ export default function FormMaterial({ courseId, topicId, herramienta = "GENERAL
       <div className="flex items-center gap-3">
         <Boton type="submit" cargando={cargando}>Agregar material</Boton>
         {avance !== null && (
-          <span className="animate-pulse text-sm font-medium text-cyan-300" role="status">
+          <span className="animate-pulse text-sm font-medium text-enlace" role="status">
             {avance < 100 ? `Subiendo... ${avance}%` : "Guardando..."}
           </span>
         )}

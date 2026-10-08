@@ -35,7 +35,7 @@ export default function PanelEstudiante() {
   return (
     <div className="flex flex-col gap-10">
       <div className="grid gap-4 sm:grid-cols-3">
-        <Cifra titulo="Por entregar" valor={pending.length} detalle={pending.length ? plazo(pending[0].closesAt).texto : "Está al día"} color={pending.length ? "text-amber-300" : "text-emerald-300"} />
+        <Cifra titulo="Por entregar" valor={pending.length} detalle={pending.length ? plazo(pending[0].closesAt).texto : "Está al día"} color={pending.length ? "text-acento" : "text-exito"} />
         <Cifra
           titulo="Próxima clase"
           valor={proxima ? proxima.nextClass.title : "Sin definir"}
@@ -55,7 +55,7 @@ export default function PanelEstudiante() {
       <section className="flex flex-col gap-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-xl font-bold tracking-tight">Por entregar</h2>
-          <Link href="/mis-notas" className="text-sm text-violet-300 hover:text-violet-200 hover:underline">Ver todo lo entregado →</Link>
+          <Link href="/mis-notas" className="text-sm text-enlace hover:text-enlace hover:underline">Ver todo lo entregado →</Link>
         </div>
         {pending.length === 0 ? (
           <p className="tarjeta flex items-center gap-3 p-5 text-foreground/75">
@@ -71,16 +71,16 @@ export default function PanelEstudiante() {
         )}
         {upcoming.length > 0 && (
           <div className="flex flex-col gap-2 pt-2">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground/50">Próximamente</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground/70">Próximamente</h3>
             <ul className="flex flex-col gap-2">
               {upcoming.map((q) => (
                 <li key={q.id}>
-                  <Link href={`/curso/${q.course.id}/quizzes/${q.id}`} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-borde bg-white/[0.03] px-4 py-2.5 text-sm transition hover:border-sky-400/50">
+                  <Link href={`/curso/${q.course.id}/quizzes/${q.id}`} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-borde bg-foreground/[0.03] px-4 py-2.5 text-sm transition hover:border-marca/50">
                     <span>
                       <span className="font-medium">{q.title}</span>
-                      <span className="text-foreground/55"> · {q.isPractice ? "Quiz de repaso" : "Quiz"} · {q.course.name}</span>
+                      <span className="text-foreground/60"> · {q.isPractice ? "Quiz de repaso" : "Quiz"} · {q.course.name}</span>
                     </span>
-                    <span className="text-sky-300">Abre {fechaCorta(q.opensAt)}</span>
+                    <span className="text-enlace">Abre {fechaCorta(q.opensAt)}</span>
                   </Link>
                 </li>
               ))}
@@ -107,14 +107,14 @@ export default function PanelEstudiante() {
         <section className="flex flex-col gap-3">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="text-xl font-bold tracking-tight">Últimas notas</h2>
-            <Link href="/mis-notas" className="text-sm text-violet-300 hover:text-violet-200 hover:underline">Ver mis notas →</Link>
+            <Link href="/mis-notas" className="text-sm text-enlace hover:text-enlace hover:underline">Ver mis notas →</Link>
           </div>
           <ul className="tarjeta divide-y divide-borde">
             {recentGrades.map((g) => (
               <li key={`${g.kind}-${g.id}`} className="flex items-center justify-between gap-3 px-5 py-3">
                 <span className="min-w-0">
                   <span className="block truncate font-medium">{g.title}</span>
-                  <span className="text-xs text-foreground/55">{g.kind === "QUIZ" ? "Quiz" : "Actividad"} · {g.course.name}</span>
+                  <span className="text-xs text-foreground/60">{g.kind === "QUIZ" ? "Quiz" : "Actividad"} · {g.course.name}</span>
                 </span>
                 <span className={`text-xl font-bold ${colorNota(g.nota)}`}>{nota(g.nota)}</span>
               </li>
@@ -152,7 +152,7 @@ export default function PanelEstudiante() {
         </ul>
         {practice.length > 0 && (
           <div className="flex flex-col gap-2 pt-2">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground/50">Quizzes de repaso abiertos</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground/70">Quizzes de repaso abiertos</h3>
             <ul className="flex flex-wrap gap-2">
               {practice.map((q) => (
                 <li key={q.id}>
@@ -173,7 +173,7 @@ export default function PanelEstudiante() {
 function Cifra({ titulo, valor, detalle, color = "", href, pequeno = false }) {
   const contenido = (
     <>
-      <span className="text-xs font-semibold uppercase tracking-wider text-foreground/50">{titulo}</span>
+      <span className="text-xs font-semibold uppercase tracking-wider text-foreground/70">{titulo}</span>
       <span className={`${pequeno ? "text-lg leading-snug" : "text-3xl"} font-bold ${color}`}>{valor}</span>
       <span className="text-sm text-foreground/60">{detalle}</span>
     </>
@@ -206,8 +206,8 @@ function Pendiente({ p }) {
         </span>
         <span className="flex w-full items-center justify-between gap-4 sm:w-auto">
           <span className="flex flex-col gap-0.5 sm:items-end sm:text-right">
-            <span className={`text-sm font-semibold ${urgente ? "text-rose-300" : "text-amber-300"}`}>{texto}</span>
-            <span className="text-xs text-foreground/50">{fechaCorta(p.closesAt)}</span>
+            <span className={`text-sm font-semibold ${urgente ? "text-peligro" : "text-acento"}`}>{texto}</span>
+            <span className="text-xs text-foreground/60">{fechaCorta(p.closesAt)}</span>
           </span>
           <span className="btn-primario py-1.5">{p.kind === "QUIZ" ? (p.attemptId ? "Continuar" : "Presentar") : "Entregar"}</span>
         </span>
@@ -222,26 +222,26 @@ function Curso({ curso }) {
     <div className="tarjeta flex h-full flex-col gap-4 p-5">
       <Link href={`/curso/${curso.id}`} className="group flex flex-col gap-1">
         <span className="text-lg font-semibold">
-          {curso.name} <span className="inline-block text-marca-2 transition group-hover:translate-x-1">→</span>
+          {curso.name} <span className="inline-block text-enlace transition group-hover:translate-x-1">→</span>
         </span>
         <span className="text-sm text-foreground/65">{curso.period} · Docente: {curso.teacher.fullName}</span>
       </Link>
       {curso.nextClass && (
-        <Link href={`/curso/${curso.id}#tema-${curso.nextClass.id}`} className="flex items-center gap-2 rounded-xl border border-amber-400/40 bg-amber-500/10 px-3 py-2 text-sm transition hover:border-amber-300/70">
+        <Link href={`/curso/${curso.id}#tema-${curso.nextClass.id}`} className="flex items-center gap-2 rounded-xl border border-acento/40 bg-acento/10 px-3 py-2 text-sm transition hover:border-acento/70">
           <span aria-hidden="true">⭐</span>
-          <span><span className="font-semibold text-amber-300">Próxima clase:</span> {curso.nextClass.title}</span>
+          <span><span className="font-semibold text-acento">Próxima clase:</span> {curso.nextClass.title}</span>
         </Link>
       )}
       {temas.length > 0 && (
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-foreground/50">Mi avance por tema</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-foreground/70">Mi avance por tema</span>
           <ul className="flex flex-col gap-2">
             {temas.map((t) => (
               <li key={t.id} className={`tono-${t.tool} flex items-center gap-3 text-sm`}>
                 <Icono herramienta={t.tool} className="h-4 w-4 shrink-0 text-tono" />
                 <span className="w-32 shrink-0 truncate sm:w-40" title={t.title}>{t.title}</span>
-                <span className="h-2 flex-1 overflow-hidden rounded-full bg-white/10" role="progressbar" aria-label={`Avance en ${t.title}`} aria-valuemin={0} aria-valuemax={t.total} aria-valuenow={t.hechas}>
-                  <span className="block h-full rounded-full bg-tono transition-all" style={{ width: `${(t.hechas / t.total) * 100}%` }} />
+                <span className="h-2 flex-1 overflow-hidden rounded-full bg-foreground/10" role="progressbar" aria-label={`Avance en ${t.title}`} aria-valuemin={0} aria-valuemax={t.total} aria-valuenow={t.hechas}>
+                  <span className="block h-full rounded-full bg-tono-vivo transition-all" style={{ width: `${(t.hechas / t.total) * 100}%` }} />
                 </span>
                 <span className="w-10 text-right text-xs text-foreground/60">{t.hechas}/{t.total}</span>
               </li>
@@ -252,7 +252,7 @@ function Curso({ curso }) {
       <div className="mt-auto flex flex-wrap gap-2 border-t border-borde pt-3 text-sm">
         <Link href={`/curso/${curso.id}`} className="accion">📚 Temas y material</Link>
         <Link href={`/curso/${curso.id}/quizzes`} className="accion">🏆 Quizzes</Link>
-        {curso.pendientes > 0 && <span className="ml-auto self-center text-xs font-semibold text-amber-300">{curso.pendientes} por entregar</span>}
+        {curso.pendientes > 0 && <span className="ml-auto self-center text-xs font-semibold text-acento">{curso.pendientes} por entregar</span>}
       </div>
     </div>
   );

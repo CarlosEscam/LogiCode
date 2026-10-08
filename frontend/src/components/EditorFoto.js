@@ -137,7 +137,7 @@ export default function EditorFoto({ usuario }) {
           role="img"
           aria-label="Vista previa de la foto. Use las flechas del teclado para moverla."
           tabIndex={0}
-          className="relative cursor-grab touch-none select-none overflow-hidden rounded-3xl border border-borde bg-black/40 outline-none focus-visible:ring-2 focus-visible:ring-marca active:cursor-grabbing"
+          className="relative cursor-grab touch-none select-none overflow-hidden rounded-3xl border border-borde bg-azul outline-none focus-visible:ring-2 focus-visible:ring-marca active:cursor-grabbing"
           style={{ width: VISOR, height: VISOR }}
           onPointerDown={(e) => {
             e.currentTarget.setPointerCapture(e.pointerId);
@@ -166,7 +166,7 @@ export default function EditorFoto({ usuario }) {
             className="pointer-events-none absolute max-w-none"
             style={{ left: encuadre.x, top: encuadre.y, width: imagen.img.naturalWidth * escala, height: imagen.img.naturalHeight * escala }}
           />
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-full shadow-[0_0_0_999px_rgb(11_15_30/0.55)]" />
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-full shadow-[0_0_0_999px_rgb(15_23_42/0.6)]" />
         </div>
         <label className="flex w-full max-w-60 items-center gap-3 text-sm text-foreground/70">
           <span aria-hidden="true">−</span>
@@ -178,7 +178,7 @@ export default function EditorFoto({ usuario }) {
             value={encuadre.zoom}
             onChange={(e) => acercar(Number(e.target.value))}
             aria-label="Acercar la foto"
-            className="flex-1 accent-violet-500"
+            className="flex-1 accent-marca"
           />
           <span aria-hidden="true">+</span>
         </label>

@@ -124,7 +124,7 @@ export default function Memorama() {
           </p>
           <ul className="tono-DFD grid grid-cols-2 gap-3 sm:grid-cols-4">
             {SIMBOLOS.map((s) => (
-              <li key={s.clave} className="flex flex-col items-center gap-1 rounded-xl border border-borde bg-white/[0.03] p-3 text-center">
+              <li key={s.clave} className="flex flex-col items-center gap-1 rounded-xl border border-borde bg-foreground/[0.03] p-3 text-center">
                 <Simbolo s={s} className="h-12 w-16" />
                 <span className="text-sm font-semibold">{s.nombre}</span>
                 <span className="text-xs text-foreground/60">{s.ayuda}</span>
@@ -170,7 +170,7 @@ export default function Memorama() {
                       ?
                     </span>
                     <span
-                      className={`absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-xl border p-1 text-center ${lista ? "border-emerald-400/60 bg-emerald-500/15" : "border-tono/60 bg-superficie-2"}`}
+                      className={`absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-xl border p-1 text-center ${lista ? "border-exito/60 bg-exito/15" : "border-tono/60 bg-superficie-2"}`}
                       style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
                     >
                       {carta.tipo === "simbolo" ? (

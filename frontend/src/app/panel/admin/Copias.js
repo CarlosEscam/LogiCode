@@ -45,8 +45,8 @@ export default function Copias() {
       <h2 className="text-xl font-bold tracking-tight">Copias de seguridad</h2>
       <p className="text-sm text-foreground/70">
         LogiCode guarda sola una copia de la base de datos cada día mientras está encendida, y conserva las 14 más recientes en la carpeta
-        <code className="mx-1 rounded bg-black/30 px-1.5">backend/copias</code>. Descargue una de vez en cuando y guárdela fuera del computador.
-        Los archivos subidos (material y videos) están en <code className="mx-1 rounded bg-black/30 px-1.5">backend/uploads</code> y se copian aparte.
+        <code className="mx-1 rounded bg-foreground/10 px-1.5">backend/copias</code>. Descargue una de vez en cuando y guárdela fuera del computador.
+        Los archivos subidos (material y videos) están en <code className="mx-1 rounded bg-foreground/10 px-1.5">backend/uploads</code> y se copian aparte.
       </p>
       <div>
         <button type="button" className="btn-primario" disabled={haciendo} onClick={hacerAhora}>
@@ -64,7 +64,7 @@ export default function Copias() {
                 <span className="font-medium">{fechaHora(c.createdAt)}</span>
                 <span className="text-foreground/60"> · {tamano(c.size)}</span>
               </span>
-              <button type="button" className="accion text-violet-300" onClick={() => descargar(c.name)}>Descargar</button>
+              <button type="button" className="accion text-enlace" onClick={() => descargar(c.name)}>Descargar</button>
             </li>
           ))}
         </ul>
@@ -72,8 +72,8 @@ export default function Copias() {
       <details className="text-sm text-foreground/70">
         <summary className="cursor-pointer font-medium text-foreground/85">¿Cómo se restaura una copia?</summary>
         <p className="mt-2">
-          Con la API detenida, en la carpeta <code className="rounded bg-black/30 px-1.5">backend</code> ejecute
-          <code className="mx-1 rounded bg-black/30 px-1.5">npm run restaurar-copia -- copias/NOMBRE-DE-LA-COPIA.json.gz</code>
+          Con la API detenida, en la carpeta <code className="rounded bg-foreground/10 px-1.5">backend</code> ejecute
+          <code className="mx-1 rounded bg-foreground/10 px-1.5">npm run restaurar-copia -- copias/NOMBRE-DE-LA-COPIA.json.gz</code>
           y escriba SI. Se borra lo que hay en la base y se carga la copia.
         </p>
       </details>

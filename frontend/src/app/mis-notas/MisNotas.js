@@ -33,7 +33,7 @@ export default function MisNotas() {
     return (
       <p className="tarjeta p-6">
         {usuario ? "Esta página es para estudiantes. Las notas del curso están en la planilla del docente." : (
-          <><Link href="/ingresar" className="font-semibold text-violet-300 underline">Ingrese</Link> para ver sus notas.</>
+          <><Link href="/ingresar" className="font-semibold text-enlace underline">Ingrese</Link> para ver sus notas.</>
         )}
       </p>
     );
@@ -42,7 +42,7 @@ export default function MisNotas() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
-        <Link href="/panel" className="self-start text-sm text-foreground/60 transition hover:text-violet-300">← Mi panel</Link>
+        <Link href="/panel" className="self-start text-sm text-foreground/60 transition hover:text-enlace">← Mi panel</Link>
         <Encabezado titulo="Mis notas">Lo que ha entregado, lo que le falta y lo que le dijo su docente.</Encabezado>
       </div>
       <Aviso>{error}</Aviso>
@@ -60,7 +60,7 @@ export default function MisNotas() {
               type="button"
               aria-pressed={filtro === valor}
               onClick={() => setFiltro(valor)}
-              className={`rounded-full border px-3 py-1 text-sm font-medium transition ${filtro === valor ? "border-marca bg-marca/20 text-violet-200" : "border-borde text-foreground/70 hover:border-marca/50"}`}
+              className={`rounded-full border px-3 py-1 text-sm font-medium transition ${filtro === valor ? "border-marca bg-marca/15 text-enlace" : "border-borde text-foreground/70 hover:border-marca/50"}`}
             >
               {texto}
             </button>
@@ -96,12 +96,12 @@ function Curso({ curso, filtro }) {
           <span className={`text-2xl font-bold ${colorNota(curso.promedio)}`}>{nota(curso.promedio)}</span>
         </div>
       </div>
-      <p className="text-xs text-foreground/50">
+      <p className="text-xs text-foreground/60">
         Es la misma cuenta de la planilla de su docente: suma las notas puestas y, con 0,0, lo que venció sin entregar, con el porcentaje de cada actividad. Los quizzes de repaso no cuentan.
       </p>
 
       <div className="flex flex-col gap-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground/50">Tareas, talleres y evaluaciones</h3>
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground/70">Tareas, talleres y evaluaciones</h3>
         {actividades.length === 0 ? (
           <p className="text-sm text-foreground/60">{curso.actividades.length ? "Nada con este filtro." : "El docente todavía no ha publicado actividades."}</p>
         ) : (
@@ -116,23 +116,23 @@ function Curso({ curso, filtro }) {
       </div>
 
       <div className="flex flex-col gap-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground/50">Quizzes</h3>
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground/70">Quizzes</h3>
         {quizzes.length === 0 ? (
           <p className="text-sm text-foreground/60">{curso.quizzes.length ? "Nada con este filtro." : "Todavía no hay quizzes publicados."}</p>
         ) : (
           <ul className="tarjeta divide-y divide-borde">
             {quizzes.map((q) => (
               <li key={q.id}>
-                <Link href={`/curso/${curso.id}/quizzes/${q.id}`} className="flex flex-wrap items-center gap-3 px-5 py-3 transition hover:bg-white/[0.03]">
+                <Link href={`/curso/${curso.id}/quizzes/${q.id}`} className="flex flex-wrap items-center gap-3 px-5 py-3 transition hover:bg-foreground/[0.03]">
                   <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="font-medium">{q.title}{q.isPractice && <span className="ml-2 text-xs font-normal text-foreground/55">Repaso sin nota</span>}</span>
-                    <span className="text-xs text-foreground/55">
+                    <span className="font-medium">{q.title}{q.isPractice && <span className="ml-2 text-xs font-normal text-foreground/60">Repaso sin nota</span>}</span>
+                    <span className="text-xs text-foreground/60">
                       {q.estado === "PROXIMO" ? `Abre ${fechaCorta(q.opensAt)}` : `Cierra ${fechaCorta(q.closesAt)}`}
                       {q.topic ? ` · ${q.topic.title}` : ""}
                     </span>
                   </span>
                   <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${ESTADO_QUIZ_ESTUDIANTE[q.estado].clase}`}>{ESTADO_QUIZ_ESTUDIANTE[q.estado].nombre}</span>
-                  <span className={`w-12 text-right text-xl font-bold ${q.isPractice ? "text-foreground/50" : colorNota(q.estado === "NO_PRESENTADO" ? 0 : q.nota)}`}>
+                  <span className={`w-12 text-right text-xl font-bold ${q.isPractice ? "text-foreground/60" : colorNota(q.estado === "NO_PRESENTADO" ? 0 : q.nota)}`}>
                     {q.estado === "NO_PRESENTADO" && !q.isPractice ? "0,0" : nota(q.nota)}
                   </span>
                 </Link>
@@ -156,7 +156,7 @@ function Actividad({ a, courseId }) {
             <span className="chip">{NOMBRE_ACTIVIDAD[a.type]}</span>
             <span className="font-semibold">{a.title}</span>
           </span>
-          <span className="flex flex-wrap items-center gap-2 text-xs text-foreground/55">
+          <span className="flex flex-wrap items-center gap-2 text-xs text-foreground/60">
             {a.topic && <EtiquetaHerramienta herramienta={a.topic.tool} />}
             {a.topic?.title}
             <span>{a.estado === "PENDIENTE" ? `Cierra ${fechaCorta(a.cierre)}` : a.entregadaEl ? `Entregada ${fechaCorta(a.entregadaEl)}` : `Cerró ${fechaCorta(a.cierre)}`}</span>
@@ -169,10 +169,10 @@ function Actividad({ a, courseId }) {
       {(a.comentario || a.observaciones) && (
         <div className="flex flex-col gap-2 border-t border-borde pt-3 text-sm">
           {a.comentario && (
-            <p><span className="font-semibold text-violet-300">Comentario del docente:</span> <span className="whitespace-pre-line text-foreground/85">{a.comentario}</span></p>
+            <p><span className="font-semibold text-enlace">Comentario del docente:</span> <span className="whitespace-pre-line text-foreground/85">{a.comentario}</span></p>
           )}
           {a.observaciones && (
-            <p><span className="font-semibold text-sky-300">Revisión de la plataforma:</span> <span className="whitespace-pre-line text-foreground/75">{a.observaciones}</span></p>
+            <p><span className="font-semibold text-enlace">Revisión de la plataforma:</span> <span className="whitespace-pre-line text-foreground/75">{a.observaciones}</span></p>
           )}
         </div>
       )}

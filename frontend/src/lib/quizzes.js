@@ -11,10 +11,10 @@ export const TIPOS_PREGUNTA = [
 export const NOMBRE_TIPO = Object.fromEntries(TIPOS_PREGUNTA.map((t) => [t.valor, t.nombre]));
 
 export const ESTADO_QUIZ = {
-  DRAFT: { nombre: "Borrador", clase: "bg-white/10 text-foreground/70" },
-  UPCOMING: { nombre: "Próximamente", clase: "bg-sky-500/15 text-sky-300" },
-  OPEN: { nombre: "Abierto", clase: "bg-emerald-500/15 text-emerald-300" },
-  CLOSED: { nombre: "Cerrado", clase: "bg-rose-500/15 text-rose-300" },
+  DRAFT: { nombre: "Borrador", clase: "bg-foreground/10 text-foreground/70" },
+  UPCOMING: { nombre: "Próximamente", clase: "bg-marca/15 text-enlace" },
+  OPEN: { nombre: "Abierto", clase: "bg-exito/15 text-exito" },
+  CLOSED: { nombre: "Cerrado", clase: "bg-peligro/15 text-peligro" },
 };
 
 // Nota con coma decimal: 3,5
@@ -24,8 +24,8 @@ export function nota(valor) {
 }
 
 export function colorNota(valor) {
-  if (valor === null || valor === undefined) return "text-foreground/50";
-  return valor >= 3 ? "text-emerald-300" : "text-rose-300";
+  if (valor === null || valor === undefined) return "text-foreground/60";
+  return valor >= 3 ? "text-exito" : "text-peligro";
 }
 
 export function fechaHora(valor) {

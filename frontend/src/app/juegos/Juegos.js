@@ -27,7 +27,7 @@ export default function Juegos() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
-        {conSesion && <Link href="/panel" className="self-start text-sm text-foreground/60 transition hover:text-violet-300">← Mi panel</Link>}
+        {conSesion && <Link href="/panel" className="self-start text-sm text-foreground/60 transition hover:text-enlace">← Mi panel</Link>}
         <Encabezado titulo="Juegos">Repase lo de clase jugando. No cuentan para la nota.</Encabezado>
       </div>
       <ul className="grid gap-5 md:grid-cols-3">
@@ -41,7 +41,7 @@ export default function Juegos() {
                 <span className="relative text-xl font-bold">{j.nombre}</span>
                 <span className="relative text-sm text-foreground/70">{j.descripcion}</span>
                 <span className="relative mt-auto flex items-center justify-between pt-2 text-sm">
-                  <span className="text-xs text-foreground/55">
+                  <span className="text-xs text-foreground/60">
                     {mejor?.score !== undefined
                       ? `Mejor: ${mejor.score} de ${mejor.maxScore} · ${segundosATexto(mejor.seconds)}`
                       : conSesion ? "Aún no ha jugado" : ""}

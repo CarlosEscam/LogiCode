@@ -69,18 +69,18 @@ export default function Banco() {
     }
   }
 
-  if (usuario === null) return <p className="tarjeta p-6"><Link href="/ingresar" className="font-semibold text-violet-300 underline">Ingrese</Link> para ver el banco.</p>;
+  if (usuario === null) return <p className="tarjeta p-6"><Link href="/ingresar" className="font-semibold text-enlace underline">Ingrese</Link> para ver el banco.</p>;
 
   const cambiarFiltro = (campo) => (e) => setFiltro((f) => ({ ...f, [campo]: e.target.value }));
 
   return (
     <div className="flex flex-col gap-8">
       <div className="aparecer flex flex-col gap-2">
-        <Link href={`/curso/${id}/quizzes`} className="self-start text-sm text-foreground/60 transition hover:text-violet-300">← Quizzes</Link>
+        <Link href={`/curso/${id}/quizzes`} className="self-start text-sm text-foreground/60 transition hover:text-enlace">← Quizzes</Link>
         <h1 className="titulo-pagina">Banco de preguntas</h1>
         <p className="text-foreground/70">
           Sus preguntas sirven para todos sus quizzes, en este curso y en los de otros semestres.
-          {curso && <span className="text-foreground/50"> · {curso.name} {curso.period}</span>}
+          {curso && <span className="text-foreground/60"> · {curso.name} {curso.period}</span>}
         </p>
       </div>
       <Aviso>{error}</Aviso>
@@ -109,7 +109,7 @@ export default function Banco() {
             {temas.map((t) => <option key={t.id} value={t.id}>{t.title}</option>)}
           </select>
           <label className="flex items-center gap-2 text-sm text-foreground/70 lg:col-span-5">
-            <input type="checkbox" checked={filtro.archived === "1"} onChange={(e) => setFiltro((f) => ({ ...f, archived: e.target.checked ? "1" : "" }))} className="accent-violet-500" />
+            <input type="checkbox" checked={filtro.archived === "1"} onChange={(e) => setFiltro((f) => ({ ...f, archived: e.target.checked ? "1" : "" }))} className="accent-marca" />
             Ver las archivadas
           </label>
         </div>
@@ -138,25 +138,25 @@ export default function Banco() {
               </li>
             ) : (
               <li key={p.id} className={`tono-${p.tool} tarjeta relative flex flex-col gap-4 overflow-hidden p-5`}>
-                <div aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-tono" />
+                <div aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-tono-vivo" />
                 <Enunciado pregunta={p} />
                 {p.type === "MULTIPLE_CHOICE" && (
                   <ul className="grid gap-1.5 text-sm sm:grid-cols-2">
                     {p.options.map((o, i) => (
-                      <li key={i} className={`rounded-lg px-3 py-1.5 ${i === p.correctAnswer ? "bg-emerald-500/15 text-emerald-200" : "bg-white/5 text-foreground/75"}`}>
+                      <li key={i} className={`rounded-lg px-3 py-1.5 ${i === p.correctAnswer ? "bg-exito/15 text-exito" : "bg-foreground/5 text-foreground/75"}`}>
                         {String.fromCharCode(65 + i)}. {o} {i === p.correctAnswer && "✓"}
                       </li>
                     ))}
                   </ul>
                 )}
                 {p.type !== "MULTIPLE_CHOICE" && (
-                  <p className="whitespace-pre-wrap rounded-lg bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
+                  <p className="whitespace-pre-wrap rounded-lg bg-exito/10 px-3 py-2 text-sm text-exito">
                     <span className="font-semibold">Respuesta: </span>
                     {p.type === "ORDER_STEPS" || p.type === "OUTPUT" ? "\n" : ""}
                     {textoCorrecta(p)}
                   </p>
                 )}
-                <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-foreground/55">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-foreground/60">
                   <span>
                     {p.topic ? `Tema: ${p.topic} · ` : ""}
                     {p.usedInQuizzes ? `En ${p.usedInQuizzes} ${p.usedInQuizzes === 1 ? "quiz" : "quizzes"}` : "Sin usar"}

@@ -59,7 +59,7 @@ export default function Tema() {
   }
 
   const volver = (
-    <Link href={datos ? `/foro?categoria=${datos.thread.category}` : "/foro"} className="self-start text-sm text-foreground/60 transition hover:text-violet-300">
+    <Link href={datos ? `/foro?categoria=${datos.thread.category}` : "/foro"} className="self-start text-sm text-foreground/60 transition hover:text-enlace">
       ← Foro{datos && ` · ${NOMBRE_HERRAMIENTA[datos.thread.category]}`}
     </Link>
   );
@@ -83,8 +83,8 @@ export default function Tema() {
         <Titulo thread={thread} puedeEditar={canEditTitle} onGuardar={(title) => cambiarTema({ title })} />
         <p className="flex flex-wrap items-center gap-x-1 gap-y-1 text-sm text-foreground/65">
           <EtiquetaHerramienta herramienta={thread.category} />
-          {thread.isPinned && <span className="rounded-full bg-amber-400/15 px-2 py-0.5 text-xs font-semibold text-amber-300">📌 Fijado</span>}
-          {thread.isClosed && <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs">Cerrado</span>}
+          {thread.isPinned && <span className="rounded-full bg-acento/15 px-2 py-0.5 text-xs font-semibold text-acento">📌 Fijado</span>}
+          {thread.isClosed && <span className="rounded-full bg-foreground/10 px-2 py-0.5 text-xs">Cerrado</span>}
           Abierto por <NombreAutor autor={thread.author} /> · {fechaForo(thread.createdAt)}
         </p>
       </div>
@@ -93,7 +93,7 @@ export default function Tema() {
         <div className="tarjeta flex flex-wrap items-center gap-2 px-4 py-2.5 text-sm">
           {canModerate && (
             <>
-              <span className="font-semibold text-violet-300">Moderación:</span>
+              <span className="font-semibold text-enlace">Moderación:</span>
               <button type="button" className="accion" onClick={() => cambiarTema({ isPinned: !thread.isPinned })}>
                 {thread.isPinned ? "Desfijar" : "Fijar arriba"}
               </button>
@@ -137,7 +137,7 @@ export default function Tema() {
       ) : (
         usuario === null && (
           <p className="tarjeta p-4 text-sm">
-            <Link href="/ingresar" className="font-semibold text-violet-300 underline">Ingrese</Link> para responder.
+            <Link href="/ingresar" className="font-semibold text-enlace underline">Ingrese</Link> para responder.
           </p>
         )
       )}
@@ -183,7 +183,7 @@ function Mensaje({ post, primero, accion }) {
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
         <span className="inline-flex flex-wrap items-center gap-x-1">
           <span className="font-medium"><NombreAutor autor={post.author} foto /></span>
-          <span className="text-foreground/55"> · {fechaForo(post.createdAt)}{post.editedAt && " · editado"}</span>
+          <span className="text-foreground/60"> · {fechaForo(post.createdAt)}{post.editedAt && " · editado"}</span>
         </span>
         {!editando && (post.canEdit || post.canDelete) && (
           <span className="flex gap-1">

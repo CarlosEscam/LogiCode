@@ -38,7 +38,7 @@ export function CabeceraJuego({ clave, children }) {
   const juego = datosJuego(clave);
   return (
     <div className={`tono-${juego.herramienta} aparecer flex flex-col gap-2`}>
-      <Link href="/juegos" className="self-start text-sm text-foreground/60 transition hover:text-violet-300">← Juegos</Link>
+      <Link href="/juegos" className="self-start text-sm text-foreground/60 transition hover:text-enlace">← Juegos</Link>
       <div className="flex items-center gap-3">
         <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-tono/30 bg-tono/15 text-2xl" aria-hidden="true">{juego.emoji}</span>
         <div>
@@ -61,7 +61,7 @@ export function Marcador({ actual, total, aciertos, segundos, etiqueta = "Aciert
         </span>
       </div>
       {total > 0 && (
-        <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+        <div className="h-1.5 overflow-hidden rounded-full bg-foreground/10">
           <div className="h-full rounded-full bg-gradient-to-r from-marca to-marca-2 transition-all" style={{ width: `${(Math.min(actual, total) / total) * 100}%` }} />
         </div>
       )}
@@ -103,13 +103,13 @@ export function FinDelJuego({ clave, score, maxScore, segundos, onOtraVez, child
         <span className="text-foreground/60"> de {maxScore}</span>
         <span className="block text-sm text-foreground/60">en {segundosATexto(segundos)}</span>
       </p>
-      {esRecord && <p className="rounded-full bg-amber-500/15 px-3 py-1 text-sm font-semibold text-amber-300">¡Nuevo récord personal!</p>}
+      {esRecord && <p className="rounded-full bg-acento/15 px-3 py-1 text-sm font-semibold text-acento">¡Nuevo récord personal!</p>}
       {mejor && !esRecord && mejor.score !== undefined && (
         <p className="text-sm text-foreground/60">Su mejor partida: {mejor.score} de {mejor.maxScore} en {segundosATexto(mejor.seconds)}</p>
       )}
       {usuario === null && (
         <p className="text-sm text-foreground/60">
-          <Link href="/ingresar" className="text-violet-300 underline">Ingrese</Link> para guardar sus puntajes.
+          <Link href="/ingresar" className="text-enlace underline">Ingrese</Link> para guardar sus puntajes.
         </p>
       )}
       {children}
@@ -126,7 +126,7 @@ const CLAVES = /\b(Algoritmo|FinAlgoritmo|Proceso|FinProceso|Definir|Como|Entero
 
 export function CodigoPseint({ codigo }) {
   return (
-    <pre className="overflow-x-auto rounded-xl border border-borde bg-black/40 p-4 font-mono text-sm leading-6" style={{ tabSize: 4 }}>
+    <pre className="overflow-x-auto rounded-xl oscuro border border-borde bg-azul p-4 font-mono text-sm leading-6" style={{ tabSize: 4 }}>
       {codigo.split("\n").map((linea, i) => (
         <span key={i} className="block">
           <span className="mr-4 inline-block w-5 select-none text-right text-foreground/30">{i + 1}</span>
@@ -140,12 +140,12 @@ export function CodigoPseint({ codigo }) {
 function resaltar(linea) {
   // Primero se separan los textos entre comillas para no resaltar palabras dentro de ellos.
   return linea.split(/("[^"]*")/).map((parte, i) => {
-    if (parte.startsWith('"')) return <span key={i} className="text-amber-300">{parte}</span>;
+    if (parte.startsWith('"')) return <span key={i} className="text-acento">{parte}</span>;
     const piezas = [];
     let ultimo = 0;
     for (const m of parte.matchAll(CLAVES)) {
       piezas.push(parte.slice(ultimo, m.index));
-      piezas.push(<span key={`${i}-${m.index}`} className="font-semibold text-sky-300">{m[0]}</span>);
+      piezas.push(<span key={`${i}-${m.index}`} className="font-semibold text-enlace">{m[0]}</span>);
       ultimo = m.index + m[0].length;
     }
     piezas.push(parte.slice(ultimo));

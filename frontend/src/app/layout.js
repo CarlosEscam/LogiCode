@@ -27,7 +27,7 @@ export default function RootLayout({ children }) {
         <Header />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10">{children}</main>
         <footer className="border-t border-borde">
-          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-6 text-sm text-foreground/50">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-6 text-sm text-foreground/60">
             <p>LogiCode · Pensamiento Computacional</p>
             <p>Universidad de Pamplona</p>
           </div>

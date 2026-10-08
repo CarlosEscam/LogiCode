@@ -44,7 +44,7 @@ export default function Actividad() {
   if (usuario === null) {
     return (
       <p className="tarjeta p-6">
-        <Link href="/ingresar" className="font-semibold text-violet-300 underline">Ingrese</Link> para ver la actividad.
+        <Link href="/ingresar" className="font-semibold text-enlace underline">Ingrese</Link> para ver la actividad.
       </p>
     );
   }
@@ -54,7 +54,7 @@ export default function Actividad() {
   return (
     <div className="flex flex-col gap-6">
       <div className="aparecer flex flex-col gap-2">
-        <Link href={`/curso/${id}`} className="self-start text-sm text-foreground/60 transition hover:text-violet-300">← Volver al curso</Link>
+        <Link href={`/curso/${id}`} className="self-start text-sm text-foreground/60 transition hover:text-enlace">← Volver al curso</Link>
         <div className="flex flex-wrap items-center gap-2">
           <span className={`tono-${a.topic?.tool ?? "GENERAL"} chip`}>{NOMBRE_TIPO[a.type]}</span>
           <span className="text-sm text-foreground/60">Entrega: {NOMBRE_ENTREGA[a.submissionType]}</span>
@@ -96,7 +96,7 @@ function VistaEstudiante({ datos, recargar }) {
       <Instrucciones actividad={a} />
       <section className="flex flex-wrap items-center gap-3 text-sm">
         {datos.nota !== null && (
-          <span className="rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-3 py-1.5 font-semibold text-emerald-200">
+          <span className="rounded-xl border border-exito/40 bg-exito/10 px-3 py-1.5 font-semibold text-exito">
             Su nota: {nota(datos.nota)} / {nota(a.maxGrade)}
           </span>
         )}
@@ -123,7 +123,7 @@ function VistaEstudiante({ datos, recargar }) {
                   {s.finalGrade !== null && <strong className="text-lg">{nota(s.finalGrade)}</strong>}
                 </div>
               </div>
-              {s.status === "IN_REVIEW" && <p className="text-sm text-amber-200">El docente revisará esta entrega y pondrá la nota.</p>}
+              {s.status === "IN_REVIEW" && <p className="text-sm text-acento">El docente revisará esta entrega y pondrá la nota.</p>}
               {s.teacherComment && (
                 <p className="rounded-xl border border-marca/30 bg-marca/10 p-3 text-sm"><strong>Comentario del docente:</strong> {s.teacherComment}</p>
               )}
@@ -374,14 +374,14 @@ function Entregas({ datos, recargar }) {
                 type="button"
                 onClick={() => setAbierto(abierto === clave ? null : clave)}
                 disabled={!s.submissions.length}
-                className="flex w-full flex-wrap items-center justify-between gap-2 px-4 py-3 text-left transition hover:bg-white/5 disabled:cursor-default disabled:hover:bg-transparent"
+                className="flex w-full flex-wrap items-center justify-between gap-2 px-4 py-3 text-left transition hover:bg-foreground/5 disabled:cursor-default disabled:hover:bg-transparent"
               >
                 <span>
                   <span className="font-semibold">{s.fullName ?? "(sin nombre)"}</span>
-                  <span className="ml-2 text-sm text-foreground/55">{s.cedula}{!s.userId && " · sin registrarse"}</span>
+                  <span className="ml-2 text-sm text-foreground/60">{s.cedula}{!s.userId && " · sin registrarse"}</span>
                 </span>
                 <span className="flex items-center gap-3 text-sm">
-                  {ultima ? <Estado estado={ultima.status} /> : <span className="text-foreground/55">{new Date(s.closesAt) < new Date() ? "No entregó" : "Sin entrega"}</span>}
+                  {ultima ? <Estado estado={ultima.status} /> : <span className="text-foreground/60">{new Date(s.closesAt) < new Date() ? "No entregó" : "Sin entrega"}</span>}
                   <strong className="w-10 text-right">{nota(s.nota)}</strong>
                 </span>
               </button>

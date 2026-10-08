@@ -15,7 +15,7 @@ export default function NuevaActividad() {
   if (usuario === null) {
     return (
       <p className="tarjeta p-6">
-        <Link href="/ingresar" className="font-semibold text-violet-300 underline">Ingrese</Link> para crear actividades.
+        <Link href="/ingresar" className="font-semibold text-enlace underline">Ingrese</Link> para crear actividades.
       </p>
     );
   }
@@ -23,7 +23,7 @@ export default function NuevaActividad() {
   return (
     <div className="flex flex-col gap-6">
       <div className="aparecer flex flex-col gap-2">
-        <Link href={`/curso/${id}`} className="self-start text-sm text-foreground/60 transition hover:text-violet-300">← Volver al curso</Link>
+        <Link href={`/curso/${id}`} className="self-start text-sm text-foreground/60 transition hover:text-enlace">← Volver al curso</Link>
         <h1 className="titulo-pagina">Nueva actividad</h1>
         <p className="text-sm text-foreground/65">
           Los estudiantes la ven desde la fecha en que abre y pueden entregar hasta que cierra. Después solo entregan quienes tengan prórroga.

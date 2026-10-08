@@ -26,7 +26,7 @@ export default function Avatar({ persona, tamano = "md", className = "" }) {
     return <img src={foto} alt="" className={`${base} bg-superficie-2 object-cover`} />;
   }
   return (
-    <span aria-hidden="true" className={`${base} bg-gradient-to-br from-marca to-marca-2 font-bold text-white shadow-lg shadow-marca/30`}>
+    <span aria-hidden="true" className={`${base} bg-cian-oscuro font-bold text-white shadow-lg shadow-marca/30`}>
       {iniciales(persona?.fullName)}
     </span>
   );

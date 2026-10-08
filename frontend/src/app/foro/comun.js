@@ -17,7 +17,7 @@ export function NombreAutor({ autor, foto = false }) {
       {foto && <Avatar persona={autor} tamano="sm" />}
       {autor.fullName}
       {autor.role !== "STUDENT" && (
-        <span className="ml-1 rounded-full bg-marca/20 px-1.5 py-px text-[0.7rem] font-semibold text-violet-200">{NOMBRE_ROL[autor.role]}</span>
+        <span className="ml-1 rounded-full bg-marca/15 px-1.5 py-px text-[0.7rem] font-semibold text-enlace">{NOMBRE_ROL[autor.role]}</span>
       )}
     </span>
   );

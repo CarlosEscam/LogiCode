@@ -30,11 +30,11 @@ export function paraInputFecha(iso) {
 }
 
 const ESTADOS = {
-  PENDIENTE: ["Pendiente", "border-sky-400/40 bg-sky-400/10 text-sky-300"],
-  VENCIDA: ["No entregó", "border-rose-400/40 bg-rose-400/10 text-rose-300"],
-  SUBMITTED: ["Calificando...", "border-violet-400/40 bg-violet-400/10 text-violet-200"],
-  IN_REVIEW: ["En revisión", "border-amber-400/40 bg-amber-400/10 text-amber-300"],
-  GRADED: ["Calificada", "border-emerald-400/40 bg-emerald-400/10 text-emerald-300"],
+  PENDIENTE: ["Pendiente", "border-marca/40 bg-marca/10 text-enlace"],
+  VENCIDA: ["No entregó", "border-peligro/40 bg-peligro/10 text-peligro"],
+  SUBMITTED: ["Calificando...", "border-marca/40 bg-marca/10 text-enlace"],
+  IN_REVIEW: ["En revisión", "border-acento/40 bg-acento/10 text-acento"],
+  GRADED: ["Calificada", "border-exito/40 bg-exito/10 text-exito"],
 };
 
 export function Estado({ estado }) {
@@ -51,14 +51,14 @@ export function DetalleCalificacion({ entrega, paraDocente = false }) {
       {d?.tipo === "casos" && d.resultados?.length > 0 && (
         <ol className="flex flex-col gap-2">
           {d.resultados.map((r, i) => (
-            <li key={i} className={`rounded-xl border p-3 ${r.ok ? "border-emerald-500/30 bg-emerald-500/5" : "border-rose-500/30 bg-rose-500/5"}`}>
+            <li key={i} className={`rounded-xl border p-3 ${r.ok ? "border-exito/30 bg-exito/5" : "border-peligro/30 bg-peligro/5"}`}>
               <p className="font-semibold">{r.ok ? "✓" : "✗"} Caso {i + 1}</p>
               <div className="mt-2 grid gap-2 sm:grid-cols-3">
                 <Bloque titulo="Entrada" texto={r.entrada || "(sin datos)"} />
                 <Bloque titulo="Salida esperada" texto={r.esperado} />
                 <Bloque titulo="Salida del algoritmo" texto={r.obtenido || "(no escribió nada)"} />
               </div>
-              {r.error && <p className="mt-2 text-rose-300">{r.error}</p>}
+              {r.error && <p className="mt-2 text-peligro">{r.error}</p>}
             </li>
           ))}
         </ol>
@@ -66,7 +66,7 @@ export function DetalleCalificacion({ entrega, paraDocente = false }) {
       {d?.tipo === "scratch" && (
         <ul className="flex flex-col gap-1">
           {d.revisiones.map((r) => (
-            <li key={r.clave} className={r.ok ? "text-emerald-300" : "text-rose-300"}>
+            <li key={r.clave} className={r.ok ? "text-exito" : "text-peligro"}>
               {r.ok ? "✓" : "✗"} {r.nombre}
             </li>
           ))}
@@ -75,7 +75,7 @@ export function DetalleCalificacion({ entrega, paraDocente = false }) {
       {paraDocente && d?.lectura && (
         <details>
           <summary className="cursor-pointer text-foreground/70">Lo que leyó la IA</summary>
-          <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded-xl bg-black/30 p-3 font-mono text-xs">{d.lectura}</pre>
+          <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded-xl oscuro bg-azul p-3 font-mono text-xs">{d.lectura}</pre>
         </details>
       )}
     </div>
@@ -85,8 +85,8 @@ export function DetalleCalificacion({ entrega, paraDocente = false }) {
 function Bloque({ titulo, texto }) {
   return (
     <div className="flex min-w-0 flex-col gap-1">
-      <span className="text-xs font-semibold uppercase tracking-wider text-foreground/50">{titulo}</span>
-      <pre className="max-h-40 overflow-auto whitespace-pre-wrap rounded-lg bg-black/30 p-2 font-mono text-xs">{texto}</pre>
+      <span className="text-xs font-semibold uppercase tracking-wider text-foreground/70">{titulo}</span>
+      <pre className="max-h-40 overflow-auto whitespace-pre-wrap rounded-lg oscuro bg-azul p-2 font-mono text-xs">{texto}</pre>
     </div>
   );
 }
@@ -97,7 +97,7 @@ export function ContenidoEntrega({ entrega }) {
   return (
     <div className="flex flex-col gap-2">
       {entrega.textAnswer && (
-        <pre className="max-h-80 overflow-auto whitespace-pre-wrap rounded-xl bg-black/30 p-3 font-mono text-sm">{entrega.textAnswer}</pre>
+        <pre className="max-h-80 overflow-auto whitespace-pre-wrap rounded-xl oscuro bg-azul p-3 font-mono text-sm">{entrega.textAnswer}</pre>
       )}
       {entrega.hasFile && <ArchivoEntrega entrega={entrega} esImagen={esImagen} />}
     </div>
@@ -124,7 +124,7 @@ function ArchivoEntrega({ entrega, esImagen }) {
     };
   }, [entrega.id]);
 
-  if (error) return <p className="text-sm text-rose-300">{error}</p>;
+  if (error) return <p className="text-sm text-peligro">{error}</p>;
   if (!url) return <p className="text-sm text-foreground/60">Cargando archivo...</p>;
   return (
     <div className="flex flex-col gap-1">
