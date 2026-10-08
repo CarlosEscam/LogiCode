@@ -28,8 +28,10 @@ async function pedir(url, opciones) {
   }
   const cuerpo = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const detalle = cuerpo.error?.message ?? cuerpo.error ?? `código ${res.status}`;
-    throw new ErrorIA(`La IA rechazó la consulta: ${String(detalle).slice(0, 200)}`);
+    const detalle = String(cuerpo.error?.message ?? cuerpo.error ?? `código ${res.status}`);
+    const error = new ErrorIA(`La IA rechazó la consulta: ${detalle.slice(0, 200)}`);
+    error.detalle = detalle;
+    throw error;
   }
   return cuerpo;
 }
@@ -46,20 +48,47 @@ async function ollama(instrucciones, imagen) {
   return cuerpo.message?.content;
 }
 
+// Google retira modelos viejos (a veces solo para cuentas nuevas) y en el error dice cuál usar.
+// Si pasa, se reintenta una vez con ese modelo, o con el alias del Flash vigente, y se sigue
+// usando el que funcionó hasta que se reinicie la API.
+let geminiReemplazo = null;
+
 async function gemini(instrucciones, imagen) {
   const { geminiClave, geminiModelo } = config.ia;
   if (!geminiClave) throw new ErrorIA('Falta GEMINI_API_KEY en backend/.env.');
   const partes = [{ text: instrucciones }];
   if (imagen) partes.push({ inline_data: { mime_type: imagen.tipo, data: imagen.datos.toString('base64') } });
-  const cuerpo = await pedir(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(geminiModelo)}:generateContent`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': geminiClave },
-    body: JSON.stringify({
-      contents: [{ parts: partes }],
-      generationConfig: { responseMimeType: 'application/json', temperature: 0 },
-    }),
-  });
-  return cuerpo.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('');
+  const consultar = async (modelo) => {
+    const cuerpo = await pedir(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelo)}:generateContent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': geminiClave },
+      body: JSON.stringify({
+        contents: [{ parts: partes }],
+        generationConfig: { responseMimeType: 'application/json', temperature: 0 },
+      }),
+    });
+    return cuerpo.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('');
+  };
+
+  const modelo = geminiReemplazo ?? geminiModelo;
+  try {
+    return await consultar(modelo);
+  } catch (e) {
+    const otro = modeloDeReemplazo(e, modelo);
+    if (!otro) throw e;
+    console.warn(`Gemini: el modelo ${modelo} ya no está disponible; se usa ${otro}. Cambie GEMINI_MODEL en backend/.env.`);
+    const texto = await consultar(otro);
+    geminiReemplazo = otro;
+    return texto;
+  }
+}
+
+function modeloDeReemplazo(error, actual) {
+  const detalle = error.detalle ?? '';
+  if (!/no longer available|is not found|not supported for generateContent/i.test(detalle)) return null;
+  const sugerido = detalle.match(/use models\/([\w.-]+)/i)?.[1];
+  if (sugerido && sugerido !== actual) return sugerido;
+  return actual === 'gemini-flash-latest' ? null : 'gemini-flash-latest';
 }
 
 // Los modelos a veces envuelven el JSON en ```json ... ```.

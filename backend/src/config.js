@@ -30,7 +30,8 @@ export const config = {
     ollamaUrl: process.env.OLLAMA_URL ?? 'http://localhost:11434',
     ollamaModelo: process.env.OLLAMA_MODEL ?? 'qwen2.5vl:7b',
     geminiClave: process.env.GEMINI_API_KEY ?? '',
-    geminiModelo: process.env.GEMINI_MODEL ?? 'gemini-2.5-flash',
+    // gemini-flash-latest es el alias de Google que siempre apunta al Flash vigente.
+    geminiModelo: process.env.GEMINI_MODEL || 'gemini-flash-latest',
     // Con menos confianza que esto, la nota queda "en revisión" para el docente.
     confianzaMinima: Number(process.env.AI_MIN_CONFIDENCE ?? 0.75),
     tiempoMaximoMs: Number(process.env.AI_TIMEOUT_SECONDS ?? 180) * 1000,
