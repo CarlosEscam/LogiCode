@@ -43,7 +43,7 @@ export default function Calificar({ entrega, maximo = 5, onGuardada }) {
   }
 
   return (
-    <form onSubmit={guardar} className="flex flex-col gap-3 rounded-xl border border-borde bg-black/15 p-3">
+    <form onSubmit={guardar} className="flex flex-col gap-3 rounded-xl border border-borde bg-hundido p-3">
       {entrega.autoGrade !== null && entrega.autoGrade !== undefined && (
         <p className="text-sm text-foreground/75">
           Nota propuesta por la plataforma: <strong>{nota(entrega.autoGrade)}</strong>

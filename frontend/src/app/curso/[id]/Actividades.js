@@ -34,7 +34,7 @@ export default function Actividades({ courseId }) {
           <div className="flex flex-wrap gap-2">
             <Link href={`/curso/${courseId}/revision`} className="btn-secundario">
               Por revisar
-              {porRevisar > 0 && <span className="rounded-full bg-amber-400 px-2 text-xs font-bold text-black">{porRevisar}</span>}
+              {porRevisar > 0 && <span className="rounded-full bg-naranja px-2 text-xs font-bold text-azul">{porRevisar}</span>}
             </Link>
             <Link href={`/curso/${courseId}/notas`} className="btn-secundario">Notas</Link>
             <Link href={`/curso/${courseId}/actividades/nueva`} className="btn-primario">+ Nueva actividad</Link>
@@ -52,7 +52,7 @@ export default function Actividades({ courseId }) {
             <Link href={`/curso/${courseId}/actividad/${a.id}`} className={`tono-${a.topic?.tool ?? "GENERAL"} tarjeta-viva flex h-full flex-col gap-2 p-4`}>
               <div className="flex flex-wrap items-center gap-2">
                 <span className="chip">{NOMBRE_TIPO[a.type]}</span>
-                <span className="text-xs text-foreground/55">{NOMBRE_ENTREGA[a.submissionType]}</span>
+                <span className="text-xs text-foreground/60">{NOMBRE_ENTREGA[a.submissionType]}</span>
                 {!canEdit && <Estado estado={a.estado} />}
               </div>
               <p className="font-semibold">{a.title}</p>
@@ -63,7 +63,7 @@ export default function Actividades({ courseId }) {
               {canEdit ? (
                 <p className="text-sm text-foreground/75">
                   {a.entregas} entrega(s)
-                  {a.porRevisar > 0 && <span className="ml-2 font-semibold text-amber-300">{a.porRevisar} por revisar</span>}
+                  {a.porRevisar > 0 && <span className="ml-2 font-semibold text-acento">{a.porRevisar} por revisar</span>}
                 </p>
               ) : (
                 a.nota !== null && <p className="text-sm">Nota: <strong>{nota(a.nota)}</strong></p>

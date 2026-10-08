@@ -21,8 +21,8 @@ export function Aviso({ tipo = "error", children }) {
   if (!children) return null;
   const color =
     tipo === "error"
-      ? "border-rose-500/40 bg-rose-500/10 text-rose-300"
-      : "border-emerald-500/40 bg-emerald-500/10 text-emerald-300";
+      ? "border-peligro/40 bg-peligro/10 text-peligro"
+      : "border-exito/40 bg-exito/10 text-exito";
   return (
     <p role={tipo === "error" ? "alert" : "status"} className={`rounded-xl border px-3 py-2 text-sm ${color}`}>
       {children}

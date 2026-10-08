@@ -20,7 +20,7 @@ export default function Practica() {
       </div>
       {usuario === null ? (
         <p className="tarjeta p-6">
-          <Link href="/ingresar" className="font-semibold text-violet-300 underline">Ingrese</Link> para usar el editor.
+          <Link href="/ingresar" className="font-semibold text-enlace underline">Ingrese</Link> para usar el editor.
         </p>
       ) : (
         <div className="tarjeta p-5">

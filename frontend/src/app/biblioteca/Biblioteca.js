@@ -86,7 +86,7 @@ export default function Biblioteca() {
             className={`${h.valor ? `tono-${h.valor}` : ""} inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 font-medium transition ${
               herramienta === h.valor
                 ? "border-tono bg-tono/20 text-tono shadow-md shadow-tono/20"
-                : "border-borde bg-white/5 text-foreground/75 hover:border-tono/60 hover:text-tono"
+                : "border-borde bg-foreground/5 text-foreground/75 hover:border-tono/60 hover:text-tono"
             }`}
           >
             {h.valor && <Icono herramienta={h.valor} className="h-4 w-4" />}
@@ -110,7 +110,7 @@ export default function Biblioteca() {
             <h2 className={`${tema ? `tono-${tema.tool}` : ""} flex items-center gap-2 text-lg font-semibold`}>
               {tema && <Icono herramienta={tema.tool} className="h-5 w-5 text-tono" />}
               {tema ? tema.title : "Material general"}
-              <span className="text-sm font-normal text-foreground/55">({lista.length})</span>
+              <span className="text-sm font-normal text-foreground/60">({lista.length})</span>
             </h2>
             <ul className="flex flex-col gap-3">
               {lista.map((m) => (

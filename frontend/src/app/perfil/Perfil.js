@@ -14,7 +14,7 @@ export default function Perfil() {
   if (usuario === null) {
     return (
       <p className="tarjeta p-6">
-        <Link href="/ingresar" className="font-semibold text-violet-300 underline">Ingrese</Link> para ver su perfil.
+        <Link href="/ingresar" className="font-semibold text-enlace underline">Ingrese</Link> para ver su perfil.
       </p>
     );
   }
@@ -22,7 +22,7 @@ export default function Perfil() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
       <div className="flex flex-col gap-2">
-        <Link href="/panel" className="self-start text-sm text-foreground/60 transition hover:text-violet-300">← Mi panel</Link>
+        <Link href="/panel" className="self-start text-sm text-foreground/60 transition hover:text-enlace">← Mi panel</Link>
         <Encabezado titulo="Mi perfil">Su foto, su correo y su contraseña.</Encabezado>
       </div>
 
@@ -39,7 +39,7 @@ export default function Perfil() {
           <Dato titulo="Rol">{NOMBRE_ROL[usuario.role]}</Dato>
         </dl>
         {usuario.role === "STUDENT" && (
-          <p className="text-xs text-foreground/50">Si su nombre o su cédula están mal, pídale a su docente que los corrija en la lista del curso.</p>
+          <p className="text-xs text-foreground/60">Si su nombre o su cédula están mal, pídale a su docente que los corrija en la lista del curso.</p>
         )}
         <FormCorreo usuario={usuario} />
       </section>
@@ -55,7 +55,7 @@ export default function Perfil() {
 function Dato({ titulo, children }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <dt className="text-xs font-semibold uppercase tracking-wider text-foreground/45">{titulo}</dt>
+      <dt className="text-xs font-semibold uppercase tracking-wider text-foreground/70">{titulo}</dt>
       <dd className="font-medium">{children}</dd>
     </div>
   );

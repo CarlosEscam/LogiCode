@@ -3,18 +3,18 @@
 export const NOMBRE_ACTIVIDAD = { TASK: "Tarea", WORKSHOP: "Taller", EVALUATION: "Evaluación", QUIZ: "Quiz" };
 
 export const ESTADO_ACTIVIDAD = {
-  PENDIENTE: { nombre: "Por entregar", clase: "bg-amber-500/15 text-amber-300" },
-  EN_REVISION: { nombre: "Entregada, en revisión", clase: "bg-sky-500/15 text-sky-300" },
-  CALIFICADA: { nombre: "Calificada", clase: "bg-emerald-500/15 text-emerald-300" },
-  NO_ENTREGO: { nombre: "No entregada", clase: "bg-rose-500/15 text-rose-300" },
+  PENDIENTE: { nombre: "Por entregar", clase: "bg-acento/15 text-acento" },
+  EN_REVISION: { nombre: "Entregada, en revisión", clase: "bg-marca/15 text-enlace" },
+  CALIFICADA: { nombre: "Calificada", clase: "bg-exito/15 text-exito" },
+  NO_ENTREGO: { nombre: "No entregada", clase: "bg-peligro/15 text-peligro" },
 };
 
 export const ESTADO_QUIZ_ESTUDIANTE = {
-  PROXIMO: { nombre: "Próximamente", clase: "bg-sky-500/15 text-sky-300" },
-  PENDIENTE: { nombre: "Por presentar", clase: "bg-amber-500/15 text-amber-300" },
-  EN_CURSO: { nombre: "En curso", clase: "bg-violet-500/15 text-violet-300" },
-  PRESENTADO: { nombre: "Presentado", clase: "bg-emerald-500/15 text-emerald-300" },
-  NO_PRESENTADO: { nombre: "No presentado", clase: "bg-rose-500/15 text-rose-300" },
+  PROXIMO: { nombre: "Próximamente", clase: "bg-marca/15 text-enlace" },
+  PENDIENTE: { nombre: "Por presentar", clase: "bg-acento/15 text-acento" },
+  EN_CURSO: { nombre: "En curso", clase: "bg-marca/15 text-enlace" },
+  PRESENTADO: { nombre: "Presentado", clase: "bg-exito/15 text-exito" },
+  NO_PRESENTADO: { nombre: "No presentado", clase: "bg-peligro/15 text-peligro" },
 };
 
 // Página de una actividad para entregarla y ver su nota.

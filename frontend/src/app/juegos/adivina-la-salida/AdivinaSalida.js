@@ -35,7 +35,7 @@ export default function AdivinaSalida() {
         <div className="tarjeta flex flex-col items-start gap-4 p-6">
           <p className="text-foreground/80">
             Verá {RONDA} algoritmos cortos. Recórralos paso a paso en su cabeza (o en papel) y elija lo que
-            muestran en pantalla. Cada salto de línea es un <code className="rounded bg-white/10 px-1">Escribir</code> distinto.
+            muestran en pantalla. Cada salto de línea es un <code className="rounded bg-foreground/10 px-1">Escribir</code> distinto.
           </p>
           <button type="button" className="btn-primario px-6 py-2.5" onClick={empezar}>Empezar</button>
         </div>
@@ -73,9 +73,9 @@ export default function AdivinaSalida() {
         <CodigoPseint codigo={actual.codigo} />
         <ul className="grid gap-3 sm:grid-cols-2">
           {actual.opciones.map((op) => {
-            let estilo = "border-borde hover:border-tono/60 hover:bg-white/5";
-            if (respondida && op === actual.salida) estilo = "border-emerald-400/70 bg-emerald-500/15";
-            else if (respondida && op === elegida) estilo = "border-rose-400/70 bg-rose-500/15";
+            let estilo = "border-borde hover:border-tono/60 hover:bg-foreground/5";
+            if (respondida && op === actual.salida) estilo = "border-exito/70 bg-exito/15";
+            else if (respondida && op === elegida) estilo = "border-peligro/70 bg-peligro/15";
             else if (respondida) estilo = "border-borde opacity-60";
             return (
               <li key={op}>
@@ -94,8 +94,8 @@ export default function AdivinaSalida() {
           })}
         </ul>
         {respondida && (
-          <div className="aparecer flex flex-col gap-3 rounded-xl border border-borde bg-white/[0.03] p-4">
-            <p className={`font-semibold ${elegida === actual.salida ? "text-emerald-300" : "text-rose-300"}`}>
+          <div className="aparecer flex flex-col gap-3 rounded-xl border border-borde bg-foreground/[0.03] p-4">
+            <p className={`font-semibold ${elegida === actual.salida ? "text-exito" : "text-peligro"}`}>
               {elegida === actual.salida ? "¡Correcto!" : "No era esa."}
             </p>
             <p className="text-sm text-foreground/80">{actual.explicacion}</p>

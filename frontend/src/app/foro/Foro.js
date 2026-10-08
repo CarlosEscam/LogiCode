@@ -67,7 +67,7 @@ export default function Foro() {
         Preguntas y respuestas sobre PSeInt, DFD, Scratch y Arduino.
         {usuario === null && (
           <>
-            {" "}Cualquiera puede leer; para escribir, <Link href="/ingresar" className="font-semibold text-violet-300 underline">ingrese</Link>.
+            {" "}Cualquiera puede leer; para escribir, <Link href="/ingresar" className="font-semibold text-enlace underline">ingrese</Link>.
           </>
         )}
       </Encabezado>
@@ -121,7 +121,7 @@ export default function Foro() {
         <p className="text-sm text-foreground/75">
           {categoria && <>Categoría: {NOMBRE_HERRAMIENTA[categoria]}. </>}
           {q && <>Búsqueda: “{q}”. </>}
-          <button type="button" className="font-semibold text-violet-300 underline" onClick={() => router.push("/foro")}>Ver todo</button>
+          <button type="button" className="font-semibold text-enlace underline" onClick={() => router.push("/foro")}>Ver todo</button>
         </p>
       )}
 
@@ -134,11 +134,11 @@ export default function Foro() {
       <ul className="tarjeta flex flex-col divide-y divide-borde overflow-hidden">
         {lista?.threads.map((t) => (
           <li key={t.id}>
-            <Link href={`/foro/tema/${t.id}`} className="group flex flex-wrap items-center justify-between gap-2 px-5 py-4 transition hover:bg-white/5">
+            <Link href={`/foro/tema/${t.id}`} className="group flex flex-wrap items-center justify-between gap-2 px-5 py-4 transition hover:bg-foreground/5">
               <span className="flex flex-col gap-1">
-                <span className="font-semibold transition group-hover:text-violet-200">
-                  {t.isPinned && <span className="mr-2 rounded-full bg-amber-400/15 px-2 py-0.5 text-xs font-semibold text-amber-300">📌 Fijado</span>}
-                  {t.isClosed && <span className="mr-2 rounded-full bg-white/10 px-2 py-0.5 text-xs text-foreground/60">Cerrado</span>}
+                <span className="font-semibold transition group-hover:text-enlace">
+                  {t.isPinned && <span className="mr-2 rounded-full bg-acento/15 px-2 py-0.5 text-xs font-semibold text-acento">📌 Fijado</span>}
+                  {t.isClosed && <span className="mr-2 rounded-full bg-foreground/10 px-2 py-0.5 text-xs text-foreground/70">Cerrado</span>}
                   {t.title}
                 </span>
                 <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-foreground/60">

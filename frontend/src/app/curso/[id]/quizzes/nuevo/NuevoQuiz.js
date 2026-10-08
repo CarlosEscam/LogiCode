@@ -25,12 +25,12 @@ export default function NuevoQuiz() {
     };
   }, [id, usuario]);
 
-  if (usuario === null) return <p className="tarjeta p-6"><Link href="/ingresar" className="font-semibold text-violet-300 underline">Ingrese</Link> para crear quizzes.</p>;
+  if (usuario === null) return <p className="tarjeta p-6"><Link href="/ingresar" className="font-semibold text-enlace underline">Ingrese</Link> para crear quizzes.</p>;
 
   return (
     <div className="flex flex-col gap-6">
       <div className="aparecer flex flex-col gap-2">
-        <Link href={`/curso/${id}/quizzes`} className="self-start text-sm text-foreground/60 transition hover:text-violet-300">← Quizzes</Link>
+        <Link href={`/curso/${id}/quizzes`} className="self-start text-sm text-foreground/60 transition hover:text-enlace">← Quizzes</Link>
         <h1 className="titulo-pagina">Nuevo quiz</h1>
       </div>
       <Aviso>{error}</Aviso>

@@ -72,7 +72,7 @@ function VistaPrevia({ material, tipo }) {
     };
   }, [material, tipo]);
 
-  if (error) return <p className="text-sm text-rose-400">{error}</p>;
+  if (error) return <p className="text-sm text-peligro">{error}</p>;
   if (!url && texto === null) return <p className="animate-pulse text-sm text-foreground/60">Cargando...</p>;
 
   if (tipo === "video") {
@@ -87,7 +87,7 @@ function VistaPrevia({ material, tipo }) {
   }
   if (tipo === "texto") {
     return (
-      <pre className="max-h-[60vh] overflow-auto whitespace-pre-wrap rounded-xl border border-borde bg-black/40 p-4 font-mono text-sm">
+      <pre className="max-h-[60vh] overflow-auto whitespace-pre-wrap rounded-xl border oscuro border-borde bg-azul p-4 font-mono text-sm">
         {texto}
       </pre>
     );
@@ -101,7 +101,7 @@ function VistaPrevia({ material, tipo }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img src={url} alt={material.title} className="max-h-[75vh] max-w-full self-start rounded-xl object-contain" />
       )}
-      <a href={url} target="_blank" rel="noopener noreferrer" className="accion self-start text-cyan-300">
+      <a href={url} target="_blank" rel="noopener noreferrer" className="accion self-start text-enlace">
         Abrir en una pestaña nueva
       </a>
     </div>
@@ -128,7 +128,7 @@ export default function Material({ material, onBorrar, onCambiarVisibilidad }) {
           <div className="flex min-w-0 flex-col gap-1">
             <p className="font-semibold leading-snug">{material.title}</p>
             {material.description && <p className="text-sm text-foreground/75">{material.description}</p>}
-            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-foreground/55">
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-foreground/60">
               <EtiquetaHerramienta herramienta={material.tool} />
               {material.kind === "FILE" && <span className="[overflow-wrap:anywhere]">{material.fileName}</span>}
               {material.uploadedBy && <span>· {material.uploadedBy}</span>}
@@ -138,7 +138,7 @@ export default function Material({ material, onBorrar, onCambiarVisibilidad }) {
         </div>
         <div className="flex flex-wrap gap-1">
           {vista && (
-            <button type="button" className="accion text-cyan-300" onClick={() => setViendo((v) => !v)}>
+            <button type="button" className="accion text-enlace" onClick={() => setViendo((v) => !v)}>
               {viendo ? "Ocultar" : "Ver"}
             </button>
           )}
@@ -152,7 +152,7 @@ export default function Material({ material, onBorrar, onCambiarVisibilidad }) {
             </button>
           )}
           {material.kind !== "FILE" && !video && (
-            <a href={material.url} target="_blank" rel="noopener noreferrer" className="accion text-cyan-300">
+            <a href={material.url} target="_blank" rel="noopener noreferrer" className="accion text-enlace">
               Abrir enlace
             </a>
           )}
@@ -181,11 +181,11 @@ export default function Material({ material, onBorrar, onCambiarVisibilidad }) {
         </div>
       )}
       {material.kind === "VIDEO" && !video && (
-        <a href={material.url} target="_blank" rel="noopener noreferrer" className="accion self-start text-cyan-300">
+        <a href={material.url} target="_blank" rel="noopener noreferrer" className="accion self-start text-enlace">
           Ver video
         </a>
       )}
-      {error && <p className="text-sm text-rose-400">{error}</p>}
+      {error && <p className="text-sm text-peligro">{error}</p>}
     </li>
   );
 }

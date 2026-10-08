@@ -31,7 +31,7 @@ export default function Quizzes() {
     };
   }, [id, usuario]);
 
-  if (usuario === null) return <p className="tarjeta p-6"><Link href="/ingresar" className="font-semibold text-violet-300 underline">Ingrese</Link> para ver los quizzes.</p>;
+  if (usuario === null) return <p className="tarjeta p-6"><Link href="/ingresar" className="font-semibold text-enlace underline">Ingrese</Link> para ver los quizzes.</p>;
   if (!datos) return <Aviso>{error}</Aviso>;
 
   const { course, canEdit, quizzes } = datos;
@@ -39,7 +39,7 @@ export default function Quizzes() {
   return (
     <div className="flex flex-col gap-8">
       <div className="aparecer flex flex-col gap-2">
-        <Link href={`/curso/${id}`} className="self-start text-sm text-foreground/60 transition hover:text-violet-300">← {course.name}</Link>
+        <Link href={`/curso/${id}`} className="self-start text-sm text-foreground/60 transition hover:text-enlace">← {course.name}</Link>
         <h1 className="titulo-pagina">Quizzes</h1>
         <p className="text-foreground/70">
           {canEdit
@@ -73,7 +73,7 @@ export default function Quizzes() {
                 {q.questionCount} preguntas · {q.timeLimitMinutes} min{q.isPractice ? " · Repaso sin nota" : ""}
                 {q.topic ? ` · ${q.topic}` : ""}
               </p>
-              <p className="text-xs text-foreground/50">
+              <p className="text-xs text-foreground/60">
                 {q.status === "UPCOMING" ? `Abre ${fechaHora(q.opensAt)}` : `Cierra ${fechaHora(q.closesAt)}`}
               </p>
               <div className="mt-auto flex items-end justify-between gap-3 border-t border-borde pt-3 text-sm">

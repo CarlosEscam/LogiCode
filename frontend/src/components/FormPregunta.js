@@ -120,13 +120,13 @@ export default function FormPregunta({ courseId, temas = [], pregunta, onGuardad
               type="button"
               title={t.ayuda}
               onClick={() => cambiarTipo(t.valor)}
-              className={`rounded-xl border px-3 py-1.5 text-sm transition ${f.type === t.valor ? "border-marca bg-marca/15 font-semibold text-violet-100" : "border-borde bg-white/5 text-foreground/75 hover:border-marca/50"}`}
+              className={`rounded-xl border px-3 py-1.5 text-sm transition ${f.type === t.valor ? "border-marca bg-marca/15 font-semibold text-enlace" : "border-borde bg-foreground/5 text-foreground/75 hover:border-marca/50"}`}
             >
               {t.nombre}
             </button>
           ))}
         </div>
-        <p className="text-xs text-foreground/55">{TIPOS_PREGUNTA.find((t) => t.valor === f.type)?.ayuda}</p>
+        <p className="text-xs text-foreground/60">{TIPOS_PREGUNTA.find((t) => t.valor === f.type)?.ayuda}</p>
       </fieldset>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -170,7 +170,7 @@ export default function FormPregunta({ courseId, temas = [], pregunta, onGuardad
           <legend className="mb-2 text-sm font-medium text-foreground/90">Opciones: marque la correcta</legend>
           {f.options.map((o, i) => (
             <div key={i} className="flex items-center gap-2">
-              <input type="radio" name="correcta" checked={f.correcta === i} onChange={() => cambiar("correcta", i)} className="accent-violet-500" aria-label={`Opción ${i + 1} es la correcta`} />
+              <input type="radio" name="correcta" checked={f.correcta === i} onChange={() => cambiar("correcta", i)} className="accent-marca" aria-label={`Opción ${i + 1} es la correcta`} />
               <input value={o} onChange={(e) => cambiarLista("options", i, e.target.value)} placeholder={`Opción ${i + 1}`} className="campo flex-1" />
               {f.options.length > 2 && <button type="button" onClick={() => quitar("options", i)} className="accion-peligro">Quitar</button>}
             </div>
@@ -184,7 +184,7 @@ export default function FormPregunta({ courseId, temas = [], pregunta, onGuardad
           <legend className="mb-2 text-sm font-medium text-foreground/90">La afirmación es</legend>
           {[[true, "Verdadera"], [false, "Falsa"]].map(([valor, texto]) => (
             <label key={texto} className="flex items-center gap-2">
-              <input type="radio" name="verdadera" checked={f.verdadera === valor} onChange={() => cambiar("verdadera", valor)} className="accent-violet-500" />
+              <input type="radio" name="verdadera" checked={f.verdadera === valor} onChange={() => cambiar("verdadera", valor)} className="accent-marca" />
               {texto}
             </label>
           ))}
@@ -196,7 +196,7 @@ export default function FormPregunta({ courseId, temas = [], pregunta, onGuardad
           <legend className="mb-1 text-sm font-medium text-foreground/90">
             {f.type === "OUTPUT" ? "Salida esperada" : "Respuestas aceptadas"}
           </legend>
-          <p className="text-xs text-foreground/55">
+          <p className="text-xs text-foreground/60">
             No importan mayúsculas, tildes ni espacios de más. Puede agregar otras formas válidas de responder.
           </p>
           {f.aceptadas.map((a, i) => (
@@ -216,10 +216,10 @@ export default function FormPregunta({ courseId, temas = [], pregunta, onGuardad
       {f.type === "ORDER_STEPS" && (
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-1 text-sm font-medium text-foreground/90">Pasos en el orden correcto</legend>
-          <p className="text-xs text-foreground/55">Al estudiante le aparecen revueltos. Cada paso en su lugar suma.</p>
+          <p className="text-xs text-foreground/60">Al estudiante le aparecen revueltos. Cada paso en su lugar suma.</p>
           {f.options.map((o, i) => (
             <div key={i} className="flex items-center gap-2">
-              <span className="w-6 text-right text-sm text-foreground/50">{i + 1}.</span>
+              <span className="w-6 text-right text-sm text-foreground/60">{i + 1}.</span>
               <input value={o} onChange={(e) => cambiarLista("options", i, e.target.value)} placeholder={`Paso ${i + 1}`} className="campo flex-1" />
               <button type="button" onClick={() => mover(i, -1)} disabled={i === 0} className="accion" aria-label="Subir paso">↑</button>
               <button type="button" onClick={() => mover(i, 1)} disabled={i === f.options.length - 1} className="accion" aria-label="Bajar paso">↓</button>

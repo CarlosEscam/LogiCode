@@ -36,7 +36,7 @@ function Enlaces({ ruta }) {
             <Link
               href={e.href}
               aria-current={activo ? "page" : undefined}
-              className={`rounded-lg px-3 py-1.5 font-medium transition ${activo ? "bg-white/10 text-foreground" : "text-foreground/70 hover:bg-white/5 hover:text-foreground"}`}
+              className={`rounded-lg px-3 py-1.5 font-medium transition ${activo ? "bg-foreground/10 text-foreground" : "text-foreground/70 hover:bg-foreground/5 hover:text-foreground"}`}
             >
               {e.texto}
             </Link>

@@ -5,7 +5,7 @@ import Navegacion from "@/components/Navegacion";
 export default function Header() {
   return (
     <header className="sticky top-0 z-20 border-b border-borde bg-background/75 backdrop-blur-md">
-      <div className="h-0.5 bg-gradient-to-r from-marca via-fuchsia-400 to-marca-2" />
+      <div className="h-0.5 bg-gradient-to-r from-marca via-menta to-naranja" />
       <nav className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3">
         <Link href="/" className="group flex items-center gap-2.5 text-lg font-bold tracking-tight">
           <Logo />

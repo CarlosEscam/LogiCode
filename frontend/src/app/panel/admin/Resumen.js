@@ -10,7 +10,7 @@ function Cifra({ titulo, valor, detalle }) {
     <div className="tarjeta flex flex-col gap-1 p-4">
       <p className="text-sm text-foreground/65">{titulo}</p>
       <p className="text-3xl font-bold tracking-tight">{valor ?? "—"}</p>
-      {detalle && <p className="text-xs text-foreground/55">{detalle}</p>}
+      {detalle && <p className="text-xs text-foreground/60">{detalle}</p>}
     </div>
   );
 }
@@ -51,7 +51,7 @@ export default function Resumen({ onIrA }) {
                 <button type="button" onClick={() => decidir(d.id, "approve")} className="btn-primario py-1.5">
                   Aprobar
                 </button>
-                <button type="button" onClick={() => decidir(d.id, "disable")} className="btn-secundario py-1.5 hover:border-rose-400/60 hover:text-rose-300">
+                <button type="button" onClick={() => decidir(d.id, "disable")} className="btn-secundario py-1.5 hover:border-peligro/60 hover:text-peligro">
                   Rechazar
                 </button>
               </div>
@@ -82,7 +82,7 @@ export default function Resumen({ onIrA }) {
         <section className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-xl font-bold tracking-tight">Últimas cuentas creadas</h2>
-            <button type="button" className="accion text-violet-300" onClick={() => onIrA("usuarios")}>
+            <button type="button" className="accion text-enlace" onClick={() => onIrA("usuarios")}>
               Ver todos los usuarios →
             </button>
           </div>

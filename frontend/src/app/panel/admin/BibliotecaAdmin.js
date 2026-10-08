@@ -62,7 +62,7 @@ export default function BibliotecaAdmin() {
     <section className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-xl font-bold tracking-tight">Biblioteca pública</h2>
-        <Link href="/biblioteca" className="accion text-violet-300">Ver como visitante →</Link>
+        <Link href="/biblioteca" className="accion text-enlace">Ver como visitante →</Link>
       </div>
       {materiales && (
         <p className="text-sm text-foreground/65">

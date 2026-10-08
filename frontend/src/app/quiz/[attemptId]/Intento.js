@@ -27,7 +27,7 @@ export default function Intento() {
     };
   }, [attemptId, usuario, version]);
 
-  if (usuario === null) return <p className="tarjeta p-6"><Link href="/ingresar" className="font-semibold text-violet-300 underline">Ingrese</Link> para presentar el quiz.</p>;
+  if (usuario === null) return <p className="tarjeta p-6"><Link href="/ingresar" className="font-semibold text-enlace underline">Ingrese</Link> para presentar el quiz.</p>;
   if (!datos) return <Aviso>{error}</Aviso>;
 
   const volver = `/curso/${datos.quiz.courseId}/quizzes/${datos.quiz.id}`;
@@ -37,7 +37,7 @@ export default function Intento() {
   if (datos.inProgress) {
     return (
       <div className="flex flex-col gap-4">
-        <Link href={volver} className="self-start text-sm text-foreground/60 hover:text-violet-300">← {datos.quiz.title}</Link>
+        <Link href={volver} className="self-start text-sm text-foreground/60 hover:text-enlace">← {datos.quiz.title}</Link>
         <p className="tarjeta p-6 text-foreground/75">{datos.student?.fullName} está respondiendo el quiz. Termina a las {fechaHora(datos.attempt.deadline)}.</p>
       </div>
     );
@@ -142,20 +142,20 @@ function Presentar({ datos, onEnviado }) {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="truncate font-semibold">{quiz.title}</p>
-            <p className="text-xs text-foreground/55">
+            <p className="text-xs text-foreground/60">
               {guardando > 0 ? "Guardando..." : "Respuestas guardadas"} · {questions.length - sinResponder} de {questions.length} respondidas
             </p>
           </div>
           <div
             role="timer"
             aria-live={poco ? "assertive" : "off"}
-            className={`rounded-xl px-4 py-2 font-mono text-2xl font-bold tabular-nums ${poco ? "animate-pulse bg-rose-500/20 text-rose-300" : "bg-white/10"}`}
+            className={`rounded-xl px-4 py-2 font-mono text-2xl font-bold tabular-nums ${poco ? "animate-pulse bg-peligro/20 text-peligro" : "bg-foreground/10"}`}
           >
             {reloj(restante)}
           </div>
         </div>
-        <div className="h-1.5 overflow-hidden rounded-full bg-white/10" aria-hidden="true">
-          <div className={`h-full rounded-full transition-all ${poco ? "bg-rose-500" : "bg-gradient-to-r from-marca to-marca-2"}`} style={{ width: `${Math.max(0, Math.min(100, (restante / total) * 100))}%` }} />
+        <div className="h-1.5 overflow-hidden rounded-full bg-foreground/10" aria-hidden="true">
+          <div className={`h-full rounded-full transition-all ${poco ? "bg-peligro" : "bg-gradient-to-r from-marca to-marca-2"}`} style={{ width: `${Math.max(0, Math.min(100, (restante / total) * 100))}%` }} />
         </div>
       </div>
 
@@ -168,7 +168,7 @@ function Presentar({ datos, onEnviado }) {
             type="button"
             onClick={() => setActual(i)}
             aria-current={i === actual ? "step" : undefined}
-            className={`h-9 w-9 rounded-lg text-sm font-semibold transition ${i === actual ? "bg-marca text-white shadow-md shadow-marca/30" : respondida(q) ? "bg-emerald-500/20 text-emerald-200" : "bg-white/10 text-foreground/70 hover:bg-white/15"}`}
+            className={`h-9 w-9 rounded-lg text-sm font-semibold transition ${i === actual ? "bg-cian-oscuro text-white shadow-md shadow-marca/30" : respondida(q) ? "bg-exito/20 text-exito" : "bg-foreground/10 text-foreground/70 hover:bg-foreground/15"}`}
           >
             {i + 1}
           </button>
@@ -176,7 +176,7 @@ function Presentar({ datos, onEnviado }) {
       </nav>
 
       <div key={pregunta.id} className={`tono-${pregunta.tool} tarjeta aparecer relative flex flex-col gap-5 overflow-hidden p-5 sm:p-6`}>
-        <div aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-tono" />
+        <div aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-tono-vivo" />
         <Enunciado pregunta={pregunta} numero={actual + 1} puntos={pregunta.points} />
         <CampoRespuesta pregunta={pregunta} valor={respuestas[pregunta.id]} onCambio={(v) => responder(pregunta, v)} deshabilitado={enviando} />
       </div>
@@ -197,7 +197,7 @@ function Resultado({ datos, volver }) {
   return (
     <div className="flex flex-col gap-8">
       <div className="aparecer flex flex-col gap-2">
-        <Link href={volver} className="self-start text-sm text-foreground/60 transition hover:text-violet-300">← {quiz.title}</Link>
+        <Link href={volver} className="self-start text-sm text-foreground/60 transition hover:text-enlace">← {quiz.title}</Link>
         <h1 className="titulo-pagina">{student ? `Respuestas de ${student.fullName}` : "Quiz enviado"}</h1>
         <p className="text-sm text-foreground/65">
           Intento {attempt.attemptNumber} · enviado {fechaHora(attempt.submittedAt)}
@@ -208,13 +208,13 @@ function Resultado({ datos, volver }) {
       <div className="tarjeta flex flex-wrap items-center gap-8 p-6">
         {!quiz.isPractice && (
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-foreground/50">Nota</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-foreground/70">Nota</p>
             <p className={`text-5xl font-bold ${colorNota(attempt.grade)}`}>{nota(attempt.grade)}</p>
           </div>
         )}
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-foreground/50">Correctas</p>
-          <p className="text-3xl font-bold">{attempt.correctCount} <span className="text-lg text-foreground/50">de {questionCount}</span></p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-foreground/70">Correctas</p>
+          <p className="text-3xl font-bold">{attempt.correctCount} <span className="text-lg text-foreground/60">de {questionCount}</span></p>
         </div>
       </div>
 

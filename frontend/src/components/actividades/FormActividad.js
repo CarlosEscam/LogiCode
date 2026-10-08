@@ -108,7 +108,7 @@ export default function FormActividad({ courseId, actividad, onGuardada }) {
             ["TEXT", "Texto"],
             ["FILE", "Archivo"],
           ].map(([valor, nombre]) => (
-            <label key={valor} className={`cursor-pointer rounded-xl border px-3 py-1.5 text-sm transition ${tipoEntrega === valor ? "border-marca bg-marca/15 font-semibold" : "border-borde bg-white/5 hover:border-marca/50"}`}>
+            <label key={valor} className={`cursor-pointer rounded-xl border px-3 py-1.5 text-sm transition ${tipoEntrega === valor ? "border-marca bg-marca/15 font-semibold" : "border-borde bg-foreground/5 hover:border-marca/50"}`}>
               <input type="radio" name="submissionType" value={valor} checked={tipoEntrega === valor} onChange={() => setTipoEntrega(valor)} className="sr-only" />
               {nombre}
             </label>
@@ -133,7 +133,7 @@ export default function FormActividad({ courseId, actividad, onGuardada }) {
           placeholder={tipoEntrega === "PHOTO" ? "Qué debe verse en la foto. Ej.: el diagrama lee A y B y muestra el mayor." : ""}
           className="campo font-normal"
         />
-        <span className="font-normal text-foreground/55">El estudiante no la ve.</span>
+        <span className="font-normal text-foreground/60">El estudiante no la ve.</span>
       </label>
       <label className="flex flex-col gap-1.5 text-sm font-medium text-foreground/90">
         Rúbrica (opcional)
@@ -150,7 +150,7 @@ export default function FormActividad({ courseId, actividad, onGuardada }) {
             mayúsculas, tildes ni espacios. Si escribe solo números, se comparan los números de la línea.
           </p>
           {casos.map((c, i) => (
-            <div key={i} className="grid gap-3 rounded-xl border border-borde bg-black/15 p-3 sm:grid-cols-[1fr_1fr_6rem_auto] sm:items-end">
+            <div key={i} className="grid gap-3 rounded-xl border border-borde bg-hundido p-3 sm:grid-cols-[1fr_1fr_6rem_auto] sm:items-end">
               <label className="flex flex-col gap-1 text-xs font-medium text-foreground/80">
                 Entrada del caso {i + 1}
                 <textarea value={c.input} onChange={(e) => cambiarCaso(i, "input", e.target.value)} rows={2} className="campo font-mono font-normal" />

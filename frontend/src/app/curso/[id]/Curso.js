@@ -44,7 +44,7 @@ export default function Curso() {
   if (usuario === null) {
     return (
       <p className="tarjeta p-6">
-        <Link href="/ingresar" className="font-semibold text-violet-300 underline">Ingrese</Link> para ver el curso.
+        <Link href="/ingresar" className="font-semibold text-enlace underline">Ingrese</Link> para ver el curso.
       </p>
     );
   }
@@ -56,7 +56,7 @@ export default function Curso() {
   return (
     <div className="flex flex-col gap-8">
       <div className="aparecer flex flex-col gap-2">
-        <Link href="/panel" className="self-start text-sm text-foreground/60 transition hover:text-violet-300">← Mi panel</Link>
+        <Link href="/panel" className="self-start text-sm text-foreground/60 transition hover:text-enlace">← Mi panel</Link>
         <h1 className="titulo-pagina">{course.name}</h1>
         <p className="text-sm text-foreground/65">Periodo {course.period}</p>
         <div className="mt-2 flex flex-wrap gap-2">
@@ -67,10 +67,10 @@ export default function Curso() {
       <Aviso>{error}</Aviso>
 
       {proxima && (
-        <a href={`#tema-${proxima.id}`} className="flex items-center gap-3 rounded-2xl border border-amber-400/40 bg-gradient-to-r from-amber-500/20 to-amber-500/5 px-5 py-4 transition hover:border-amber-300/70">
+        <a href={`#tema-${proxima.id}`} className="flex items-center gap-3 rounded-2xl border border-acento/40 bg-gradient-to-r from-naranja/20 to-naranja/5 px-5 py-4 transition hover:border-acento/70">
           <span className="text-2xl" aria-hidden="true">⭐</span>
           <span>
-            <span className="text-sm font-semibold text-amber-300">Próxima clase:</span> {proxima.title}
+            <span className="text-sm font-semibold text-acento">Próxima clase:</span> {proxima.title}
           </span>
         </a>
       )}
@@ -84,16 +84,16 @@ export default function Curso() {
           <li
             key={t.id}
             id={`tema-${t.id}`}
-            className={`tono-${t.tool} tarjeta relative flex scroll-mt-24 flex-col gap-4 overflow-hidden p-5 sm:p-6 ${t.isNextClass ? "ring-1 ring-amber-400/50" : ""}`}
+            className={`tono-${t.tool} tarjeta relative flex scroll-mt-24 flex-col gap-4 overflow-hidden p-5 sm:p-6 ${t.isNextClass ? "ring-1 ring-acento/50" : ""}`}
           >
-            <div aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-tono" />
+            <div aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-tono-vivo" />
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="flex items-start gap-3">
                 <CuadroHerramienta herramienta={t.tool} grande />
                 <div className="flex flex-col gap-1">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-foreground/45">Tema {i + 1}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-foreground/70">Tema {i + 1}</p>
                   <h2 className="text-xl font-bold tracking-tight">
-                    {t.title} {t.isNextClass && <span className="ml-2 rounded-full bg-amber-400/15 px-2 py-0.5 align-middle text-xs font-semibold text-amber-300">Próxima clase</span>}
+                    {t.title} {t.isNextClass && <span className="ml-2 rounded-full bg-acento/15 px-2 py-0.5 align-middle text-xs font-semibold text-acento">Próxima clase</span>}
                   </h2>
                   <div><EtiquetaHerramienta herramienta={t.tool} /></div>
                   {t.description && <p className="mt-1 text-foreground/75">{t.description}</p>}

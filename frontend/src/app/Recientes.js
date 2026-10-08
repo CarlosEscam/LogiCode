@@ -28,7 +28,7 @@ export default function Recientes() {
     <section className="grid gap-4 lg:grid-cols-2">
       <Columna titulo="Lo nuevo en la biblioteca" href="/biblioteca" enlace="Ver toda la biblioteca" vacio="Todavía no hay material público." lista={materiales}>
         {(m) => (
-          <Link href="/biblioteca" className={`tono-${m.tool} group flex items-start gap-3 px-5 py-3.5 transition hover:bg-white/5`}>
+          <Link href="/biblioteca" className={`tono-${m.tool} group flex items-start gap-3 px-5 py-3.5 transition hover:bg-foreground/5`}>
             <CuadroHerramienta herramienta={m.tool} />
             <span className="flex min-w-0 flex-col gap-1">
               <span className="font-medium leading-snug transition group-hover:text-tono">{m.title}</span>
@@ -42,9 +42,9 @@ export default function Recientes() {
       </Columna>
       <Columna titulo="Conversaciones en el foro" href="/foro" enlace="Ir al foro" vacio="Todavía no hay temas en el foro." lista={temas}>
         {(t) => (
-          <Link href={`/foro/tema/${t.id}`} className="group flex flex-col gap-1 px-5 py-3.5 transition hover:bg-white/5">
-            <span className="font-medium leading-snug transition group-hover:text-violet-200">
-              {t.isPinned && <span className="mr-2 rounded-full bg-amber-400/15 px-2 py-0.5 text-xs font-semibold text-amber-300">📌 Fijado</span>}
+          <Link href={`/foro/tema/${t.id}`} className="group flex flex-col gap-1 px-5 py-3.5 transition hover:bg-foreground/5">
+            <span className="font-medium leading-snug transition group-hover:text-enlace">
+              {t.isPinned && <span className="mr-2 rounded-full bg-acento/15 px-2 py-0.5 text-xs font-semibold text-acento">📌 Fijado</span>}
               {t.title}
             </span>
             <span className="flex flex-wrap items-center gap-x-2 text-xs text-foreground/60">
@@ -63,12 +63,12 @@ function Columna({ titulo, href, enlace, vacio, lista, children }) {
     <div className="tarjeta flex flex-col overflow-hidden">
       <div className="flex items-center justify-between gap-2 border-b border-borde px-5 py-4">
         <h2 className="text-lg font-semibold">{titulo}</h2>
-        <Link href={href} className="text-sm font-medium text-cyan-300 hover:underline">
+        <Link href={href} className="text-sm font-medium text-enlace hover:underline">
           {enlace} →
         </Link>
       </div>
-      {lista === null && <p className="px-5 py-6 text-sm text-foreground/55">Cargando...</p>}
-      {lista?.length === 0 && <p className="px-5 py-6 text-sm text-foreground/55">{vacio}</p>}
+      {lista === null && <p className="px-5 py-6 text-sm text-foreground/60">Cargando...</p>}
+      {lista?.length === 0 && <p className="px-5 py-6 text-sm text-foreground/60">{vacio}</p>}
       {lista?.length > 0 && (
         <ul className="divide-y divide-borde">
           {lista.map((x) => (

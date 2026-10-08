@@ -28,9 +28,9 @@ export function useDatos(ruta, version = 0) {
 export const NOMBRE_ESTADO = { ACTIVE: "Activa", PENDING: "Pendiente", DISABLED: "Deshabilitada" };
 
 const COLOR_ESTADO = {
-  ACTIVE: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
-  PENDING: "border-amber-500/40 bg-amber-500/10 text-amber-300",
-  DISABLED: "border-rose-500/40 bg-rose-500/10 text-rose-300",
+  ACTIVE: "border-exito/40 bg-exito/10 text-exito",
+  PENDING: "border-acento/40 bg-acento/10 text-acento",
+  DISABLED: "border-peligro/40 bg-peligro/10 text-peligro",
 };
 
 export function Estado({ estado }) {

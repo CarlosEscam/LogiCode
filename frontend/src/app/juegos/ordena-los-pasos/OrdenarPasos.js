@@ -104,8 +104,8 @@ export default function OrdenarPasos() {
         <ol className="flex flex-col gap-2">
           {orden.map((paso, i) => {
             const correcto = paso.texto === problema.pasos[i];
-            let estilo = "border-borde bg-white/[0.03]";
-            if (revisado) estilo = correcto ? "border-emerald-400/60 bg-emerald-500/10" : "border-rose-400/60 bg-rose-500/10";
+            let estilo = "border-borde bg-foreground/[0.03]";
+            if (revisado) estilo = correcto ? "border-exito/60 bg-exito/10" : "border-peligro/60 bg-peligro/10";
             else if (arrastrando === i) estilo = "border-tono bg-tono/10 opacity-60";
             return (
               <li
@@ -137,8 +137,8 @@ export default function OrdenarPasos() {
           })}
         </ol>
         {revisado ? (
-          <div className="aparecer flex flex-col gap-3 rounded-xl border border-borde bg-white/[0.03] p-4">
-            <p className={`font-semibold ${bien === orden.length ? "text-emerald-300" : "text-amber-300"}`}>
+          <div className="aparecer flex flex-col gap-3 rounded-xl border border-borde bg-foreground/[0.03] p-4">
+            <p className={`font-semibold ${bien === orden.length ? "text-exito" : "text-acento"}`}>
               {bien === orden.length ? "¡Todo en orden!" : `${bien} de ${orden.length} pasos en su lugar.`}
             </p>
             {bien < orden.length && (

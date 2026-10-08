@@ -134,21 +134,21 @@ export default function FormQuiz({ courseId, temas = [], quiz, preguntas, bloque
             <Campo etiqueta="Intentos por estudiante" type="number" min={1} max={10} value={f.maxAttempts} onChange={(e) => cambiar("maxAttempts", e.target.value)} required />
           )}
         </div>
-        <p className="text-xs text-foreground/55">
+        <p className="text-xs text-foreground/60">
           Cuando se acaba el tiempo, el quiz se envía solo con lo que el estudiante alcanzó a responder. La nota va de 0,0 a 5,0
           y depende solo de los aciertos. Las respuestas correctas y el ranking se muestran cuando cierra el quiz.
         </p>
         <div className="flex flex-col gap-2 text-sm">
           <label className="flex items-center gap-2">
-            <input type="checkbox" checked={f.isPractice} onChange={(e) => cambiar("isPractice", e.target.checked)} className="accent-violet-500" />
+            <input type="checkbox" checked={f.isPractice} onChange={(e) => cambiar("isPractice", e.target.checked)} className="accent-marca" />
             Quiz de repaso: sin nota, intentos ilimitados y las respuestas se ven al terminar
           </label>
           <label className="flex items-center gap-2">
-            <input type="checkbox" checked={f.shuffleQuestions} onChange={(e) => cambiar("shuffleQuestions", e.target.checked)} className="accent-violet-500" />
+            <input type="checkbox" checked={f.shuffleQuestions} onChange={(e) => cambiar("shuffleQuestions", e.target.checked)} className="accent-marca" />
             Cambiar el orden de las preguntas para cada estudiante
           </label>
           <label className="flex items-center gap-2">
-            <input type="checkbox" checked={f.published} onChange={(e) => cambiar("published", e.target.checked)} className="accent-violet-500" />
+            <input type="checkbox" checked={f.published} onChange={(e) => cambiar("published", e.target.checked)} className="accent-marca" />
             Publicado: los estudiantes del curso lo ven (si no, queda como borrador)
           </label>
         </div>
@@ -166,10 +166,10 @@ export default function FormQuiz({ courseId, temas = [], quiz, preguntas, bloque
         <ol className="flex flex-col gap-2">
           {f.elegidas.map((p, i) => (
             <li key={p.id} className={`tono-${p.tool} tarjeta flex flex-wrap items-center gap-3 px-4 py-3`}>
-              <span className="w-6 text-right text-sm font-semibold text-foreground/50">{i + 1}.</span>
+              <span className="w-6 text-right text-sm font-semibold text-foreground/60">{i + 1}.</span>
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <p className="truncate">{p.statement}</p>
-                <p className="flex items-center gap-2 text-xs text-foreground/55">
+                <p className="flex items-center gap-2 text-xs text-foreground/60">
                   {NOMBRE_TIPO[p.type]} <EtiquetaHerramienta herramienta={p.tool} />
                 </p>
               </div>
@@ -193,7 +193,7 @@ export default function FormQuiz({ courseId, temas = [], quiz, preguntas, bloque
         <section className="flex flex-col gap-3">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="text-xl font-bold tracking-tight">Banco de preguntas</h2>
-            <Link href={`/curso/${courseId}/preguntas`} target="_blank" className="text-sm font-semibold text-violet-300 hover:underline">
+            <Link href={`/curso/${courseId}/preguntas`} target="_blank" className="text-sm font-semibold text-enlace hover:underline">
               Crear preguntas en el banco ↗
             </Link>
           </div>
@@ -210,7 +210,7 @@ export default function FormQuiz({ courseId, temas = [], quiz, preguntas, bloque
           </div>
           {banco?.length === 0 && (
             <p className="tarjeta p-5 text-sm text-foreground/65">
-              No hay preguntas con ese filtro. <Link href={`/curso/${courseId}/preguntas`} className="font-semibold text-violet-300 underline">Vaya al banco</Link> para crearlas.
+              No hay preguntas con ese filtro. <Link href={`/curso/${courseId}/preguntas`} className="font-semibold text-enlace underline">Vaya al banco</Link> para crearlas.
             </p>
           )}
           {banco?.some((p) => !elegidaIds.has(p.id)) && (
@@ -218,17 +218,17 @@ export default function FormQuiz({ courseId, temas = [], quiz, preguntas, bloque
           )}
           <ul className="flex max-h-[28rem] flex-col gap-2 overflow-y-auto pr-1">
             {banco?.map((p) => (
-              <li key={p.id} className={`tono-${p.tool} flex items-center gap-3 rounded-xl border border-borde bg-white/5 px-4 py-2.5`}>
+              <li key={p.id} className={`tono-${p.tool} flex items-center gap-3 rounded-xl border border-borde bg-foreground/5 px-4 py-2.5`}>
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
                   <p className="truncate text-sm">{p.statement}</p>
-                  <p className="flex items-center gap-2 text-xs text-foreground/55">
+                  <p className="flex items-center gap-2 text-xs text-foreground/60">
                     {NOMBRE_TIPO[p.type]} <EtiquetaHerramienta herramienta={p.tool} /> {p.topic && <span>· {p.topic}</span>}
                   </p>
                 </div>
                 {elegidaIds.has(p.id) ? (
-                  <span className="text-xs font-semibold text-emerald-300">Agregada ✓</span>
+                  <span className="text-xs font-semibold text-exito">Agregada ✓</span>
                 ) : (
-                  <button type="button" onClick={() => agregar(p)} className="accion text-violet-300">+ Agregar</button>
+                  <button type="button" onClick={() => agregar(p)} className="accion text-enlace">+ Agregar</button>
                 )}
               </li>
             ))}
