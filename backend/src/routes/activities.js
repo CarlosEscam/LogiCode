@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import fs from 'node:fs';
 import path from 'node:path';
 import { prisma } from '../lib/prisma.js';
 import { HttpError } from '../lib/errors.js';
@@ -10,7 +9,8 @@ import {
 import { encolar } from '../lib/calificador.js';
 import { crearExcel } from '../lib/excel.js';
 import { REVISIONES_SCRATCH } from '../lib/scratch.js';
-import { recibirEntrega, rutaArchivo, borrarArchivo, tipoDeArchivo, IMAGENES } from '../lib/uploads.js';
+import { recibirEntrega, borrarArchivo, enviarArchivo, existeArchivo, IMAGENES } from '../lib/uploads.js';
+import { leer } from '../lib/almacen.js';
 import { ejecutar } from '../lib/pseint/index.js';
 import * as v from '../lib/validate.js';
 import { requireAuth } from '../middleware/auth.js';
@@ -278,7 +278,7 @@ activitiesRouter.post('/activities/:activityId/submissions', requireAuth, recibi
 
     let codigo = textAnswer;
     if (activity.submissionType === 'PSEINT' && req.file) {
-      codigo = (await fs.promises.readFile(req.file.path)).toString('utf8').slice(0, 50000);
+      codigo = (await leer(req.file.filename)).toString('utf8').slice(0, 50000);
     }
     let creada;
     try {
@@ -325,11 +325,8 @@ async function entregaDe(req, nivel) {
 activitiesRouter.get('/submissions/:submissionId/file', requireAuth, async (req, res) => {
   const { entrega } = await entregaDe(req);
   if (!entrega.filePath) throw new HttpError(404, 'Esta entrega no tiene archivo.');
-  const ruta = rutaArchivo(entrega.filePath);
-  if (!fs.existsSync(ruta)) throw new HttpError(404, 'El archivo ya no está en el servidor.');
-  res.download(ruta, entrega.fileName ?? entrega.filePath, {
-    headers: { 'Content-Type': tipoDeArchivo(entrega.fileName ?? entrega.filePath), 'X-Content-Type-Options': 'nosniff' },
-  });
+  if (!existeArchivo(entrega.filePath)) throw new HttpError(404, 'El archivo ya no está en el servidor.');
+  await enviarArchivo(res, entrega.filePath, { nombreDescarga: entrega.fileName ?? entrega.filePath });
 });
 
 // PATCH /api/submissions/:submissionId { finalGrade, teacherComment }: el docente pone o ajusta la nota (RF-13).

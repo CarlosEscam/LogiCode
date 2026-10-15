@@ -17,13 +17,15 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
-    "restaurar-copia": "node scripts/restaurar-copia.js"
+    "restaurar-copia": "node scripts/restaurar-copia.js",
+    "subir-archivos-r2": "node scripts/subir-archivos-r2.js"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
+    "aws4fetch": "^1.0.20",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^18.0.6",

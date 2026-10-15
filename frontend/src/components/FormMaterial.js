@@ -39,7 +39,7 @@ export default function FormMaterial({ courseId, topicId, herramienta = "GENERAL
     try {
       const { material } =
         tipo === "FILE"
-          ? await subirConAvance("/materials", datos, setAvance)
+          ? await subirConAvance("/materials", datos, setAvance, "material")
           : await api("/materials", { method: "POST", body: datos });
       form.reset();
       setTipo("FILE");

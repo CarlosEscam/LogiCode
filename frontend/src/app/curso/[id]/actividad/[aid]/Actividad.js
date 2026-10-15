@@ -162,7 +162,7 @@ function FormEntrega({ actividad, onEntregada, ultima }) {
     try {
       if (conArchivo) {
         if (tipo === "PSEINT") datos.delete("textAnswer");
-        await subirConAvance(`/activities/${actividad.id}/submissions`, datos, setAvance);
+        await subirConAvance(`/activities/${actividad.id}/submissions`, datos, setAvance, "entrega");
       } else {
         await api(`/activities/${actividad.id}/submissions`, { method: "POST", body: { textAnswer: tipo === "PSEINT" ? codigo : datos.get("textAnswer") } });
       }

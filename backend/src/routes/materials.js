@@ -1,10 +1,9 @@
 import { Router } from 'express';
-import fs from 'node:fs';
 import { prisma } from '../lib/prisma.js';
 import { HttpError } from '../lib/errors.js';
 import { courseAccess, requireCourse } from '../lib/access.js';
 import { publicMaterial, TOOLS } from '../lib/material.js';
-import { recibirArchivo, rutaArchivo, borrarArchivo, tipoDeArchivo } from '../lib/uploads.js';
+import { recibirArchivo, borrarArchivo, enviarArchivo, existeArchivo } from '../lib/uploads.js';
 import { firmarArchivo, leerFirmaArchivo } from '../lib/auth.js';
 import * as v from '../lib/validate.js';
 import { requireAuth, optionalAuth } from '../middleware/auth.js';
@@ -151,9 +150,8 @@ async function archivoVisible(req) {
     throw new HttpError(req.user ? 403 : 401, 'Este material es solo para los estudiantes del curso.');
   }
   if (material.kind !== 'FILE' || !material.filePath) throw new HttpError(404, 'Este material no tiene archivo.');
-  const ruta = rutaArchivo(material.filePath);
-  if (!fs.existsSync(ruta)) throw new HttpError(404, 'El archivo ya no está en el servidor.');
-  return { material, ruta };
+  if (!existeArchivo(material.filePath)) throw new HttpError(404, 'El archivo ya no está en el servidor.');
+  return { material };
 }
 
 // GET /api/materials/:id/enlace: enlace firmado al archivo, para reproducir videos y descargar
@@ -184,10 +182,13 @@ async function sesionOFirma(req, res, next) {
 
 // GET /api/materials/:id/file: entrega el archivo si el usuario puede verlo.
 // La web lo usa para descargar y para mostrarlo en la página; admite rangos para adelantar videos.
+// Con R2, el enlace firmado (?firma=) redirige al archivo en R2 y la petición con sesión
+// responde { url } (ver enviarArchivo).
 materialsRouter.get('/:id/file', sesionOFirma, async (req, res) => {
-  const { material, ruta } = await archivoVisible(req);
-  res.download(ruta, material.fileName ?? material.filePath, {
-    headers: { 'Content-Type': tipoDeArchivo(material.fileName ?? material.filePath), 'X-Content-Type-Options': 'nosniff' },
+  const { material } = await archivoVisible(req);
+  await enviarArchivo(res, material.filePath, {
+    nombreDescarga: material.fileName ?? material.filePath,
+    redirigir: req.query.firma !== undefined,
   });
 });
 

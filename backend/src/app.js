@@ -12,6 +12,7 @@ import { forumRouter } from './routes/forum.js';
 import { questionsRouter } from './routes/questions.js';
 import { quizzesRouter } from './routes/quizzes.js';
 import { meRouter, usersRouter } from './routes/me.js';
+import { archivosRouter } from './routes/archivos.js';
 
 export const app = express();
 
@@ -36,6 +37,7 @@ app.use('/api', questionsRouter);
 app.use('/api', quizzesRouter);
 app.use('/api/me', meRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/archivos', archivosRouter);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });
