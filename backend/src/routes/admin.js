@@ -5,7 +5,7 @@ import { config } from '../config.js';
 import { HttpError } from '../lib/errors.js';
 import { hashPassword, publicUser } from '../lib/auth.js';
 import { sendMail } from '../lib/mailer.js';
-import { hacerCopia, listarCopias, rutaCopia } from '../lib/copias.js';
+import { armarCopia, hacerCopia, listarCopias, rutaCopia } from '../lib/copias.js';
 import * as v from '../lib/validate.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 
@@ -296,12 +296,21 @@ adminRouter.patch('/courses/:id', async (req, res) => {
 // ---------------------------------------------------------------------------
 
 // GET /api/admin/backups
+// En Vercel no hay carpeta que dure: la lista queda vacía y la copia diaria la hace GitHub
+// (.github/workflows/copia-diaria.yml). enLaNube le avisa a la web para explicarlo.
 adminRouter.get('/backups', async (req, res) => {
-  res.json({ backups: await listarCopias() });
+  res.json({ backups: config.enVercel ? [] : await listarCopias(), enLaNube: config.enVercel });
+});
+
+// GET /api/admin/backups/nueva: arma una copia y la descarga sin guardarla.
+adminRouter.get('/backups/nueva', async (req, res) => {
+  const { nombre, datos } = await armarCopia();
+  res.attachment(nombre).type('application/gzip').send(datos);
 });
 
 // POST /api/admin/backups: hace una copia ahora.
 adminRouter.post('/backups', async (req, res) => {
+  if (config.enVercel) throw new HttpError(400, 'En internet las copias no se guardan en el servidor: use "Descargar una copia ahora".');
   res.status(201).json({ backup: await hacerCopia() });
 });
 

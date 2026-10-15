@@ -13,17 +13,28 @@ function required(name) {
 
 const backendDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
+// Direcciones de la web que pueden usar la API, separadas por comas.
+// Un * vale por cualquier texto: https://logicode-*.vercel.app acepta las vistas previas de Vercel.
+const corsOrigins = (process.env.CORS_ORIGIN ?? 'http://localhost:3000')
+  .split(',')
+  .map((o) => o.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
+
 export const config = {
   port: Number(process.env.PORT ?? 4000),
   databaseUrl: required('DATABASE_URL'),
   jwtSecret: required('JWT_SECRET'),
-  corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:3000',
+  corsOrigins,
+  // En Vercel la API corre como función: no hay disco que dure ni tareas cada hora.
+  enVercel: Boolean(process.env.VERCEL),
+  // Clave con la que Vercel llama a las tareas programadas (ver routes/cron.js).
+  cronSecret: process.env.CRON_SECRET ?? '',
   // Carpeta donde se guardan los archivos subidos (por defecto backend/uploads).
   uploadDir: path.resolve(backendDir, process.env.UPLOAD_DIR ?? 'uploads'),
   // Carpeta de las copias de seguridad de la base (por defecto backend/copias).
   backupDir: path.resolve(backendDir, process.env.BACKUP_DIR ?? 'copias'),
   // Dirección de la web, para armar los enlaces de los correos.
-  appUrl: process.env.APP_URL ?? process.env.CORS_ORIGIN ?? 'http://localhost:3000',
+  appUrl: (process.env.APP_URL || corsOrigins[0] || 'http://localhost:3000').replace(/\/+$/, ''),
   // IA para calificar fotos y respuestas abiertas (ver lib/ia.js).
   ia: {
     proveedor: ['ollama', 'gemini'].includes(process.env.AI_PROVIDER) ? process.env.AI_PROVIDER : null,

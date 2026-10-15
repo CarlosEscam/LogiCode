@@ -49,17 +49,22 @@ function nombreArchivo(fecha) {
   return `logicode-${dia}-${hora}.json.gz`;
 }
 
-// Arma la copia con todas las tablas y la guarda en la carpeta de copias.
-export async function hacerCopia() {
+// Arma la copia con todas las tablas: devuelve su nombre y el .json.gz en memoria.
+export async function armarCopia() {
   const fecha = new Date();
   const tablas = {};
   for (const modelo of modelosEnOrden()) {
     tablas[modelo.name] = await prisma[delegado(modelo)].findMany();
   }
   const contenido = { app: 'LogiCode', version: 1, createdAt: fecha.toISOString(), tablas };
+  return { nombre: nombreArchivo(fecha), datos: await gzip(JSON.stringify(contenido)) };
+}
+
+// Arma la copia y la guarda en la carpeta de copias.
+export async function hacerCopia() {
+  const { nombre, datos } = await armarCopia();
   await fs.promises.mkdir(carpeta(), { recursive: true });
-  const nombre = nombreArchivo(fecha);
-  await fs.promises.writeFile(path.join(carpeta(), nombre), await gzip(JSON.stringify(contenido)));
+  await fs.promises.writeFile(path.join(carpeta(), nombre), datos);
   await borrarViejas();
   return (await listarCopias()).find((c) => c.name === nombre);
 }

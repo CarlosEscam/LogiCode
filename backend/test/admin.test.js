@@ -148,6 +148,23 @@ test('copia de seguridad: se hace, aparece en la lista y se descarga', async () 
 
     const fuera = await request(app).get('/api/admin/backups/..%2F.env').set(auth(admin.token));
     assert.equal(fuera.status, 404);
+
+    // La copia "al momento" (la que se usa en Vercel) se descarga sin quedar guardada.
+    const antes = (await request(app).get('/api/admin/backups').set(auth(admin.token))).body.backups.length;
+    const nueva = await request(app)
+      .get('/api/admin/backups/nueva')
+      .set(auth(admin.token))
+      .buffer(true)
+      .parse((res, cb) => {
+        const partes = [];
+        res.on('data', (p) => partes.push(p));
+        res.on('end', () => cb(null, Buffer.concat(partes)));
+      });
+    assert.equal(nueva.status, 200);
+    assert.match(nueva.headers['content-disposition'], /logicode-\d{8}-\d{6}\.json\.gz/);
+    assert.ok(JSON.parse(zlib.gunzipSync(nueva.body).toString('utf8')).tablas.User.some((u) => u.id === admin.user.id));
+    const despues = (await request(app).get('/api/admin/backups').set(auth(admin.token))).body.backups.length;
+    assert.equal(despues, antes);
   } finally {
     fs.rmSync(rutaCopia(nombre), { force: true });
   }
