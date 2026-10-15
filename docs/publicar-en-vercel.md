@@ -7,7 +7,7 @@ LogiCode se publica como **dos proyectos de Vercel** que salen del mismo reposit
 | `logicode-api` | `backend` | La API (Express + Prisma). Vercel la corre como una función. |
 | `logicode-web` | `frontend` | La web (Next.js). |
 
-La base de datos es **Neon** (PostgreSQL gratis de 1 GB), creada desde el panel de Vercel. Los archivos subidos van a **Cloudflare R2** (ver la guía de R2). Todo es gratis; cada PR que se fusiona en `main` se publica solo.
+La base de datos es **Neon** (PostgreSQL gratis de 1 GB), creada desde el panel de Vercel. Los archivos subidos van a **Cloudflare R2** (ver [la guía de R2](archivos-en-r2.md)). Todo es gratis; cada PR que se fusiona en `main` se publica solo.
 
 En el PC nada cambia: la base sigue en Docker (puerto 5433) y la API y la web se corren como siempre.
 
@@ -69,7 +69,16 @@ En el PC nada cambia: la base sigue en Docker (puerto 5433) y la API y la web se
 
 ### 6. Archivos (Cloudflare R2)
 
-Siga la guía de R2 y pegue sus variables en `logicode-api` (Settings → Environment Variables), luego **Redeploy**. Sin R2 la API no puede guardar fotos ni material en internet.
+Siga [la guía de R2](archivos-en-r2.md) para crear el bucket y sus claves, y pegue sus variables en `logicode-api` (Settings → Environment Variables):
+
+```
+R2_ACCOUNT_ID=...
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_BUCKET=...
+```
+
+Luego **Deployments → ⋯ → Redeploy**. Sin R2 la API no puede guardar fotos ni material en internet.
 
 ### 7. Copia diaria de la base
 
@@ -93,5 +102,5 @@ Neon, además, permite volver la base a cualquier momento de las últimas 6 hora
   npm run restaurar-copia -- C:\ruta\de\la\copia.json.gz
   ```
 
-  Así mismo puede subir a internet lo que ya tiene en su PC: en el panel del administrador local, **Copias de seguridad → Hacer una copia ahora → Descargar**, y restaure esa copia en Neon. Los archivos (fotos, material) se pasan aparte con la guía de R2.
+  Así mismo puede subir a internet lo que ya tiene en su PC: en el panel del administrador local, **Copias de seguridad → Hacer una copia ahora → Descargar**, y restaure esa copia en Neon. Los archivos (fotos, material) se pasan aparte con [la guía de R2](archivos-en-r2.md).
 - **Límites del plan gratis:** Neon da 1 GB de base; Vercel corta cada petición a los 5 minutos y no deja subir por la API archivos de más de 4,5 MB (la parte de R2 resuelve las subidas grandes).
