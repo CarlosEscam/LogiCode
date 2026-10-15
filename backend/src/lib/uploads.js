@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import fs from 'node:fs';
 import path from 'node:path';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
@@ -132,7 +133,9 @@ function receptor(destino, campo = 'file') {
     storage: enR2
       ? multer.memoryStorage()
       : multer.diskStorage({
-          destination: config.uploadDir,
+          // La carpeta se crea al subir, no al arrancar: en Vercel sin R2 el disco es de solo
+          // lectura y crearla al importar tumbaba toda la API.
+          destination: (req, file, cb) => fs.mkdir(config.uploadDir, { recursive: true }, (err) => cb(err, config.uploadDir)),
           filename: (req, file, cb) => cb(null, nombreAleatorio(file.originalname)),
         }),
     // multer solo admite un límite: el mayor. El de cada formato se revisa al terminar.
