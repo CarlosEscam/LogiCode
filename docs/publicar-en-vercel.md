@@ -1,11 +1,13 @@
 # Publicar LogiCode en internet (Vercel + Neon)
 
-LogiCode se publica como **dos proyectos de Vercel** que salen del mismo repositorio:
+LogiCode se publica como **un solo proyecto de Vercel** con dos servicios, definidos en `vercel.json` de la raíz:
 
-| Proyecto de Vercel | Carpeta del repositorio | Qué es |
+| Servicio | Carpeta | Qué atiende |
 | --- | --- | --- |
-| `logicode-api` | `backend` | La API (Express + Prisma). Vercel la corre como una función. |
-| `logicode-web` | `frontend` | La web (Next.js). |
+| `backend` | `backend` | Todo lo que empieza por `/api` (Express + Prisma). Vercel lo corre como una función. |
+| `frontend` | `frontend` | Todo lo demás: la web (Next.js). |
+
+Web y API comparten la misma dirección (por ejemplo `https://logicode.vercel.app`), así que no hay que configurar direcciones entre ellas.
 
 La base de datos es **Neon** (PostgreSQL gratis de 1 GB), creada desde el panel de Vercel. Los archivos subidos van a **Cloudflare R2** (ver [la guía de R2](archivos-en-r2.md)). Todo es gratis; cada PR que se fusiona en `main` se publica solo.
 
@@ -18,10 +20,10 @@ En el PC nada cambia: la base sigue en Docker (puerto 5433) y la API y la web se
 1. Entre a https://vercel.com/signup, elija el plan **Hobby** y **Continue with GitHub** con la cuenta `CarlosEscam`.
 2. Cuando pregunte a qué repositorios dar acceso, elija **LogiCode**.
 
-### 2. La API (`logicode-api`)
+### 2. Importar el proyecto
 
 1. En Vercel: **Add New… → Project**, elija **LogiCode** y **Import**.
-2. **Project Name:** `logicode-api`. **Root Directory:** `backend` (botón *Edit*). El *Framework Preset* debe decir **Express**.
+2. **Project Name:** `logicode`. Deje **Root Directory** en la raíz del repositorio: Vercel lee `vercel.json` y muestra *Importar proyecto multiservicio* con los servicios `backend` y `frontend`. No hace falta copiar el `vercel.json` que sugiere: el repositorio ya lo trae.
 3. Abra **Environment Variables** y pegue estas (puede pegar todo el bloque de una vez):
 
    ```
@@ -40,36 +42,21 @@ En el PC nada cambia: la base sigue en Docker (puerto 5433) y la API y la web se
 
 ### 3. La base de datos (Neon)
 
-1. En el proyecto `logicode-api`, pestaña **Storage → Create Database → Neon** (*Serverless Postgres*).
+1. En el proyecto `logicode`, pestaña **Storage → Create Database → Neon** (*Serverless Postgres*).
 2. Acepte crear la cuenta de Neon desde Vercel (no hace falta registrarse aparte), plan **Free**, región **Washington, D.C. (iad1)**, que es la más cercana a Colombia.
 3. Al conectarla al proyecto, deje marcados *Production*, *Preview* y *Development*. Vercel agrega solo `DATABASE_URL` y `DATABASE_URL_UNPOOLED`.
-4. Pestaña **Deployments**, en el último: **⋯ → Redeploy**. Esta vez crea las tablas y su administrador.
-5. Copie la dirección del proyecto (por ejemplo `https://logicode-api.vercel.app`) y ábrala con `/api/health` al final. Debe responder `{"estado":"ok","baseDeDatos":"conectada"}`.
 
-### 4. La web (`logicode-web`)
+### 4. Publicar de nuevo
 
-1. **Add New… → Project**, otra vez **LogiCode**.
-2. **Project Name:** `logicode-web`. **Root Directory:** `frontend`. El *Framework Preset* debe decir **Next.js**.
-3. Variable de entorno (la dirección de la API del paso 3, sin `/` al final):
+1. Pestaña **Deployments**, en el último: **⋯ → Redeploy**. Esta vez crea las tablas y su administrador.
+2. Abra la dirección del proyecto (por ejemplo `https://logicode.vercel.app`) con `/api/health` al final. Debe responder `{"estado":"ok","baseDeDatos":"conectada"}`.
+3. Abra la dirección sin nada al final y entre con su cédula y la contraseña de `SEED_ADMIN_PASSWORD`.
 
-   ```
-   NEXT_PUBLIC_API_URL=https://logicode-api.vercel.app
-   ```
-4. **Deploy.** Copie la dirección de la web (por ejemplo `https://logicode-web.vercel.app`).
+Si más adelante le pone un dominio propio, agregue la variable `APP_URL` con ese dominio (es la dirección que va en los correos de recuperación).
 
-### 5. Avisarle a la API dónde está la web
+### 5. Archivos (Cloudflare R2)
 
-1. En `logicode-api` → **Settings → Environment Variables**, agregue (con la dirección del paso 4):
-
-   ```
-   CORS_ORIGIN=https://logicode-web.vercel.app
-   APP_URL=https://logicode-web.vercel.app
-   ```
-2. **Deployments → ⋯ → Redeploy.** Ya puede entrar a la web con su cédula y la contraseña de `SEED_ADMIN_PASSWORD`.
-
-### 6. Archivos (Cloudflare R2)
-
-Siga [la guía de R2](archivos-en-r2.md) para crear el bucket y sus claves, y pegue sus variables en `logicode-api` (Settings → Environment Variables):
+Siga [la guía de R2](archivos-en-r2.md) para crear el bucket y sus claves, y pegue sus variables en `logicode` (Settings → Environment Variables):
 
 ```
 R2_ACCOUNT_ID=...
@@ -80,11 +67,11 @@ R2_BUCKET=...
 
 Luego **Deployments → ⋯ → Redeploy**. Sin R2 la API no puede guardar fotos ni material en internet.
 
-### 7. Copia diaria de la base
+### 6. Copia diaria de la base
 
 GitHub hace una copia de la base de Neon cada día y la guarda 14 días.
 
-1. En `logicode-api` → **Settings → Environment Variables**, busque `DATABASE_URL_UNPOOLED`, ábrala con el ojo y cópiela.
+1. En `logicode` → **Settings → Environment Variables**, busque `DATABASE_URL_UNPOOLED`, ábrala con el ojo y cópiela.
 2. En GitHub, repositorio LogiCode → **Settings → Secrets and variables → Actions → New repository secret**. Nombre: `NEON_DATABASE_URL`; valor: lo que copió.
 3. Para probarla: pestaña **Actions → Copia diaria de la base → Run workflow**. Al terminar, la copia aparece abajo en *Artifacts*.
 
@@ -94,7 +81,7 @@ Neon, además, permite volver la base a cualquier momento de las últimas 6 hora
 
 - **Vistas previas:** cada PR también se publica en una dirección de prueba, pero esas vistas previas **no** cambian la base de datos: las migraciones solo corren al publicar `main`.
 - **Calificación pendiente:** si una entrega queda sin calificar (por ejemplo, Gemini no respondió), Vercel la retoma una vez al día (tarea `/api/cron/diario`).
-- **Correos de recuperación:** como en el PC, se escriben en el registro de la API: `logicode-api` → **Logs**.
+- **Correos de recuperación:** como en el PC, se escriben en el registro del proyecto: `logicode` → **Logs**.
 - **Restaurar una copia en Neon** (borra lo que hay en la base de internet): descargue la copia, y en la carpeta `backend` de su PC, en PowerShell:
 
   ```powershell

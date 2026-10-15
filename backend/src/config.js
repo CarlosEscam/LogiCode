@@ -34,7 +34,12 @@ export const config = {
   // Carpeta de las copias de seguridad de la base (por defecto backend/copias).
   backupDir: path.resolve(backendDir, process.env.BACKUP_DIR ?? 'copias'),
   // Dirección de la web, para armar los enlaces de los correos.
-  appUrl: (process.env.APP_URL || corsOrigins[0] || 'http://localhost:3000').replace(/\/+$/, ''),
+  // En Vercel, por defecto, la dirección de producción del proyecto (web y API comparten dirección).
+  appUrl: (
+    process.env.APP_URL ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : corsOrigins[0]) ||
+    'http://localhost:3000'
+  ).replace(/\/+$/, ''),
   // IA para calificar fotos y respuestas abiertas (ver lib/ia.js).
   ia: {
     proveedor: ['ollama', 'gemini'].includes(process.env.AI_PROVIDER) ? process.env.AI_PROVIDER : null,

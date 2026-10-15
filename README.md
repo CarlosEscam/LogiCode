@@ -92,10 +92,10 @@ Páginas: `/panel` (estudiante), `/mis-notas`, `/perfil` (todos los roles) y `/j
 
 ## Publicar en internet (Vercel + Neon)
 
-La API (`backend`) y la web (`frontend`) se publican como dos proyectos de Vercel, con la base en Neon. Los pasos para crear las cuentas y pegar las variables están en [docs/publicar-en-vercel.md](docs/publicar-en-vercel.md).
+La API (`backend`) y la web (`frontend`) se publican como un solo proyecto de Vercel con dos servicios (`vercel.json` de la raíz: `/api` va a la API y lo demás a la web), con la base en Neon. Los pasos para crear las cuentas y pegar las variables están en [docs/publicar-en-vercel.md](docs/publicar-en-vercel.md).
 
 - En producción, `npm run vercel-build` aplica las migraciones a Neon y crea el primer administrador; las vistas previas de los PR no tocan la base.
-- `CORS_ORIGIN` acepta varias direcciones separadas por comas, y `*` en una dirección vale por cualquier texto.
+- En Vercel web y API comparten dirección: la web llama a `/api` sin dominio y no hace falta CORS. En el PC, `CORS_ORIGIN` acepta varias direcciones separadas por comas, y `*` vale por cualquier texto.
 - La copia diaria de la base la hace GitHub Actions (`.github/workflows/copia-diaria.yml`, secreto `NEON_DATABASE_URL`) y queda 14 días en la pestaña Actions.
 - Vercel llama una vez al día a `/api/cron/diario` (con `CRON_SECRET`) para calificar las entregas que quedaron pendientes.
 
