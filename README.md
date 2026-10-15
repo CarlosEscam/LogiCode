@@ -14,6 +14,7 @@ backend/             API en Node.js (Express 5) + Prisma + PostgreSQL
   test/                  pruebas (node:test + supertest)
 frontend/            web en Next.js (React) + Tailwind CSS
 docker-compose.yml   PostgreSQL para desarrollo local
+main.js              arranque local de todo con "npm start" (o F5 en VS Code)
 ```
 
 ## Requisitos
@@ -22,6 +23,18 @@ docker-compose.yml   PostgreSQL para desarrollo local
 - Docker Desktop (para la base de datos), o PostgreSQL 16 instalado
 
 ## Puesta en marcha en local
+
+Con Docker Desktop abierto, en la carpeta del proyecto:
+
+```bash
+npm start          # o F5 en VS Code ("Iniciar LogiCode")
+```
+
+`main.js` hace todo en una sola ventana: trae lo nuevo de GitHub (si no hay archivos cambiados), crea los `.env` la primera vez con claves aleatorias, levanta la base en Docker, instala dependencias cuando cambian, aplica las migraciones, arranca la API y la web, y abre http://localhost:3000. Ctrl+C apaga la API y la web.
+
+Lo que nunca va a GitHub (está en `.gitignore`): los `.env` con contraseñas, los archivos subidos (`backend/uploads`), las copias de la base (`backend/copias`) y `node_modules`.
+
+### Paso a paso (sin main.js)
 
 ```bash
 # 1. Base de datos
