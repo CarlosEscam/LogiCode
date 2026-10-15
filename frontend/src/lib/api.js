@@ -33,6 +33,8 @@ export async function api(ruta, { method = "GET", body } = {}) {
 }
 
 // Pide un archivo a la API con la sesión y lo devuelve como Blob.
+// Si los archivos están en Cloudflare R2, la API responde { url } con un enlace firmado
+// y el archivo se trae de ahí, sin la sesión.
 export async function pedirArchivo(ruta) {
   const token = leerSesion()?.token;
   let res;
@@ -40,6 +42,10 @@ export async function pedirArchivo(ruta) {
     res = await fetch(`${API_URL}/api${ruta}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
+    if (res.ok && res.headers.get("Content-Type")?.includes("application/json")) {
+      const { url } = await res.json();
+      res = await fetch(url);
+    }
   } catch {
     throw new Error("No hay conexión con el servidor de LogiCode.");
   }
@@ -80,30 +86,58 @@ export async function descargarMaterial(material) {
   a.click();
 }
 
-// Igual que api() con un formulario, pero informa el avance de la subida (fetch no lo hace).
-export function subirConAvance(ruta, formulario, onAvance) {
-  const token = leerSesion()?.token;
+// Envía con XMLHttpRequest para poder informar el avance de la subida (fetch no lo hace).
+function enviarConAvance(metodo, url, cuerpo, { headers = {}, onAvance } = {}) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", `${API_URL}/api${ruta}`);
-    if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) onAvance(Math.floor((e.loaded / e.total) * 100));
-    };
+    xhr.open(metodo, url);
+    for (const [k, v] of Object.entries(headers)) xhr.setRequestHeader(k, v);
+    if (onAvance) {
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) onAvance(Math.floor((e.loaded / e.total) * 100));
+      };
+    }
     xhr.onerror = () => reject(new Error("No hay conexión con el servidor de LogiCode."));
-    xhr.onload = () => {
-      let datos = {};
-      try {
-        datos = JSON.parse(xhr.responseText);
-      } catch {
-        // respuesta sin JSON
-      }
-      if (xhr.status === 401 && token) cerrarSesion();
-      if (xhr.status >= 400) reject(new Error(datos.error ?? "Ocurrió un error. Intente de nuevo."));
-      else resolve(datos);
-    };
-    xhr.send(formulario);
+    xhr.onload = () => resolve(xhr);
+    xhr.send(cuerpo);
   });
+}
+
+// Igual que api() con un formulario, pero informa el avance de la subida.
+// destino ("material" o "entrega") permite subir el archivo del campo "file" directo a
+// Cloudflare R2 cuando la API lo usa: así pasan los videos de hasta 1 GB, que la API en
+// Vercel no puede recibir. Después solo se envía a la API el comprobante de la subida.
+export async function subirConAvance(ruta, formulario, onAvance, destino) {
+  const token = leerSesion()?.token;
+  const archivo = formulario.get("file");
+  let avance = onAvance;
+  if (destino && archivo instanceof File && archivo.size) {
+    const subida = await api("/archivos/subida", {
+      method: "POST",
+      body: { destino, nombre: archivo.name, tamano: archivo.size },
+    });
+    if (subida.directo) {
+      const r2 = await enviarConAvance("PUT", subida.url, archivo, { headers: subida.headers, onAvance });
+      if (r2.status >= 400) throw new Error("No se pudo subir el archivo. Intente de nuevo.");
+      formulario.delete("file");
+      formulario.set("subida", subida.subida);
+      onAvance(100);
+      avance = null;
+    }
+  }
+  const xhr = await enviarConAvance("POST", `${API_URL}/api${ruta}`, formulario, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    onAvance: avance,
+  });
+  let datos = {};
+  try {
+    datos = JSON.parse(xhr.responseText);
+  } catch {
+    // respuesta sin JSON
+  }
+  if (xhr.status === 401 && token) cerrarSesion();
+  if (xhr.status >= 400) throw new Error(datos.error ?? "Ocurrió un error. Intente de nuevo.");
+  return datos;
 }
 
 function leerCrudo() {

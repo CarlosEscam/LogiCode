@@ -82,12 +82,13 @@ Mientras no haya servidor de correo, el correo de recuperación se escribe en la
 | `GET` / `POST /api/courses/:id/topics` | curso / docente | Temas en orden con su material; el docente crea temas. |
 | `PATCH` / `DELETE /api/topics/:id` | docente del curso | Edita, marca "próxima clase" (solo uno por curso) o borra un tema. |
 | `POST /api/topics/:id/move` | docente del curso | Sube o baja el tema (`direction: up | down`). |
-| `POST /api/materials` | docente / administrador | Archivo (multipart, máx. 20 MB), enlace o video. Sin `courseId` va directo a la biblioteca. |
+| `POST /api/archivos/subida` | con sesión | Enlace firmado para subir un archivo directo a Cloudflare R2 (`destino: material | entrega`). Sin R2 responde `directo: false`. |
+| `POST /api/materials` | docente / administrador | Archivo (multipart, máx. 20 MB, o `subida` de R2 con videos hasta 1 GB), enlace o video. Sin `courseId` va directo a la biblioteca. |
 | `PATCH` / `DELETE /api/materials/:id` | quien lo subió o el docente | Cambia visibilidad, título o tema; borra el material y su archivo. |
 | `GET /api/materials/:id/file` | según visibilidad | Descarga: público para todos, del curso solo para sus estudiantes. |
 | `GET /api/library?tool=PSEINT` | visitantes | Material público, filtrado por herramienta. |
 
-Los archivos se guardan en `backend/uploads` (cambiable con `UPLOAD_DIR`) con nombres aleatorios y solo se sirven por la API.
+Los archivos se guardan en `backend/uploads` (cambiable con `UPLOAD_DIR`) con nombres aleatorios y solo se sirven por la API. Con las variables `R2_*` se guardan en Cloudflare R2 y la API entrega enlaces firmados que vencen en una hora; los pasos para crear el bucket y copiar los archivos que ya existen están en [docs/archivos-en-r2.md](docs/archivos-en-r2.md).
 
 ## Apartado del estudiante y perfil
 

@@ -1,13 +1,12 @@
 import { Router } from 'express';
 import crypto from 'node:crypto';
-import fs from 'node:fs';
-import path from 'node:path';
 import multer from 'multer';
 import { prisma } from '../lib/prisma.js';
 import { HttpError } from '../lib/errors.js';
 import { checkPassword, hashPassword, publicUser } from '../lib/auth.js';
 import { MAX_FOTO_KB, extensionDeImagen } from '../lib/perfil.js';
-import { borrarArchivo, rutaArchivo, tipoDeArchivo } from '../lib/uploads.js';
+import { borrarArchivo, enviarArchivo, existeArchivo, tipoDeArchivo } from '../lib/uploads.js';
+import { guardar } from '../lib/almacen.js';
 import { cerrarVencidos } from '../lib/quizzes.js';
 import { NO_QUIZ, plazoDe, planillaDelCurso } from '../lib/actividades.js';
 import * as v from '../lib/validate.js';
@@ -66,7 +65,7 @@ meRouter.put('/avatar', leerFoto, async (req, res) => {
   const ext = extensionDeImagen(req.file.buffer);
   if (!ext) throw new HttpError(400, 'La foto debe ser JPG, PNG o WebP.');
   const nombre = `avatar-${crypto.randomBytes(12).toString('hex')}${ext}`;
-  await fs.promises.writeFile(rutaArchivo(nombre), req.file.buffer);
+  await guardar(nombre, req.file.buffer, tipoDeArchivo(nombre));
   const anterior = req.user.avatarPath;
   const user = await prisma.user.update({ where: { id: req.user.id }, data: { avatarPath: nombre } });
   await borrarArchivo(anterior);
@@ -84,16 +83,16 @@ meRouter.delete('/avatar', async (req, res) => {
 usersRouter.get('/:id/avatar', async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: v.id(req.params.id) }, select: { avatarPath: true } });
   if (!user?.avatarPath) throw new HttpError(404, 'Este usuario no tiene foto.');
-  const ruta = rutaArchivo(user.avatarPath);
-  if (!fs.existsSync(ruta)) throw new HttpError(404, 'Este usuario no tiene foto.');
-  res.set({
-    'Content-Type': tipoDeArchivo(path.basename(ruta)),
-    'X-Content-Type-Options': 'nosniff',
-    // La dirección cambia con cada foto nueva (?v=...), así que se puede guardar mucho tiempo.
-    'Cache-Control': 'public, max-age=31536000, immutable',
-    'Cross-Origin-Resource-Policy': 'cross-origin',
+  if (!existeArchivo(user.avatarPath)) throw new HttpError(404, 'Este usuario no tiene foto.');
+  await enviarArchivo(res, user.avatarPath, {
+    redirigir: true,
+    enLinea: true,
+    cabeceras: {
+      // La dirección cambia con cada foto nueva (?v=...), así que se puede guardar mucho tiempo.
+      'Cache-Control': 'public, max-age=31536000, immutable',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+    },
   });
-  fs.createReadStream(ruta).pipe(res);
 });
 
 // --- Actividades y quizzes del estudiante ------------------------------------------

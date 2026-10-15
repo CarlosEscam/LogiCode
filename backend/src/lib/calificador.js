@@ -1,11 +1,11 @@
-import fs from 'node:fs';
 import path from 'node:path';
 import { prisma } from './prisma.js';
 import { config } from '../config.js';
 import { probarCasos } from './pseint/index.js';
 import { preguntarIA, proveedorIA, ErrorIA } from './ia.js';
 import { revisarScratch } from './scratch.js';
-import { rutaArchivo, tipoDeArchivo } from './uploads.js';
+import { tipoDeArchivo } from './uploads.js';
+import { leer } from './almacen.js';
 import { normalizar } from './pseint/analizador.js';
 
 // Calificación automática de entregas (sección 5 del anteproyecto).
@@ -107,7 +107,7 @@ async function evaluar(entrega) {
 
 async function leerArchivo(entrega) {
   if (!entrega.filePath) throw new Error('La entrega no tiene archivo.');
-  return fs.promises.readFile(rutaArchivo(entrega.filePath));
+  return leer(entrega.filePath);
 }
 
 async function leerTexto(entrega) {
