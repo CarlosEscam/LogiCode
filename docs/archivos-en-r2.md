@@ -32,7 +32,7 @@ En el bucket `logicode` → **Settings** → **CORS Policy** → **Add CORS poli
 ]
 ```
 
-El `*` deja entrar a la web publicada (por ejemplo `https://logicode.vercel.app`), a las vistas previas de Vercel y a `localhost`. Si prefiere cerrarlo, cambie `"*"` por la dirección de su web, pero entonces las vistas previas no podrán subir archivos. No abre los archivos a nadie: sin un enlace firmado por la API, R2 los rechaza.
+El `*` deja entrar a la web publicada (la que aparece en **Settings → Domains** del proyecto de Vercel, por ejemplo `https://logicode-beta.vercel.app`), a las vistas previas de Vercel y a `localhost`. Si prefiere cerrarlo, cambie `"*"` por esa misma dirección, pero entonces las vistas previas no podrán subir archivos. No abre los archivos a nadie: sin un enlace firmado por la API, R2 los rechaza.
 
 ### 3. Crear las claves de acceso
 
