@@ -32,17 +32,17 @@ En el bucket `logicode` → **Settings** → **CORS Policy** → **Add CORS poli
 ]
 ```
 
-El `*` deja entrar a la web de Vercel, a sus vistas previas y a `localhost`. No abre los archivos a nadie: sin un enlace firmado por la API, R2 los rechaza.
+El `*` deja entrar a la web publicada (por ejemplo `https://logicode.vercel.app`), a las vistas previas de Vercel y a `localhost`. Si prefiere cerrarlo, cambie `"*"` por la dirección de su web, pero entonces las vistas previas no podrán subir archivos. No abre los archivos a nadie: sin un enlace firmado por la API, R2 los rechaza.
 
 ### 3. Crear las claves de acceso
 
 1. En R2 → **Manage API tokens** (arriba a la derecha en Overview) → **Create API token** (el de cuenta o el de usuario sirve).
-2. Nombre: `logicode-api`. Permiso: **Object Read & Write**. En **Specify bucket(s)** elija solo `logicode`.
+2. Nombre: `logicode`. Permiso: **Object Read & Write**. En **Specify bucket(s)** elija solo `logicode`.
 3. **Create API Token**. Copie el **Access Key ID** y el **Secret Access Key**: el secreto se ve una sola vez.
 
 ### 4. Pegar las variables en Vercel
 
-En el proyecto `logicode-api` de Vercel → **Settings** → **Environment Variables**, agregue:
+En el proyecto `logicode` de Vercel → **Settings** → **Environment Variables**, agregue:
 
 | Variable | Valor |
 | --- | --- |
