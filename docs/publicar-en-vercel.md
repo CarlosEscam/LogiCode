@@ -7,7 +7,7 @@ LogiCode se publica como **un solo proyecto de Vercel** con dos servicios, defin
 | `backend` | `backend` | Todo lo que empieza por `/api` (Express + Prisma). Vercel lo corre como una función. |
 | `frontend` | `frontend` | Todo lo demás: la web (Next.js). |
 
-Web y API comparten la misma dirección (por ejemplo `https://logicode.vercel.app`), así que no hay que configurar direcciones entre ellas.
+Web y API comparten la misma dirección, así que no hay que configurar direcciones entre ellas. Esa dirección la elige Vercel y aparece en el proyecto, en **Domains** (o en el botón **Visit**). Si el nombre `logicode` ya lo tiene otra persona, Vercel le agrega algo, por ejemplo `https://logicode-abc123.vercel.app`, y `logicode.vercel.app` muestra la página de otra cuenta o un 404.
 
 La base de datos es **Neon** (PostgreSQL gratis de 1 GB), creada desde el panel de Vercel. Los archivos subidos van a **Cloudflare R2** (ver [la guía de R2](archivos-en-r2.md)). Todo es gratis; cada PR que se fusiona en `main` se publica solo.
 
@@ -24,7 +24,7 @@ En el PC nada cambia: la base sigue en Docker (puerto 5433) y la API y la web se
 
 1. En Vercel: **Add New… → Project**, elija **LogiCode** y **Import**.
 2. **Project Name:** `logicode`. Deje **Root Directory** en la raíz del repositorio: Vercel lee `vercel.json` y muestra *Importar proyecto multiservicio* con los servicios `backend` y `frontend`. No hace falta copiar el `vercel.json` que sugiere: el repositorio ya lo trae.
-3. Abra **Environment Variables** y pegue estas (puede pegar todo el bloque de una vez):
+3. Abra **Environment Variables** y pegue estas (puede pegar todo el bloque de una vez). **Cambie cada valor por el suyo**: lo que está a la derecha del `=` es solo un ejemplo.
 
    ```
    JWT_SECRET=una-clave-larga-y-aleatoria
@@ -37,7 +37,7 @@ En el PC nada cambia: la base sigue en Docker (puerto 5433) y la API y la web se
    SEED_ADMIN_PASSWORD=una-contrasena-de-8-o-mas
    ```
 
-   Para las dos claves sirve cualquier texto largo sin espacios (por ejemplo, el que da https://www.uuidgenerator.net, dos veces seguidas). Con `SEED_ADMIN_*` se crea su usuario administrador en la base de internet; si ya existe, no se toca.
+   Para las dos claves sirve cualquier texto largo sin espacios (por ejemplo, el que da https://www.uuidgenerator.net, dos veces seguidas). Con `SEED_ADMIN_*` se crea su usuario administrador en la base de internet; si ya existe, no se toca. `SEED_ADMIN_CEDULA` debe ser su cédula, solo con números; si no, la publicación falla con un aviso.
 4. **Deploy.** Este primer intento **falla** porque todavía no hay base de datos: es normal.
 
 ### 3. La base de datos (Neon)
@@ -49,7 +49,7 @@ En el PC nada cambia: la base sigue en Docker (puerto 5433) y la API y la web se
 ### 4. Publicar de nuevo
 
 1. Pestaña **Deployments**, en el último: **⋯ → Redeploy**. Esta vez crea las tablas y su administrador.
-2. Abra la dirección del proyecto (por ejemplo `https://logicode.vercel.app`) con `/api/health` al final. Debe responder `{"estado":"ok","baseDeDatos":"conectada"}`.
+2. Abra la dirección del proyecto (la de **Domains**) con `/api/health` al final. Debe responder `{"estado":"ok","baseDeDatos":"conectada"}`.
 3. Abra la dirección sin nada al final y entre con su cédula y la contraseña de `SEED_ADMIN_PASSWORD`.
 
 Si más adelante le pone un dominio propio, agregue la variable `APP_URL` con ese dominio (es la dirección que va en los correos de recuperación).

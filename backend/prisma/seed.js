@@ -13,6 +13,10 @@ async function main() {
     console.log('Seed omitido: complete las variables SEED_ADMIN_* en backend/.env.');
     return;
   }
+  // Sin esto, copiar el ejemplo de la guía tal cual crea un administrador que no puede entrar.
+  if (!/^\d{5,15}$/.test(SEED_ADMIN_CEDULA)) {
+    throw new Error('SEED_ADMIN_CEDULA debe ser una cédula real: solo números, de 5 a 15 dígitos.');
+  }
   if (SEED_ADMIN_PASSWORD.length < 8) {
     throw new Error('SEED_ADMIN_PASSWORD debe tener al menos 8 caracteres.');
   }
