@@ -1,0 +1,55 @@
+name: Copia diaria de la base
+
+# Copia de seguridad de la base de Neon (RNF-07) cuando LogiCode está publicado en Vercel.
+# Necesita el secreto NEON_DATABASE_URL (Settings → Secrets and variables → Actions).
+# Cada copia queda 14 días en la pestaña Actions, dentro de la ejecución del día.
+on:
+  schedule:
+    - cron: '0 9 * * *'   # 4:00 a. m. en Colombia
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  copia:
+    name: Copia de la base
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+      JWT_SECRET: solo-para-la-copia
+      BACKUP_DIR: copias
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Revisar el secreto
+        id: secreto
+        working-directory: .
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "Falta el secreto NEON_DATABASE_URL: no se hace la copia."
+            echo "listo=no" >> "$GITHUB_OUTPUT"
+          else
+            echo "listo=si" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.secreto.outputs.listo == 'si'
+      - uses: actions/setup-node@v4
+        if: steps.secreto.outputs.listo == 'si'
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+        if: steps.secreto.outputs.listo == 'si'
+      - run: npm run hacer-copia
+        if: steps.secreto.outputs.listo == 'si'
+      - uses: actions/upload-artifact@v4
+        if: steps.secreto.outputs.listo == 'si'
+        with:
+          name: copia-logicode-${{ github.run_number }}
+          path: backend/copias/*.json.gz
+          retention-days: 14
+          compression-level: 0

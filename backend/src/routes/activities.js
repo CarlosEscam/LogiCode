@@ -1,3 +1,4 @@
+import { waitUntil } from '@vercel/functions';
 import { Router } from 'express';
 import path from 'node:path';
 import { prisma } from '../lib/prisma.js';
@@ -39,9 +40,12 @@ async function temaDelCurso(topicId, courseId) {
 }
 
 // Espera la calificación unos segundos para responder ya con la nota cuando es rápida
-// (PSeInt, texto). La lectura de fotos con IA puede tardar más y sigue en segundo plano.
+// (PSeInt, texto). La lectura de fotos con IA puede tardar más y sigue en segundo plano;
+// waitUntil le pide a Vercel no apagar la función hasta terminarla (en el PC no hace nada).
 async function calificarYEsperar(submissionId) {
-  await Promise.race([encolar(submissionId), new Promise((r) => setTimeout(r, 3000))]);
+  const calificacion = encolar(submissionId);
+  waitUntil(calificacion);
+  await Promise.race([calificacion, new Promise((r) => setTimeout(r, 3000))]);
   return prisma.submission.findUnique({ where: { id: submissionId } });
 }
 

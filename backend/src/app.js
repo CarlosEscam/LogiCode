@@ -13,10 +13,14 @@ import { questionsRouter } from './routes/questions.js';
 import { quizzesRouter } from './routes/quizzes.js';
 import { meRouter, usersRouter } from './routes/me.js';
 import { archivosRouter } from './routes/archivos.js';
+import { cronRouter } from './routes/cron.js';
 
 export const app = express();
 
-app.use(cors({ origin: config.corsOrigin }));
+// Convierte cada dirección de CORS_ORIGIN en un patrón (el * vale por cualquier texto).
+const escapar = (texto) => texto.replace(/[.+?^$()|[\]{}\\/]/g, '\\$&');
+const origenes = config.corsOrigins.map((o) => new RegExp(`^${o.split('*').map(escapar).join('[^/]*')}$`));
+app.use(cors({ origin: (origin, listo) => listo(null, !origin || origenes.some((re) => re.test(origin))) }));
 app.use(express.json({ limit: '1mb' }));
 // En Express 5 req.body queda sin definir si la petición no trae JSON.
 app.use((req, res, next) => {
@@ -38,6 +42,7 @@ app.use('/api', quizzesRouter);
 app.use('/api/me', meRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/archivos', archivosRouter);
+app.use('/api/cron', cronRouter);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });
@@ -48,3 +53,6 @@ app.use((err, req, res, _next) => {
   if (!err.expose) console.error(err);
   res.status(err.status ?? 500).json({ error: err.expose ? err.message : 'Error interno del servidor' });
 });
+
+// Vercel toma la app desde aquí (cada petición la atiende una función). En el PC arranca con server.js.
+export default app;

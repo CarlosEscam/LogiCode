@@ -1,0 +1,14 @@
+{
+  "name": "logicode",
+  "version": "0.1.0",
+  "private": true,
+  "description": "LogiCode, la plataforma de Pensamiento Computacional. \"npm start\" arranca la base, la API y la web.",
+  "type": "module",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

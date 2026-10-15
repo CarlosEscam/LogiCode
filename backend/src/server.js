@@ -13,5 +13,5 @@ const server = app.listen(config.port, async () => {
 // Subir una clase grabada por una conexión lenta puede pasar de los 5 minutos que Node da por defecto.
 server.requestTimeout = 60 * 60 * 1000;
 
-// Copia de seguridad diaria de la base (RNF-07).
-programarCopias();
+// Copia de seguridad diaria de la base (RNF-07). En Vercel la hace GitHub (copia-diaria.yml).
+if (!config.enVercel) programarCopias();

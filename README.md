@@ -14,6 +14,7 @@ backend/             API en Node.js (Express 5) + Prisma + PostgreSQL
   test/                  pruebas (node:test + supertest)
 frontend/            web en Next.js (React) + Tailwind CSS
 docker-compose.yml   PostgreSQL para desarrollo local
+main.js              arranque local de todo con "npm start" (o F5 en VS Code)
 ```
 
 ## Requisitos
@@ -22,6 +23,18 @@ docker-compose.yml   PostgreSQL para desarrollo local
 - Docker Desktop (para la base de datos), o PostgreSQL 16 instalado
 
 ## Puesta en marcha en local
+
+Con Docker Desktop abierto, en la carpeta del proyecto:
+
+```bash
+npm start          # o F5 en VS Code ("Iniciar LogiCode")
+```
+
+`main.js` hace todo en una sola ventana: trae lo nuevo de GitHub (si no hay archivos cambiados), crea los `.env` la primera vez con claves aleatorias, levanta la base en Docker, instala dependencias cuando cambian, aplica las migraciones, arranca la API y la web, y abre http://localhost:3000. Ctrl+C apaga la API y la web.
+
+Lo que nunca va a GitHub (está en `.gitignore`): los `.env` con contraseñas, los archivos subidos (`backend/uploads`), las copias de la base (`backend/copias`) y `node_modules`.
+
+### Paso a paso (sin main.js)
 
 ```bash
 # 1. Base de datos
@@ -90,6 +103,15 @@ Los archivos se guardan en `backend/uploads` (cambiable con `UPLOAD_DIR`) con no
 | `GET` / `POST /api/me/games` | con sesión | Mejores puntajes y partidas de los juegos. |
 
 Páginas: `/panel` (estudiante), `/mis-notas`, `/perfil` (todos los roles) y `/juegos` con *Adivina la salida*, *Memorama de símbolos* y *Ordena los pasos*. Los visitantes también pueden jugar, pero el puntaje solo se guarda con sesión. Las respuestas de *Adivina la salida* se comprueban con el intérprete de PSeInt en `backend/test/juegos.test.js`.
+
+## Publicar en internet (Vercel + Neon)
+
+La API (`backend`) y la web (`frontend`) se publican como un solo proyecto de Vercel con dos servicios (`vercel.json` de la raíz: `/api` va a la API y lo demás a la web), con la base en Neon. Los pasos para crear las cuentas y pegar las variables están en [docs/publicar-en-vercel.md](docs/publicar-en-vercel.md).
+
+- En producción, `npm run vercel-build` aplica las migraciones a Neon y crea el primer administrador; las vistas previas de los PR no tocan la base.
+- En Vercel web y API comparten dirección: la web llama a `/api` sin dominio y no hace falta CORS. En el PC, `CORS_ORIGIN` acepta varias direcciones separadas por comas, y `*` vale por cualquier texto.
+- La copia diaria de la base la hace GitHub Actions (`.github/workflows/copia-diaria.yml`, secreto `NEON_DATABASE_URL`) y queda 14 días en la pestaña Actions.
+- Vercel llama una vez al día a `/api/cron/diario` (con `CRON_SECRET`) para calificar las entregas que quedaron pendientes.
 
 ## Pruebas
 
