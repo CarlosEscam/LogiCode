@@ -1,0 +1,5 @@
+# Git guarda los archivos con saltos de línea LF. En Windows pueden quedar en CRLF
+# sin que git los muestre como cambiados.
+* text=auto
+*.bat text eol=crlf
+*.ps1 text eol=crlf
