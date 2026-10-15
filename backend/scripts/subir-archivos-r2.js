@@ -16,6 +16,27 @@ if (!enR2) {
   process.exit(1);
 }
 
+// Revisa el formato de las claves sin mostrarlas. En R2 el Account ID y el Access Key ID
+// tienen 32 letras y números (0-9, a-f) y el Secret Access Key, 64. Un token de la API de
+// Cloudflare (el que empieza distinto y se usa con "Bearer") no sirve aquí.
+const { cuenta, claveId, claveSecreta, bucket } = config.r2;
+const problemas = [];
+const revisar = (nombre, valor, largo) => {
+  if (!/^[0-9a-f]+$/i.test(valor) || valor.length !== largo) {
+    problemas.push(`${nombre} tiene ${valor.length} caracteres${/^[0-9a-f]*$/i.test(valor) ? '' : ' y alguno que no es 0-9 o a-f'}; debe tener ${largo} (solo 0-9 y a-f).`);
+  }
+};
+if (!process.env.R2_ENDPOINT) revisar('R2_ACCOUNT_ID', cuenta, 32);
+revisar('R2_ACCESS_KEY_ID', claveId, 32);
+revisar('R2_SECRET_ACCESS_KEY', claveSecreta, 64);
+if (!/^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/.test(bucket)) problemas.push(`R2_BUCKET "${bucket}" no es un nombre de bucket válido (minúsculas, números y guiones).`);
+if (problemas.length) {
+  console.error('Revise backend/.env (ver docs/archivos-en-r2.md, paso 3):');
+  for (const p of problemas) console.error(`- ${p}`);
+  process.exit(1);
+}
+console.log(`Bucket ${bucket} en ${config.r2.endpoint}\n`);
+
 let nombres;
 try {
   nombres = fs.readdirSync(config.uploadDir, { withFileTypes: true }).filter((e) => e.isFile()).map((e) => e.name);
@@ -40,6 +61,11 @@ for (const nombre of nombres) {
   } catch (err) {
     fallidos++;
     console.error(`No se pudo subir ${nombre}: ${err.message}`);
+    // Si falla el primero, fallarán todos por lo mismo: no se repite el error.
+    if (subidos + saltados === 0) {
+      console.error('\nSe detuvo en el primer archivo. Revise las variables R2_* con docs/archivos-en-r2.md.');
+      process.exit(1);
+    }
   }
 }
 
