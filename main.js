@@ -24,14 +24,18 @@ function salirConError(mensaje) {
   process.exit(1);
 }
 
+// En Windows, npm y npx son .cmd y necesitan la consola. Ahí se pasa la línea ya armada
+// (pasar la lista de argumentos con shell da un aviso de Node). Ningún argumento lleva espacios.
+const linea = (comando, args) => (windows ? [[comando, ...args].join(' '), []] : [comando, args]);
+
 // Corre un comando mostrando su salida; devuelve true si terminó bien.
 function correr(comando, args, cwd = raiz) {
-  const r = spawnSync(comando, args, { cwd, stdio: 'inherit', shell: windows });
+  const r = spawnSync(...linea(comando, args), { cwd, stdio: 'inherit', shell: windows });
   return r.status === 0;
 }
 
 function salidaDe(comando, args, cwd = raiz) {
-  const r = spawnSync(comando, args, { cwd, encoding: 'utf8', shell: windows });
+  const r = spawnSync(...linea(comando, args), { cwd, encoding: 'utf8', shell: windows });
   return r.status === 0 ? r.stdout.trim() : null;
 }
 
@@ -133,7 +137,7 @@ const procesos = [];
 // Arranca "npm run dev" en una carpeta y antepone [API] o [WEB] a cada línea.
 function arrancar(carpeta, etiqueta) {
   // En Linux y macOS va en su propio grupo de procesos para poder cerrarlo completo.
-  const p = spawn('npm', ['run', 'dev'], { cwd: carpeta, shell: windows, env: process.env, detached: !windows });
+  const p = spawn(...linea('npm', ['run', 'dev']), { cwd: carpeta, shell: windows, env: process.env, detached: !windows });
   for (const flujo of [p.stdout, p.stderr]) {
     let resto = '';
     flujo.on('data', (d) => {
