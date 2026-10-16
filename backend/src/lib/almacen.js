@@ -46,10 +46,23 @@ function urlObjeto(nombre, consulta = {}) {
 async function pedirR2(nombre, init = {}) {
   const res = await cliente.fetch(urlObjeto(nombre).toString(), init);
   if (!res.ok && (res.status !== 404 || init.method === 'PUT')) {
-    const detalle = await res.text().catch(() => '');
-    throw new Error(`R2 respondió ${res.status} con ${init.method ?? 'GET'} ${limpio(nombre)}: ${detalle.slice(0, 300)}`);
+    let detalle = await res.text().catch(() => '');
+    // Una respuesta a HEAD no trae cuerpo: se repite como GET de un byte para leer el motivo.
+    if (!detalle && init.method === 'HEAD') {
+      const otra = await cliente.fetch(urlObjeto(nombre).toString(), { headers: { Range: 'bytes=0-0' } });
+      detalle = await otra.text().catch(() => '');
+    }
+    throw new Error(`R2 respondió ${res.status} con ${init.method ?? 'GET'} ${limpio(nombre)}: ${motivo(detalle)}`);
   }
   return res;
+}
+
+// R2 explica los errores en XML: <Code>...</Code><Message>...</Message>.
+function motivo(xml) {
+  const codigo = /<Code>([^<]*)<\/Code>/.exec(xml)?.[1];
+  const mensaje = /<Message>([^<]*)<\/Message>/.exec(xml)?.[1];
+  if (codigo || mensaje) return [codigo, mensaje].filter(Boolean).join(': ');
+  return xml.slice(0, 300) || 'sin detalle';
 }
 
 // Guarda un archivo (Buffer) con el tipo con el que se servirá.
