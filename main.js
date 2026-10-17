@@ -83,6 +83,21 @@ function actualizarCodigo() {
   }
 }
 
+// Si backend/.env apunta a una base que no está en este equipo (por ejemplo Neon, la de la web),
+// se usa esa: no hace falta Docker y las migraciones las aplica Vercel al publicar.
+function baseEnLinea() {
+  const ruta = path.join(backend, '.env');
+  if (!fs.existsSync(ruta)) return false;
+  const linea = fs.readFileSync(ruta, 'utf8').split(/\r?\n/).find((l) => /^\s*DATABASE_URL\s*=/.test(l));
+  const url = linea?.replace(/^\s*DATABASE_URL\s*=\s*/, '').trim().replace(/^["']|["']$/g, '');
+  if (!url) return false;
+  try {
+    return !['localhost', '127.0.0.1', '::1', '[::1]'].includes(new URL(url).hostname);
+  } catch {
+    return false;
+  }
+}
+
 function revisarDocker() {
   paso('Revisando Docker');
   if (salidaDe('docker', ['--version']) === null) salirConError('falta Docker Desktop (https://www.docker.com/products/docker-desktop/).');
@@ -114,10 +129,14 @@ function instalar(carpeta, nombre) {
   return true;
 }
 
-function prepararBase() {
+function prepararBase(enLinea) {
   paso('Aplicando cambios a las tablas');
   // npm reciente no corre "postinstall", así que el cliente de Prisma se genera aquí.
   if (!correr('npx', ['prisma', 'generate'], backend)) salirConError('no se pudo generar el cliente de la base de datos.');
+  if (enLinea) {
+    console.log('La base en línea la actualiza Vercel al publicar; aquí no se cambian sus tablas.');
+    return;
+  }
   if (!correr('npx', ['prisma', 'migrate', 'deploy'], backend)) salirConError('no se pudieron aplicar las migraciones.');
 }
 
@@ -200,7 +219,7 @@ function apagar() {
   apagando = true;
   console.log('\nApagando LogiCode...');
   cerrarProcesos();
-  console.log('La base de datos sigue en Docker; se apaga sola al cerrar Docker Desktop.');
+  if (!baseEnLinea()) console.log('La base de datos sigue en Docker; se apaga sola al cerrar Docker Desktop.');
   setTimeout(() => process.exit(0), 500);
 }
 
@@ -213,11 +232,17 @@ async function main() {
   }
   actualizarCodigo();
   configuracion();
-  revisarDocker();
-  await levantarBase();
+  const enLinea = baseEnLinea();
+  if (enLinea) {
+    paso('Usando la base en línea');
+    console.log('backend/.env apunta a la base de la web: lo que haga aquí cambia los datos reales.');
+  } else {
+    revisarDocker();
+    await levantarBase();
+  }
   instalar(backend, 'la API');
   instalar(frontend, 'la web');
-  prepararBase();
+  prepararBase(enLinea);
 
   paso('Arrancando la API y la web');
   process.on('SIGINT', apagar);

@@ -34,6 +34,16 @@ npm start          # o F5 en VS Code ("Iniciar LogiCode")
 
 Lo que nunca va a GitHub (está en `.gitignore`): los `.env` con contraseñas, los archivos subidos (`backend/uploads`), las copias de la base (`backend/copias`) y `node_modules`.
 
+### Los mismos datos en varios equipos
+
+Para que dos PCs vean los mismos usuarios, cursos y archivos, los dos usan la base y los archivos de la web:
+
+1. En Vercel → proyecto `logicode` → **Settings → Environment Variables**, copie `DATABASE_URL` (la de Neon) y las cuatro `R2_*`.
+2. En cada PC, pegue esos valores en `backend/.env`, en lugar de la línea `DATABASE_URL` que apunta a `localhost`.
+3. `npm start`. Cuando `DATABASE_URL` no es de `localhost`, `main.js` no usa Docker ni cambia las tablas (eso lo hace Vercel al publicar).
+
+Todo lo que se haga así cambia los datos reales de la web. Para volver a la base local, ponga otra vez la línea de `localhost`, que está en el `.env` de la raíz (`POSTGRES_PASSWORD`).
+
 ### Paso a paso (sin main.js)
 
 ```bash
